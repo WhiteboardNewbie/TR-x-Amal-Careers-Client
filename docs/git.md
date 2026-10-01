@@ -1,6 +1,6 @@
 # Git
 
-Code reaches `main` through a branch and a pull request. The ERP project tracker stays the work queue. GitHub Issues are not the board.
+Code reaches `main` through a branch and a pull request. Mockup-only changes in `docs/mockups/` are committed on `main`. The ERP project tracker stays the work queue. GitHub Issues are not the board.
 
 ## Branch
 
@@ -12,7 +12,7 @@ Start from an up-to-date `main`.
 | Holds | One slice of the port. |
 | Base | `main`. |
 
-Do not commit the port directly on `main`.
+Do not commit application code directly on `main`.
 
 ## Commit
 
