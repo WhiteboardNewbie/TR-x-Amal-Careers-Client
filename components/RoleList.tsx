@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { getDepartments, getJobOpenings } from "@/lib/api";
-import type { Department, JobOpening } from "@/lib/types";
+import { getJobOpenings } from "@/lib/api";
+import type { JobOpening } from "@/lib/types";
 
 import { Pagination } from "./Pagination";
 import { RoleCard } from "./RoleCard";
@@ -16,7 +16,6 @@ function isPublished(role: JobOpening): boolean {
 
 export function RoleList() {
   const [roles, setRoles] = useState<JobOpening[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [currentDepartment, setCurrentDepartment] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [loaded, setLoaded] = useState(false);
@@ -24,18 +23,15 @@ export function RoleList() {
   useEffect(() => {
     let cancelled = false;
 
-    Promise.all([getJobOpenings(), getDepartments()])
-      .then(([openings, departmentList]) => {
-        if (cancelled) {
-          return;
+    getJobOpenings()
+      .then((openings) => {
+        if (!cancelled) {
+          setRoles(openings.filter(isPublished));
         }
-        setRoles(openings.filter(isPublished));
-        setDepartments(departmentList);
       })
       .catch(() => {
         if (!cancelled) {
           setRoles([]);
-          setDepartments([]);
         }
       })
       .finally(() => {
@@ -48,6 +44,17 @@ export function RoleList() {
       cancelled = true;
     };
   }, []);
+
+  const postedDepartments = useMemo(() => {
+    const names = new Set<string>();
+    for (const role of roles) {
+      const name = role.department_name.trim();
+      if (name) {
+        names.add(name);
+      }
+    }
+    return [...names].sort((left, right) => left.localeCompare(right));
+  }, [roles]);
 
   const filtered = useMemo(() => {
     if (currentDepartment === "All") {
@@ -83,28 +90,26 @@ export function RoleList() {
   return (
     <>
       <div className="mb-10 flex flex-wrap justify-center gap-3 md:mb-[3.75rem]">
-        {["All", ...departments.map((department) => department.name)].map(
-          (name) => {
-            const active = currentDepartment === name;
-            return (
-              <button
-                key={name}
-                type="button"
-                onClick={() => {
-                  setCurrentDepartment(name);
-                  setCurrentPage(1);
-                }}
-                className={`rounded-full border px-[17px] py-[14px] text-[17px] ${
-                  active
-                    ? "border-amal-red text-amal-red"
-                    : "border-zinc-200 text-zinc-700 hover:border-zinc-400"
-                }`}
-              >
-                {name}
-              </button>
-            );
-          },
-        )}
+        {["All", ...postedDepartments].map((name) => {
+          const active = currentDepartment === name;
+          return (
+            <button
+              key={name}
+              type="button"
+              onClick={() => {
+                setCurrentDepartment(name);
+                setCurrentPage(1);
+              }}
+              className={`rounded-full border px-[17px] py-[14px] text-[17px] ${
+                active
+                  ? "border-amal-red text-amal-red"
+                  : "border-zinc-200 text-zinc-700 hover:border-zinc-400"
+              }`}
+            >
+              {name}
+            </button>
+          );
+        })}
       </div>
 
       {pageRoles.length > 0 ? (

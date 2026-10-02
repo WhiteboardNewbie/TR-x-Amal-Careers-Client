@@ -9,7 +9,7 @@ export default function Home() {
     <div className="flex min-h-full flex-col bg-amal-white text-amal-ink">
       <SiteHeader />
       <main className="flex-1">
-        <section className="relative overflow-hidden bg-gradient-to-t from-neutral-100 to-white py-[var(--section-y)] text-center">
+        <section className="relative overflow-hidden bg-amal-sheet py-[var(--section-y)] text-center">
           <div
             className="pointer-events-none absolute top-0 right-0 w-[90.1875%]"
             aria-hidden

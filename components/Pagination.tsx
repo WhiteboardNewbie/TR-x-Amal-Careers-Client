@@ -18,7 +18,7 @@ export function Pagination({
 
   const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
   const box =
-    "inline-flex min-h-[46px] min-w-[46px] items-center justify-center rounded border px-4 py-2 text-[18px] font-medium transition-colors";
+    "inline-flex min-h-[46px] min-w-[46px] items-center justify-center rounded-lg border px-4 py-[9px] text-[18px] font-medium transition-colors";
 
   return (
     <nav

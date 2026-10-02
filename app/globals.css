@@ -8,6 +8,7 @@
   --amal-white: #ffffff;
   --amal-ink: #171717;
   --amal-staff-banner: #8b0000;
+  --amal-sheet: #f7f9fc;
   --background: var(--amal-white);
   --foreground: var(--amal-ink);
   --page-container: 84.375rem;
@@ -48,6 +49,7 @@
   --color-amal-white: var(--amal-white);
   --color-amal-ink: var(--amal-ink);
   --color-amal-staff-banner: var(--amal-staff-banner);
+  --color-amal-sheet: var(--amal-sheet);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
