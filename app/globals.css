@@ -36,6 +36,11 @@
   padding-inline: var(--page-gutter);
 }
 
+.page-bar {
+  width: 100%;
+  padding-inline: var(--page-gutter);
+}
+
 @theme inline {
   --color-amal-red: var(--amal-red);
   --color-amal-blue: var(--amal-blue);

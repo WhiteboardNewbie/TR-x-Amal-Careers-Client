@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { AmalMark } from "./AmalMark";
@@ -15,8 +16,17 @@ const LEGAL = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-zinc-100 text-base">
-      <div className="page-container grid gap-10 py-[var(--section-y)] sm:grid-cols-3">
+    <footer className="relative mt-auto overflow-hidden text-base">
+      <div className="pointer-events-none absolute top-0 left-0 w-full" aria-hidden>
+        <Image
+          src="/footer-wave.svg"
+          alt=""
+          width={1600}
+          height={268}
+          className="h-auto w-full"
+        />
+      </div>
+      <div className="page-container relative grid gap-10 py-[var(--section-y)] sm:grid-cols-3">
         <div className="space-y-3 text-zinc-500">
           <AmalMark />
           <p>
@@ -56,7 +66,7 @@ export function SiteFooter() {
           </ul>
         </div>
       </div>
-      <div className="page-container flex items-center justify-between border-t border-zinc-100 py-4 text-zinc-500">
+      <div className="page-container relative flex items-center justify-between py-4 text-zinc-500">
         <p>
           <b className="font-semibold text-zinc-700">
             Copyright ©2026 — Amal Academy
