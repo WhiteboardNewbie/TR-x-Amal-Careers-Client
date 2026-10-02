@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* Red #FF3333 / rgb(255, 51, 51). Blue #334CFF / rgb(51, 76, 255). Only here. */
 :root {
   --amal-red: #ff3333;
   --amal-blue: #334cff;

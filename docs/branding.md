@@ -17,12 +17,12 @@ The public board uses Amal Academy’s identity. Branding is built into this cli
 
 The names below are the palette. Hex values live here and in `app/globals.css`. Do not add a fifth public-board colour.
 
-| Name | Hex | Token | Use |
-| --- | --- | --- | --- |
-| Red | `#FF3333` | `--amal-red` | Public-board accent: Sign in, active filter, card edge, View role, back-to-top |
-| Blue | `#334CFF` | `--amal-blue` | The small triangle in the lockup only |
-| Black | `#000000` | `--amal-black` | Strong type |
-| White | `#FFFFFF` | `--amal-white` | Page and card surfaces |
+| Name | Hex | RGB | Token | Use |
+| --- | --- | --- | --- | --- |
+| Red | `#FF3333` | `255, 51, 51` | `--amal-red` | Public-board accent: Sign in, active filter, card edge, View role, back-to-top |
+| Blue | `#334CFF` | `51, 76, 255` | `--amal-blue` | The small triangle in the lockup only |
+| Black | `#000000` | `0, 0, 0` | `--amal-black` | Strong type |
+| White | `#FFFFFF` | `255, 255, 255` | `--amal-white` | Page and card surfaces |
 
 Staff banners use deep red `#8B0000` (`--amal-staff-banner`), dark into that red. That is not public-board red.
 
