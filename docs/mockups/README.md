@@ -119,7 +119,9 @@ Navbar Assessment database. Not under Careers tabs.
 
 ### Organizational Configuration
 
-Navbar Organizational Configuration. The records Careers reads: the role department, the ideal-profile title, the stage picker, and client review. Same tables as the ERP Organization Overview Departments, Levels, and Titles tabs, plus Clients. No org chart and no statistics.
+Navbar Organizational Configuration. The records Careers reads: the role department, the ideal-profile title, the stage picker, and client review. Same tables as the ERP Organization Overview Departments, Levels, and Titles tabs, plus Clients and Reviewers. No org chart and no statistics.
+
+Reviewers are the Amal staff Stage Assignments can pick. Add reviewer creates the person with an org title and an optional login for `/reviews`. It is not the ERP People Directory.
 
 | Screen | Path | Opened from | File |
 | --- | --- | --- | --- |
@@ -127,6 +129,7 @@ Navbar Organizational Configuration. The records Careers reads: the role departm
 | Levels | `/staff/organization` | Levels tab | `staff/staff-org-levels.jpg` |
 | Titles | `/staff/organization` | Titles tab | `staff/staff-org-titles.jpg` |
 | Clients | `/staff/organization` | Clients tab | `staff/staff-org-clients.jpg` |
+| Reviewers | `/staff/organization` | Reviewers tab | `staff/staff-org-reviewers.jpg` |
 
 ## Assigned employee
 
@@ -141,7 +144,7 @@ Navbar Organizational Configuration. The records Careers reads: the role departm
 | --- | --- | --- | --- |
 | Hiring | `/client` | Sign in as a client user | `client/client.jpg` |
 | Role | `/client/roles/[slug]` | A role on Hiring | `client/client-role.jpg` |
-| Application | `/client/applications/[id]` | A row on that role | `client/client-application.jpg` |
+| Application | `/client/applications/[id]` | A row on that role. Same unified application panel as staff, with Your review | `client/client-application.jpg` |
 
 ## Candidate
 
