@@ -9,7 +9,7 @@ Start from an up-to-date `main`.
 | Field | What to put |
 | --- | --- |
 | Name | `port/<outcome>`. The outcome is the commit subject, lowercased, with words joined by hyphens. Drop punctuation. |
-| Holds | One slice of the port. |
+| Holds | One screen or outcome, including the small layout and copy fixes that belong with it. |
 | Base | `main`. |
 
 Do not commit application code directly on `main`.
@@ -26,7 +26,9 @@ Pre-commit runs on `git commit`. If a hook edits files, stage those edits and co
 
 ## Pull request
 
-Open it into `main`. The title is the outcome sentence. The body uses `.github/PULL_REQUEST_TEMPLATE.md`. It is prose, the same three parts as the commit:
+One pull request covers one screen or one outcome, for example the public landing page. Do not open a pull request for each small tweak on that screen. Keep those commits on the same branch until the screen is ready, then open one PR into `main`.
+
+The title is the outcome sentence. The body uses `.github/PULL_REQUEST_TEMPLATE.md`. It is prose, the same three parts as the commit:
 
 - What a caller can do: the route, the status, and what comes back.
 - What this branch leaves out, when it adds or closes a row in left-behind. Omit this part when nothing was left behind.
