@@ -11,7 +11,7 @@ export function SiteHeader() {
         </Link>
         <Link
           href="/sign-in"
-          className="text-sm font-medium text-[#FF3333] hover:underline"
+          className="text-sm font-medium text-amal-red hover:underline"
         >
           Sign in
         </Link>

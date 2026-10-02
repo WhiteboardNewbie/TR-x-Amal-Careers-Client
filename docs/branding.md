@@ -13,17 +13,34 @@ The public board uses Amal Academy’s identity. Branding is built into this cli
 - Address: 259-B Khizer Road, Upper Mall, Lahore, PK 54000
 - Careers label: Careers at Amal
 
-## Logo and colours
+## Colours
 
-Taken from [amalacademy.org](https://www.amalacademy.org/).
+The names below are the palette. Hex values live here and in `app/globals.css`. Do not add a fifth public-board colour.
 
-- Red: `#FF3333`
-- Logo blue: `#334CFF`
-- Black and white
-- Color lockup: `public/amal-logo.png`, from `Amal Website_Social Sharing Logo.png` (red and blue triangles, AMAL over ACADEMY)
+| Name | Hex | Token | Use |
+| --- | --- | --- | --- |
+| Red | `#FF3333` | `--amal-red` | Public-board accent: Sign in, active filter, card edge, View role, back-to-top |
+| Blue | `#334CFF` | `--amal-blue` | The small triangle in the lockup only |
+| Black | `#000000` | `--amal-black` | Strong type |
+| White | `#FFFFFF` | `--amal-white` | Page and card surfaces |
 
-The header and footer use that lockup on white.
+Staff banners use deep red `#8B0000` (`--amal-staff-banner`), dark into that red. That is not public-board red.
+
+Do not use:
+
+- Blue as a header bar, button, or link
+- The white lockup on a white page
+- TeleRelation navy `#002060` / `#002B5C`
+
+In components, use the token (`text-amal-red`, `var(--amal-red)`). Do not paste a hex.
+
+## Logo
+
+The lockup is `public/amal-logo.png`, from `Amal Website_Social Sharing Logo.png` on the live site. It is one file: a red triangle, a blue triangle, and AMAL over ACADEMY in black. Header and footer show that file on white.
+
+The logo is not a colour. Red and blue inside it still follow the table above.
 
 ## What branding covers
 
 - Public board: name, logo, colors, hero, and the Lahore contact line
+- Staff banners, when those screens are built

@@ -92,7 +92,7 @@ export function RoleList() {
                 }}
                 className={`rounded-full border px-5 py-2 text-sm ${
                   active
-                    ? "border-[#FF3333] text-[#FF3333]"
+                    ? "border-amal-red text-amal-red"
                     : "border-zinc-200 text-zinc-700 hover:border-zinc-400"
                 }`}
               >
