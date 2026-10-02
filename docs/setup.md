@@ -10,9 +10,9 @@ npm install
 npm run dev
 ```
 
-The app listens on http://localhost:3000. `NEXT_PUBLIC_API_URL` points at the careers API, default `http://localhost:8000`.
+The app listens on http://localhost:3001 so it does not collide with the TeleRelation website on 3000. `NEXT_PUBLIC_API_URL` points at the careers API, default `http://localhost:8001`.
 
-The home page is a placeholder. The ported public routes will cover the job list, role detail, and apply form.
+The home page is a placeholder. A typed client in `lib/` calls the four public routes. The list, role, and apply pages come next.
 
 ## Pre-commit
 
