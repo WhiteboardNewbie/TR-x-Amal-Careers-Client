@@ -15,9 +15,9 @@ const LEGAL = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-zinc-100">
-      <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 sm:grid-cols-3">
-        <div className="space-y-3 text-sm text-zinc-600">
+    <footer className="mt-auto border-t border-zinc-100 text-base">
+      <div className="page-container grid gap-10 py-[var(--section-y)] sm:grid-cols-3">
+        <div className="space-y-3 text-zinc-500">
           <AmalMark />
           <p>
             Empowering Pakistan’s youth through developing soft skills and
@@ -28,10 +28,10 @@ export function SiteFooter() {
           <p>259-B Khizer Road, Upper Mall, Lahore.</p>
         </div>
         <div>
-          <h2 className="mb-3 text-sm font-semibold text-zinc-950">
+          <h2 className="mb-4 text-lg font-semibold tracking-[-0.02em] text-zinc-950">
             Social Media
           </h2>
-          <ul className="space-y-2 text-sm text-zinc-600">
+          <ul className="space-y-1 text-zinc-500">
             {SOCIAL.map((item) => (
               <li key={item.label}>
                 <a href={item.href} className="hover:text-zinc-950">
@@ -42,8 +42,10 @@ export function SiteFooter() {
           </ul>
         </div>
         <div>
-          <h2 className="mb-3 text-sm font-semibold text-zinc-950">Legal</h2>
-          <ul className="space-y-2 text-sm text-zinc-600">
+          <h2 className="mb-4 text-lg font-semibold tracking-[-0.02em] text-zinc-950">
+            Legal
+          </h2>
+          <ul className="space-y-1 text-zinc-500">
             {LEGAL.map((item) => (
               <li key={item.label}>
                 <a href={item.href} className="hover:text-zinc-950">
@@ -54,11 +56,15 @@ export function SiteFooter() {
           </ul>
         </div>
       </div>
-      <div className="mx-auto flex max-w-6xl items-center justify-between border-t border-zinc-100 px-6 py-4 text-sm text-zinc-500">
-        <p>Copyright ©2026 — Amal Academy</p>
+      <div className="page-container flex items-center justify-between border-t border-zinc-100 py-4 text-zinc-500">
+        <p>
+          <b className="font-semibold text-zinc-700">
+            Copyright ©2026 — Amal Academy
+          </b>
+        </p>
         <Link
           href="/"
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-amal-red text-amal-white"
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-amal-red text-lg text-amal-white"
           aria-label="Back to top"
         >
           ↑

@@ -17,15 +17,17 @@ export function Pagination({
   }
 
   const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
+  const box =
+    "inline-flex min-h-[46px] min-w-[46px] items-center justify-center rounded border px-4 py-2 text-[18px] font-medium transition-colors";
 
   return (
     <nav
-      className="mt-12 flex items-center justify-center gap-3 text-sm text-zinc-500"
+      className="mt-12 flex flex-wrap items-center justify-center gap-[5px]"
       aria-label="Pagination"
     >
       <button
         type="button"
-        className="px-2 disabled:opacity-30"
+        className={`${box} border-zinc-300 text-zinc-500 disabled:opacity-30`}
         disabled={activePage === 1}
         onClick={() => onPageChange(activePage - 1)}
         aria-label="Previous page"
@@ -39,8 +41,8 @@ export function Pagination({
           onClick={() => onPageChange(page)}
           className={
             page === activePage
-              ? "font-semibold text-zinc-950"
-              : "hover:text-zinc-950"
+              ? `${box} border-amal-red text-amal-red`
+              : `${box} border-zinc-300 text-zinc-500 hover:border-zinc-950 hover:text-zinc-950`
           }
           aria-current={page === activePage ? "page" : undefined}
         >
@@ -49,7 +51,7 @@ export function Pagination({
       ))}
       <button
         type="button"
-        className="px-2 disabled:opacity-30"
+        className={`${box} border-zinc-300 text-zinc-500 disabled:opacity-30`}
         disabled={activePage === totalPages}
         onClick={() => onPageChange(activePage + 1)}
         aria-label="Next page"

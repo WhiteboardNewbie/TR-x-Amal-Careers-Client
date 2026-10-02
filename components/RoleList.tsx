@@ -65,12 +65,16 @@ export function RoleList() {
   );
 
   if (!loaded) {
-    return <p className="py-16 text-center text-zinc-500">Loading roles…</p>;
+    return (
+      <p className="py-16 text-center text-[clamp(1.2rem,calc(1.152rem+0.33vw),1.4375rem)] text-zinc-500">
+        Loading roles…
+      </p>
+    );
   }
 
   if (!roles.length) {
     return (
-      <p className="py-16 text-center text-zinc-600">
+      <p className="py-16 text-center text-[clamp(1.2rem,calc(1.152rem+0.33vw),1.4375rem)] text-zinc-500">
         No job openings available at the moment.
       </p>
     );
@@ -78,29 +82,31 @@ export function RoleList() {
 
   return (
     <>
-      <div className="mb-12 flex flex-wrap justify-center gap-3">
-        {["All", ...departments.map((department) => department.name)].map(
-          (name) => {
-            const active = currentDepartment === name;
-            return (
-              <button
-                key={name}
-                type="button"
-                onClick={() => {
-                  setCurrentDepartment(name);
-                  setCurrentPage(1);
-                }}
-                className={`rounded-full border px-5 py-2 text-sm ${
-                  active
-                    ? "border-amal-red text-amal-red"
-                    : "border-zinc-200 text-zinc-700 hover:border-zinc-400"
-                }`}
-              >
-                {name}
-              </button>
-            );
-          },
-        )}
+      <div className="mb-10 flex justify-center md:mb-[3.75rem]">
+        <div className="flex flex-wrap justify-center rounded-full bg-amal-white px-[13px] text-[17px] font-normal shadow-[0_3px_50px_rgba(0,0,0,0.05)] max-md:gap-2 max-md:bg-transparent max-md:p-0 max-md:shadow-none">
+          {["All", ...departments.map((department) => department.name)].map(
+            (name) => {
+              const active = currentDepartment === name;
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => {
+                    setCurrentDepartment(name);
+                    setCurrentPage(1);
+                  }}
+                  className={`rounded-full px-[17px] py-[14px] max-md:bg-amal-white max-md:shadow-[0_3px_50px_rgba(0,0,0,0.05)] ${
+                    active
+                      ? "text-amal-red"
+                      : "text-zinc-500 hover:text-zinc-950"
+                  }`}
+                >
+                  {name}
+                </button>
+              );
+            },
+          )}
+        </div>
       </div>
 
       {pageRoles.length > 0 ? (
@@ -110,7 +116,7 @@ export function RoleList() {
           ))}
         </div>
       ) : (
-        <p className="py-16 text-center text-zinc-600">
+        <p className="py-16 text-center text-[clamp(1.2rem,calc(1.152rem+0.33vw),1.4375rem)] text-zinc-500">
           No jobs found in the {currentDepartment} department.
         </p>
       )}

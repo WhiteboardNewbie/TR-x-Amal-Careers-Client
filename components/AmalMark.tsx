@@ -7,7 +7,7 @@ export function AmalMark() {
       alt="Amal Academy"
       width={701}
       height={197}
-      className="h-8 w-auto"
+      className="h-auto w-[var(--logo-w)] max-w-full"
       priority
     />
   );
