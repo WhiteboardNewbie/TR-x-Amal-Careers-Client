@@ -82,31 +82,29 @@ export function RoleList() {
 
   return (
     <>
-      <div className="mb-10 flex justify-center md:mb-[3.75rem]">
-        <div className="flex flex-wrap justify-center rounded-full bg-amal-white px-[13px] text-[17px] font-normal shadow-[0_3px_50px_rgba(0,0,0,0.05)] max-md:gap-2 max-md:bg-transparent max-md:p-0 max-md:shadow-none">
-          {["All", ...departments.map((department) => department.name)].map(
-            (name) => {
-              const active = currentDepartment === name;
-              return (
-                <button
-                  key={name}
-                  type="button"
-                  onClick={() => {
-                    setCurrentDepartment(name);
-                    setCurrentPage(1);
-                  }}
-                  className={`rounded-full px-[17px] py-[14px] max-md:bg-amal-white max-md:shadow-[0_3px_50px_rgba(0,0,0,0.05)] ${
-                    active
-                      ? "text-amal-red"
-                      : "text-zinc-500 hover:text-zinc-950"
-                  }`}
-                >
-                  {name}
-                </button>
-              );
-            },
-          )}
-        </div>
+      <div className="mb-10 flex flex-wrap justify-center gap-3 md:mb-[3.75rem]">
+        {["All", ...departments.map((department) => department.name)].map(
+          (name) => {
+            const active = currentDepartment === name;
+            return (
+              <button
+                key={name}
+                type="button"
+                onClick={() => {
+                  setCurrentDepartment(name);
+                  setCurrentPage(1);
+                }}
+                className={`rounded-full border px-[17px] py-[14px] text-[17px] ${
+                  active
+                    ? "border-amal-red text-amal-red"
+                    : "border-zinc-200 text-zinc-700 hover:border-zinc-400"
+                }`}
+              >
+                {name}
+              </button>
+            );
+          },
+        )}
       </div>
 
       {pageRoles.length > 0 ? (
