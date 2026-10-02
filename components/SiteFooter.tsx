@@ -58,7 +58,7 @@ export function SiteFooter() {
         <p>Copyright ©2026 — Amal Academy</p>
         <Link
           href="/"
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FF3333] text-white"
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-amal-red text-amal-white"
           aria-label="Back to top"
         >
           ↑

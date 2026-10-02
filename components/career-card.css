@@ -1,11 +1,11 @@
 .career-card {
-  --career-accent: #ff3333;
-  --career-accent-soft: rgba(255, 51, 51, 0.08);
-  --career-accent-mid: rgba(255, 51, 51, 0.18);
+  --career-accent: var(--amal-red);
+  --career-accent-soft: color-mix(in srgb, var(--amal-red) 8%, transparent);
+  --career-accent-mid: color-mix(in srgb, var(--amal-red) 18%, transparent);
   --career-ink: #1a1f2e;
   --career-muted: #5c6578;
   --career-line: #e8ecf2;
-  --career-surface: #ffffff;
+  --career-surface: var(--amal-white);
   --career-ease: ease-in-out;
 
   display: flex;
