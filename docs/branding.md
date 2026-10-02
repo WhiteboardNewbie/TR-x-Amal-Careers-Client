@@ -13,9 +13,17 @@ The public board uses Amal Academy’s identity. Branding is built into this cli
 - Address: 259-B Khizer Road, Upper Mall, Lahore, PK 54000
 - Careers label: Careers at Amal
 
-## Still to take from the live site
+## Logo and colours
 
-Logo file and brand colors are not copied into this repo yet. Take them from the live Squarespace site when the public board is built, and record the values here.
+Taken from [amalacademy.org](https://www.amalacademy.org/).
+
+- Red: `#FF3333`
+- Logo blue: `#334CFF`
+- Black and white
+- Color lockup (white pages): `public/amal-logo.png`, from `Amal Website_Social Sharing Logo.png`
+- White lockup (blue bar): `public/amal-logo-white.png`, from `Amal Website_Header Logo_Desktop_White.png`
+
+The header uses the white lockup on `#334CFF`. The footer uses the color lockup.
 
 ## What branding covers
 
