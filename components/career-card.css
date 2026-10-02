@@ -43,7 +43,7 @@
 .career-card:focus-visible {
   transform: translateY(-4px);
   border-color: var(--career-accent-mid);
-  box-shadow: 0 12px 28px rgba(255, 51, 51, 0.1);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--amal-red) 10%, transparent);
 }
 
 .career-card:hover::before,

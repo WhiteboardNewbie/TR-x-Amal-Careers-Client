@@ -18,5 +18,5 @@ repos:
         entry: npm run lint
         language: system
         pass_filenames: false
-        files: \.(js|jsx|ts|tsx|mjs|cjs)$
+        files: \.(js|jsx|ts|tsx|mjs|cjs|css)$
         exclude: ^(node_modules/|\.next/)
