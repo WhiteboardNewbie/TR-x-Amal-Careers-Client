@@ -20,10 +20,9 @@ Taken from [amalacademy.org](https://www.amalacademy.org/).
 - Red: `#FF3333`
 - Logo blue: `#334CFF`
 - Black and white
-- Color lockup (white pages): `public/amal-logo.png`, from `Amal Website_Social Sharing Logo.png`
-- White lockup (blue bar): `public/amal-logo-white.png`, from `Amal Website_Header Logo_Desktop_White.png`
+- Color lockup: `public/amal-logo.png`, from `Amal Website_Social Sharing Logo.png` (red and blue triangles, AMAL over ACADEMY)
 
-The header uses the white lockup on `#334CFF`. The footer uses the color lockup.
+The header and footer use that lockup on white.
 
 ## What branding covers
 
