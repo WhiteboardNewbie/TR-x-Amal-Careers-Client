@@ -10,9 +10,9 @@ const COMPANY = [
 ];
 
 const SOCIAL = [
-  { href: "https://www.amalacademy.org/", label: "LinkedIn" },
-  { href: "https://www.amalacademy.org/", label: "Instagram" },
-  { href: "https://www.amalacademy.org/", label: "Facebook" },
+  { href: "https://www.linkedin.com/school/amalacademy/", label: "LinkedIn" },
+  { href: "https://www.instagram.com/amalacademy/", label: "Instagram" },
+  { href: "https://www.facebook.com/amalacademy.org/", label: "Facebook" },
 ];
 
 const LEGAL = [
