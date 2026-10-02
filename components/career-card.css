@@ -1,0 +1,193 @@
+.career-card {
+  --career-accent: #ff3333;
+  --career-accent-soft: rgba(255, 51, 51, 0.08);
+  --career-accent-mid: rgba(255, 51, 51, 0.18);
+  --career-ink: #1a1f2e;
+  --career-muted: #5c6578;
+  --career-line: #e8ecf2;
+  --career-surface: #ffffff;
+  --career-ease: ease-in-out;
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  padding: 1.75rem 1.6rem 1.4rem;
+  border: 1px solid var(--career-line);
+  border-radius: 14px;
+  background: var(--career-surface);
+  text-decoration: none !important;
+  color: inherit;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  transition:
+    transform 250ms var(--career-ease),
+    box-shadow 250ms var(--career-ease),
+    border-color 250ms var(--career-ease);
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.career-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--career-accent);
+  opacity: 0;
+  transition: opacity 250ms var(--career-ease);
+}
+
+.career-card:hover,
+.career-card:focus-visible {
+  transform: translateY(-4px);
+  border-color: var(--career-accent-mid);
+  box-shadow: 0 12px 28px rgba(255, 51, 51, 0.1);
+}
+
+.career-card:hover::before,
+.career-card:focus-visible::before {
+  opacity: 1;
+}
+
+.career-card:focus-visible {
+  outline: 2px solid var(--career-accent);
+  outline-offset: 3px;
+}
+
+.career-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.career-card__badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  background: var(--career-accent-soft);
+  color: var(--career-accent);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.career-card__positions {
+  flex-shrink: 0;
+  color: var(--career-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.career-card__title {
+  margin: 0 0 1.25rem;
+  color: var(--career-ink);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.career-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-bottom: 1.5rem;
+  flex: 1;
+}
+
+.career-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--career-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.35;
+  min-width: 0;
+}
+
+.career-card__meta-item span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.career-card__icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 6px;
+  background: var(--career-accent-soft);
+  color: var(--career-accent);
+}
+
+.career-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--career-line);
+}
+
+.career-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--career-accent);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.career-card__cta-arrow {
+  display: inline-flex;
+  transition: transform 250ms var(--career-ease);
+}
+
+.career-card:hover .career-card__cta-arrow,
+.career-card:focus-visible .career-card__cta-arrow {
+  transform: translateX(4px);
+}
+
+.career-card__chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  background: #f4f6f9;
+  color: var(--career-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 575.98px) {
+  .career-card {
+    min-height: 0;
+    padding: 1.4rem 1.25rem 1.2rem;
+  }
+
+  .career-card__title {
+    font-size: 1.1rem;
+  }
+}
