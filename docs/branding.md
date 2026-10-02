@@ -36,7 +36,7 @@ In components, use the token (`text-amal-red`, `var(--amal-red)`). Do not paste 
 
 ## Logo
 
-The lockup is `public/amal-logo.png`, from `Amal Website_Social Sharing Logo.png` on the live site. It is one file: a red triangle, a blue triangle, and AMAL over ACADEMY in black. Header and footer show that file on white.
+The lockup is `public/amal-wordmark.png`, from `Amal Website_Social Sharing Logo.png` on the live site. It is one file: a red triangle, a blue triangle, and AMAL over ACADEMY in black, with a transparent field. Header and footer show that file.
 
 The logo is not a colour. Red and blue inside it still follow the table above.
 

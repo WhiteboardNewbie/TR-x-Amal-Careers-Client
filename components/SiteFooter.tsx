@@ -15,7 +15,7 @@ const LEGAL = [
 
 export function SiteFooter() {
   return (
-    <footer className="relative mt-auto overflow-hidden text-base">
+    <footer className="relative mt-auto overflow-hidden bg-amal-sheet text-base">
       <div className="pointer-events-none absolute top-0 left-0 w-full" aria-hidden>
         <Image
           src="/footer-wave.svg"
