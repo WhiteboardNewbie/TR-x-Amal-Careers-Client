@@ -18,7 +18,7 @@ export function SiteFooter() {
     <footer className="mt-auto border-t border-zinc-100">
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 sm:grid-cols-3">
         <div className="space-y-3 text-sm text-zinc-600">
-          <AmalMark variant="color" />
+          <AmalMark />
           <p>
             Empowering Pakistan’s youth through developing soft skills and
             mindsets.
