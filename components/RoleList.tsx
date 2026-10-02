@@ -1,0 +1,126 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+
+import { getDepartments, getJobOpenings } from "@/lib/api";
+import type { Department, JobOpening } from "@/lib/types";
+
+import { Pagination } from "./Pagination";
+import { RoleCard } from "./RoleCard";
+
+const PAGE_SIZE = 9;
+
+function isPublished(role: JobOpening): boolean {
+  return role.is_active === true && role.is_draft !== true;
+}
+
+export function RoleList() {
+  const [roles, setRoles] = useState<JobOpening[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [currentDepartment, setCurrentDepartment] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    Promise.all([getJobOpenings(), getDepartments()])
+      .then(([openings, departmentList]) => {
+        if (cancelled) {
+          return;
+        }
+        setRoles(openings.filter(isPublished));
+        setDepartments(departmentList);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setRoles([]);
+          setDepartments([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoaded(true);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filtered = useMemo(() => {
+    if (currentDepartment === "All") {
+      return roles;
+    }
+    return roles.filter(
+      (role) =>
+        role.department_name.toLowerCase() === currentDepartment.toLowerCase(),
+    );
+  }, [currentDepartment, roles]);
+
+  const pageRoles = filtered.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
+  if (!loaded) {
+    return <p className="py-16 text-center text-zinc-500">Loading roles…</p>;
+  }
+
+  if (!roles.length) {
+    return (
+      <p className="py-16 text-center text-zinc-600">
+        No job openings available at the moment.
+      </p>
+    );
+  }
+
+  return (
+    <>
+      <div className="mb-12 flex flex-wrap justify-center gap-3">
+        {["All", ...departments.map((department) => department.name)].map(
+          (name) => {
+            const active = currentDepartment === name;
+            return (
+              <button
+                key={name}
+                type="button"
+                onClick={() => {
+                  setCurrentDepartment(name);
+                  setCurrentPage(1);
+                }}
+                className={`rounded-full border px-5 py-2 text-sm ${
+                  active
+                    ? "border-[#FF3333] text-[#FF3333]"
+                    : "border-zinc-200 text-zinc-700 hover:border-zinc-400"
+                }`}
+              >
+                {name}
+              </button>
+            );
+          },
+        )}
+      </div>
+
+      {pageRoles.length > 0 ? (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {pageRoles.map((role) => (
+            <RoleCard key={role.id ?? role.slug} role={role} />
+          ))}
+        </div>
+      ) : (
+        <p className="py-16 text-center text-zinc-600">
+          No jobs found in the {currentDepartment} department.
+        </p>
+      )}
+
+      <Pagination
+        itemsPerPage={PAGE_SIZE}
+        totalItems={filtered.length}
+        activePage={currentPage}
+        onPageChange={setCurrentPage}
+      />
+    </>
+  );
+}
