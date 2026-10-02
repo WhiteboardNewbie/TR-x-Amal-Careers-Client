@@ -11,7 +11,7 @@ export function SiteHeader() {
         </Link>
         <Link
           href="/sign-in"
-          className="text-[1.5rem] font-medium text-amal-red hover:underline"
+          className="inline-flex items-center rounded-full border border-amal-red px-5 py-2 text-[1.125rem] font-semibold tracking-[0.05em] text-amal-red transition-colors hover:bg-amal-red hover:text-amal-white"
         >
           Sign in
         </Link>
