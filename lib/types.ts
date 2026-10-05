@@ -55,3 +55,33 @@ export type ApplyFields = {
   applicant_contact: string;
   resume: File;
 };
+
+export type AuthLanding = "staff" | "reviews" | "client" | "";
+
+export type AuthToken = {
+  token: string;
+  permissions: string[];
+  is_manager: boolean;
+  is_clientuser: boolean;
+  is_admin: boolean;
+  is_hiring_staff: boolean;
+  landing: AuthLanding;
+};
+
+export type AuthSession = {
+  token: string;
+  username: string;
+  landing: AuthLanding;
+  is_hiring_staff: boolean;
+  is_clientuser: boolean;
+  permissions: string[];
+};
+
+export type Notice = {
+  id: number;
+  title: string;
+  message: string;
+  link: string;
+  is_read: boolean;
+  created_at: string;
+};
