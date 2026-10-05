@@ -26,6 +26,7 @@ export const STATUS_LABEL: Record<string, string> = {
   requested_interview: "Interview requested",
   interview: "Interview",
   completed: "Completed",
+  approved: "Approved",
 };
 
 export function labelFor(status: string): string {
