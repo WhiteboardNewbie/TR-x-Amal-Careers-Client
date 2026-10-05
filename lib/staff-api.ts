@@ -459,10 +459,41 @@ export function getShareLinks(page = 1): Promise<Page<ShareLink>> {
   );
 }
 
-export function createShareLink(job_application: number): Promise<ShareLink> {
-  return sendJson<ShareLink>("/careers/application-share-links/", "POST", {
-    job_application,
-  });
+export function createShareLink(body: {
+  job_application: number;
+  comment?: string;
+  expires_at?: string;
+}): Promise<ShareLink> {
+  return sendJson<ShareLink>("/careers/application-share-links/", "POST", body);
+}
+
+export function patchShareLink(
+  id: string,
+  body: { comment?: string; expires_at?: string | null },
+): Promise<ShareLink> {
+  return sendJson<ShareLink>(
+    `/careers/application-share-links/${id}/`,
+    "PATCH",
+    body,
+  );
+}
+
+export function getShareLinkLogs(
+  id: string,
+  page = 1,
+): Promise<
+  Page<{
+    id: number;
+    ip_address: string;
+    host: string;
+    user_agent: string;
+    referer: string;
+    accessed_at: string;
+  }>
+> {
+  return request(
+    `/careers/application-share-links/${id}/logs/${queryString({ page, page_size: 10 })}`,
+  );
 }
 
 export function deactivateShareLink(id: string): Promise<ShareLink> {

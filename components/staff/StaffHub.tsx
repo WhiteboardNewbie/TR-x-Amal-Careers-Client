@@ -198,6 +198,9 @@ export function StaffHub() {
                 <Link href="/staff/cv-search" className="text-amal-red">
                   CV search
                 </Link>
+                <Link href="/staff/share-links" className="text-amal-red">
+                  Share links
+                </Link>
               </div>
               <ApplicationsTab
                 onError={onError}
