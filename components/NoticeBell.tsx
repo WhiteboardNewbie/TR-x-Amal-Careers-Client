@@ -61,14 +61,14 @@ export function NoticeBell() {
         ) : null}
       </button>
       {open ? (
-        <div className="absolute right-0 z-30 mt-2 w-80 overflow-hidden rounded-xl border border-black/10 bg-amal-white shadow-lg">
-          <p className="border-b border-black/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+        <div className="absolute top-full right-0 z-50 mt-2 flex w-80 max-h-[min(440px,calc(100dvh-5rem))] flex-col overflow-hidden rounded-xl border border-black/10 bg-amal-white shadow-lg">
+          <p className="shrink-0 border-b border-black/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">
             Notices
           </p>
           {notices.length === 0 ? (
             <p className="px-4 py-6 text-sm text-zinc-500">No notices yet.</p>
           ) : (
-            <ul className="max-h-80 overflow-auto">
+            <ul className="min-h-0 flex-1 overflow-auto">
               {notices.map((notice) => (
                 <li
                   key={notice.id}
