@@ -267,7 +267,7 @@ export function StaffHub() {
                 key={item.id}
                 type="button"
                 onClick={() => setTab(item.id)}
-                className={`flex min-h-[4.25rem] min-w-0 flex-col justify-center rounded-lg px-3 py-3 text-left transition-all sm:min-h-[4.5rem] ${
+                className={`flex min-h-[4.25rem] min-w-0 flex-col justify-start rounded-lg px-3 py-3 text-left transition-colors sm:min-h-[4.5rem] ${
                   active
                     ? "bg-amal-red text-amal-white shadow-sm"
                     : "bg-amal-sheet text-zinc-600 hover:bg-black/5"
@@ -277,11 +277,13 @@ export function StaffHub() {
                   <item.icon className="mt-0.5 h-3.5 w-3.5 shrink-0 sm:mt-0" />
                   <span className="min-w-0 leading-snug">{item.label}</span>
                 </div>
-                {active ? (
-                  <p className="mt-2 text-[11px] leading-relaxed text-amal-white/80 sm:text-xs">
-                    {item.description}
-                  </p>
-                ) : null}
+                <p
+                  className={`mt-2 text-[11px] leading-relaxed sm:text-xs ${
+                    active ? "text-amal-white/80" : "invisible"
+                  }`}
+                >
+                  {item.description}
+                </p>
               </button>
             );
           })}

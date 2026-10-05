@@ -157,6 +157,10 @@ details > summary::-webkit-details-marker {
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

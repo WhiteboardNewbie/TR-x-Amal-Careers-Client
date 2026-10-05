@@ -260,10 +260,10 @@ export function IdealProfileModal({
                 <button
                   type="button"
                   onClick={() => setMode("template")}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
+                  className={`rounded-lg border px-3 py-1.5 text-sm font-semibold ${
                     mode === "template"
-                      ? "bg-amal-red text-amal-white"
-                      : "border border-black/15 bg-amal-white text-zinc-700 hover:bg-amal-sheet"
+                      ? "border-transparent bg-amal-red text-amal-white"
+                      : "border-black/15 bg-amal-white text-zinc-700 hover:bg-amal-sheet"
                   }`}
                 >
                   Assign Template
@@ -271,10 +271,10 @@ export function IdealProfileModal({
                 <button
                   type="button"
                   onClick={() => setMode("custom")}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
+                  className={`rounded-lg border px-3 py-1.5 text-sm font-semibold ${
                     mode === "custom"
-                      ? "bg-amal-red text-amal-white"
-                      : "border border-black/15 bg-amal-white text-zinc-700 hover:bg-amal-sheet"
+                      ? "border-transparent bg-amal-red text-amal-white"
+                      : "border-black/15 bg-amal-white text-zinc-700 hover:bg-amal-sheet"
                   }`}
                 >
                   Create / Edit Custom
@@ -442,10 +442,10 @@ function IdealProfileForm({
       <div className="flex flex-wrap gap-2 border-b border-black/10 pb-3">
         <button
           type="button"
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
+          className={`rounded-lg border px-3 py-1.5 text-sm font-semibold ${
             tab === "profile"
-              ? "bg-amal-red text-amal-white"
-              : "border border-black/15 bg-amal-white text-zinc-700 hover:bg-amal-sheet"
+              ? "border-transparent bg-amal-red text-amal-white"
+              : "border-black/15 bg-amal-white text-zinc-700 hover:bg-amal-sheet"
           }`}
           onClick={() => setTab("profile")}
         >
@@ -453,10 +453,10 @@ function IdealProfileForm({
         </button>
         <button
           type="button"
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
+          className={`rounded-lg border px-3 py-1.5 text-sm font-semibold ${
             tab === "metrics"
-              ? "bg-amal-red text-amal-white"
-              : "border border-black/15 bg-amal-white text-zinc-700 hover:bg-amal-sheet"
+              ? "border-transparent bg-amal-red text-amal-white"
+              : "border-black/15 bg-amal-white text-zinc-700 hover:bg-amal-sheet"
           }`}
           onClick={() => setTab("metrics")}
         >
