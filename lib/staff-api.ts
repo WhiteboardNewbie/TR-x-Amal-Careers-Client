@@ -275,10 +275,19 @@ export function getApplicants(params?: {
   page?: number;
   page_size?: number;
   search?: string;
+  ordering?: string;
+  min_applications?: number;
+  job_opening?: string;
 }): Promise<Page<ApplicantRow>> {
   return request<Page<ApplicantRow>>(
     `/careers/applicants/${queryString(params ?? {})}`,
   );
+}
+
+export function getApplicantJobs(
+  id: number,
+): Promise<StaffApplication[]> {
+  return request<StaffApplication[]>(`/careers/applicants/${id}/jobs-applied/`);
 }
 
 export function updateApplicantNote(
