@@ -44,41 +44,40 @@ export function AppNav({ session }: { session: AuthSession }) {
   }
 
   return (
-    <header className="sticky top-0 z-20 border-b border-black/10 bg-amal-white">
-      <div className="page-bar flex min-h-16 items-center justify-between gap-6 py-3">
-        <div className="flex min-w-0 flex-1 items-center gap-8">
-          <Link href={links[0]?.href ?? "/"} className="shrink-0">
-            <AmalMark className="h-auto w-36 max-w-full bg-transparent" />
-          </Link>
-          <nav className="hidden min-w-0 items-center gap-6 md:flex">
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`whitespace-nowrap text-sm font-semibold ${
-                  isActive(pathname, link.href)
-                    ? "text-amal-red"
-                    : "text-amal-ink hover:text-amal-red"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-        <div className="flex items-center gap-2">
+    <header className="sticky top-0 z-20 border-b border-black/10 bg-amal-white/95 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-[1600px] min-w-0 items-center justify-between gap-3 px-[var(--page-gutter)]">
+        <Link
+          href={links[0]?.href ?? "/"}
+          className="flex min-w-0 shrink-0 items-center md:min-w-[220px]"
+        >
+          <AmalMark className="h-auto w-28 max-w-full bg-transparent" />
+        </Link>
+        <nav className="hidden items-center gap-8 md:flex">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`whitespace-nowrap text-sm font-bold ${
+                isActive(pathname, link.href)
+                  ? "text-amal-red"
+                  : "text-zinc-500 hover:text-amal-ink"
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="flex shrink-0 items-center justify-end gap-2 md:min-w-[220px]">
           <NoticeBell />
           <details className="relative">
-            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold text-amal-ink hover:bg-amal-sheet">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amal-red text-xs font-bold text-amal-white">
-                {session.username.slice(0, 1).toUpperCase()}
-              </span>
-              <span className="hidden max-w-32 truncate sm:inline">
-                {session.username}
-              </span>
+            <summary
+              className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-full bg-amal-red text-xs font-bold text-amal-white"
+              aria-label="Account menu"
+            >
+              {session.username.slice(0, 1).toUpperCase()}
             </summary>
-            <div className="absolute right-0 z-30 mt-2 w-44 overflow-hidden rounded-xl border border-black/10 bg-amal-white py-1 shadow-lg">
-              <p className="px-3 py-2 text-xs text-zinc-500 sm:hidden">
+            <div className="absolute right-0 z-30 mt-2 w-48 overflow-hidden rounded-lg border border-black/10 bg-amal-white shadow-lg">
+              <p className="truncate border-b border-black/5 bg-amal-sheet px-3 py-2 text-sm font-semibold text-amal-ink">
                 {session.username}
               </p>
               <button
@@ -92,15 +91,15 @@ export function AppNav({ session }: { session: AuthSession }) {
           </details>
         </div>
       </div>
-      <nav className="page-bar flex gap-4 overflow-auto border-t border-black/5 py-2 md:hidden">
+      <nav className="flex gap-4 overflow-auto border-t border-black/5 px-[var(--page-gutter)] py-2 md:hidden">
         {links.map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            className={`whitespace-nowrap text-sm font-semibold ${
+            className={`whitespace-nowrap text-sm font-bold ${
               isActive(pathname, link.href)
                 ? "text-amal-red"
-                : "text-amal-ink hover:text-amal-red"
+                : "text-zinc-500 hover:text-amal-ink"
             }`}
           >
             {link.label}
