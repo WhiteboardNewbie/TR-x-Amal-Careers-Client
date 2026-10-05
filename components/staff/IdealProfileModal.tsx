@@ -11,6 +11,7 @@ import {
   getIdealProfileTemplates,
   getOrgDepartments,
   getOrgTitles,
+  getSkillsPage,
   updateIdealProfileForRole,
 } from "@/lib/staff-api";
 import type {
@@ -20,9 +21,14 @@ import type {
   IdealProfileMetricCatalogItem,
   IdealProfilePayload,
   OrgTitle,
+  Skill,
   StaffJobOpening,
 } from "@/lib/types";
-import { Field, GhostButton, PrimaryButton, inputClass } from "./ui";
+import { AddSkillDialog } from "./AddSkillDialog";
+import { GhostButton, PrimaryButton } from "./ui";
+
+const fieldClass =
+  "mt-1 w-full rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-sm outline-none focus:border-amal-red focus:ring-2 focus:ring-amal-red/20";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
@@ -52,7 +58,7 @@ export function IdealProfileModal({
 }: {
   role: StaffJobOpening | null;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (created?: IdealProfile) => void;
   onError: (value: string) => void;
 }) {
   const standalone = role == null;
@@ -63,6 +69,8 @@ export function IdealProfileModal({
   const [catalog, setCatalog] = useState<IdealProfileMetricCatalogItem[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [titles, setTitles] = useState<OrgTitle[]>([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [skillOpen, setSkillOpen] = useState(false);
   const [templateId, setTemplateId] = useState<number | "">("");
   const [existing, setExisting] = useState<IdealProfile | null>(null);
   const [name, setName] = useState(
@@ -72,61 +80,72 @@ export function IdealProfileModal({
     role?.department ?? "",
   );
   const [titleId, setTitleId] = useState<number | "">("");
+  const [skillIds, setSkillIds] = useState<number[]>([]);
   const [metrics, setMetrics] = useState<IdealProfileMetric[]>([]);
   const [saveAsTemplate, setSaveAsTemplate] = useState(false);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && !skillOpen) {
         event.preventDefault();
         onClose();
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [onClose, skillOpen]);
 
   useEffect(() => {
     let ignore = false;
-    const catalogPromise = getIdealProfileMetricCatalog()
-      .then((page) => page.results)
-      .catch(() => [] as IdealProfileMetricCatalogItem[]);
     Promise.all([
       getIdealProfileTemplates()
         .then((page) => page.results)
         .catch(() => [] as IdealProfile[]),
-      catalogPromise,
+      getIdealProfileMetricCatalog().catch(
+        () => [] as IdealProfileMetricCatalogItem[],
+      ),
       getOrgDepartments().catch(() => [] as Department[]),
       getOrgTitles().catch(() => [] as OrgTitle[]),
+      getSkillsPage()
+        .then((page) => page.results)
+        .catch(() => [] as Skill[]),
       role
         ? getIdealProfileForRole(role.slug).catch(() => null)
         : Promise.resolve(null),
     ])
-      .then(([nextTemplates, nextCatalog, nextDepartments, nextTitles, profile]) => {
-        if (ignore) {
-          return;
-        }
-        setTemplates(nextTemplates);
-        setCatalog(nextCatalog);
-        setDepartments(nextDepartments);
-        setTitles(nextTitles);
-        setExisting(profile);
-        const nextMetrics = defaultMetrics(
+      .then(
+        ([
+          nextTemplates,
           nextCatalog,
-          profile?.metric_weights ?? [],
-        );
-        setMetrics(nextMetrics);
-        if (profile) {
-          setName(profile.name);
-          setDepartmentId(profile.department?.id ?? "");
-          setTitleId(profile.title?.id ?? "");
-          setTemplateId("");
-          setMode("template");
-        } else if (role) {
-          setName(`${role.title} Ideal Profile`);
-          setDepartmentId(role.department);
-        }
-      })
+          nextDepartments,
+          nextTitles,
+          nextSkills,
+          profile,
+        ]) => {
+          if (ignore) {
+            return;
+          }
+          setTemplates(nextTemplates);
+          setCatalog(nextCatalog);
+          setDepartments(nextDepartments);
+          setTitles(nextTitles);
+          setSkills(nextSkills);
+          setExisting(profile);
+          setMetrics(defaultMetrics(nextCatalog, profile?.metric_weights ?? []));
+          if (profile) {
+            setName(profile.name);
+            setDepartmentId(profile.department?.id ?? "");
+            setTitleId(profile.title?.id ?? "");
+            setSkillIds((profile.skills ?? []).map((row) => row.id));
+            setTemplateId("");
+            setMode("template");
+          } else if (role) {
+            setName(`${role.title} Ideal Profile`);
+            setDepartmentId(role.department);
+            setSkillIds(role.skills.map((row) => row.id));
+          }
+        },
+      )
       .catch((error) => {
         if (!ignore) {
           onError(errorText(error));
@@ -155,20 +174,22 @@ export function IdealProfileModal({
       name: name.trim(),
       department_id: departmentId === "" ? null : departmentId,
       title_id: titleId === "" ? null : titleId,
+      skill_ids: skillIds,
       metric_weights: metrics,
     };
   }
 
   async function save() {
-    if (!name.trim()) {
-      onError("Ideal profile name is required.");
-      return;
+    if (standalone || mode === "custom") {
+      if (!name.trim()) {
+        onError("Ideal profile name is required.");
+        return;
+      }
     }
     setBusy(true);
     try {
       if (standalone) {
-        await createIdealProfileTemplate(payload());
-        onSaved();
+        onSaved(await createIdealProfileTemplate(payload()));
         return;
       }
       if (mode === "template") {
@@ -198,126 +219,145 @@ export function IdealProfileModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-amal-black/45 p-4"
-      onClick={onClose}
-      role="presentation"
-    >
+    <>
       <div
-        className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-black/10 bg-amal-white shadow-2xl"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="ideal-profile-title"
-        onClick={(event) => event.stopPropagation()}
+        className="fixed inset-0 z-[80] flex items-center justify-center bg-amal-black/45 p-4"
+        onClick={onClose}
+        role="presentation"
       >
-        <div className="flex items-start justify-between border-b border-black/10 px-6 py-4">
-          <div>
-            <h3 id="ideal-profile-title" className="text-lg font-bold">
-              {standalone
-                ? "Create Ideal Profile Template"
-                : `Ideal Profile • ${role.title}`}
-            </h3>
-            <p className="text-sm text-zinc-500">
-              {standalone
-                ? "Build a reusable template you can assign to roles later."
-                : "Keep profile optional and attach when ready."}
-            </p>
+        <div
+          className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-2xl"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="ideal-profile-title"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div className="flex shrink-0 items-center justify-between border-b border-black/10 px-6 py-4">
+            <div>
+              <h3 id="ideal-profile-title" className="text-lg font-bold">
+                {standalone
+                  ? "Create Ideal Profile Template"
+                  : `Ideal Profile • ${role.title}`}
+              </h3>
+              <p className="text-sm text-zinc-500">
+                {standalone
+                  ? "Build a reusable template you can assign to roles later."
+                  : "Keep profile optional and attach when ready."}
+              </p>
+            </div>
+            <button
+              type="button"
+              className="rounded-full px-2 py-1 text-sm font-semibold text-zinc-500 hover:bg-amal-sheet hover:text-amal-ink"
+              onClick={onClose}
+              aria-label="Close"
+            >
+              ×
+            </button>
           </div>
-          <button
-            type="button"
-            className="rounded-full px-2 py-1 text-sm font-semibold text-zinc-500 hover:bg-amal-sheet hover:text-amal-ink"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            ×
-          </button>
-        </div>
-        <div className="space-y-4 p-6">
-          {!standalone ? (
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setMode("template")}
-                className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
-                  mode === "template"
-                    ? "bg-amal-red text-amal-white"
-                    : "border border-black/15 bg-amal-white text-zinc-700"
-                }`}
-              >
-                Assign Template
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode("custom")}
-                className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
-                  mode === "custom"
-                    ? "bg-amal-red text-amal-white"
-                    : "border border-black/15 bg-amal-white text-zinc-700"
-                }`}
-              >
-                Create / Edit Custom
-              </button>
-            </div>
-          ) : null}
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-6">
+            {!standalone ? (
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMode("template")}
+                  className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
+                    mode === "template"
+                      ? "bg-amal-red text-amal-white"
+                      : "border border-black/15 bg-amal-white text-zinc-700 hover:bg-amal-sheet"
+                  }`}
+                >
+                  Assign Template
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode("custom")}
+                  className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
+                    mode === "custom"
+                      ? "bg-amal-red text-amal-white"
+                      : "border border-black/15 bg-amal-white text-zinc-700 hover:bg-amal-sheet"
+                  }`}
+                >
+                  Create / Edit Custom
+                </button>
+              </div>
+            ) : null}
 
-          {loading ? (
-            <div className="rounded-lg border border-black/10 bg-amal-sheet p-6 text-center text-sm text-zinc-600">
-              Loading ideal profile data...
-            </div>
-          ) : standalone || mode === "custom" ? (
-            <IdealProfileForm
-              name={name}
-              departmentId={departmentId}
-              titleId={titleId}
-              departments={departments}
-              titles={filteredTitles}
-              catalog={catalog}
-              metrics={metrics}
-              onName={setName}
-              onDepartment={(value) => {
-                setDepartmentId(value);
-                setTitleId("");
-              }}
-              onTitle={setTitleId}
-              onMetrics={setMetrics}
-            />
-          ) : (
-            <IdealProfileTemplatePicker
-              templates={templates}
-              selectedTemplateId={templateId}
-              onSelectTemplate={setTemplateId}
-            />
-          )}
-
-          {!standalone && !loading && mode === "custom" ? (
-            <label className="flex items-center gap-2 rounded-lg border border-black/10 bg-amal-sheet px-3 py-2 text-sm text-zinc-700">
-              <input
-                type="checkbox"
-                checked={saveAsTemplate}
-                onChange={(event) => setSaveAsTemplate(event.target.checked)}
+            {loading ? (
+              <div className="rounded-lg border border-black/10 bg-amal-sheet p-6 text-center text-sm text-zinc-600">
+                Loading ideal profile data...
+              </div>
+            ) : standalone || mode === "custom" ? (
+              <IdealProfileForm
+                name={name}
+                departmentId={departmentId}
+                titleId={titleId}
+                skillIds={skillIds}
+                departments={departments}
+                titles={filteredTitles}
+                skills={skills}
+                catalog={catalog}
+                metrics={metrics}
+                onName={setName}
+                onDepartment={(value) => {
+                  setDepartmentId(value);
+                  setTitleId("");
+                }}
+                onTitle={setTitleId}
+                onSkillIds={setSkillIds}
+                onMetrics={setMetrics}
+                onRequestAddSkill={() => setSkillOpen(true)}
               />
-              Also save as reusable template
-            </label>
-          ) : null}
-        </div>
-        <div className="flex items-center justify-end gap-2 border-t border-black/10 px-6 py-4">
-          <GhostButton type="button" onClick={onClose} disabled={busy}>
-            Cancel
-          </GhostButton>
-          <PrimaryButton
-            type="button"
-            disabled={busy || loading}
-            onClick={() => void save()}
-          >
-            {busy
-              ? "Saving..."
-              : standalone
-                ? "Create Template"
-                : "Save Ideal Profile"}
-          </PrimaryButton>
+            ) : (
+              <IdealProfileTemplatePicker
+                templates={templates}
+                selectedTemplateId={templateId}
+                onSelectTemplate={setTemplateId}
+              />
+            )}
+
+            {!standalone && !loading && mode === "custom" ? (
+              <label className="flex items-center gap-2 rounded-lg border border-black/10 bg-amal-sheet px-3 py-2 text-sm text-zinc-700">
+                <input
+                  type="checkbox"
+                  checked={saveAsTemplate}
+                  onChange={(event) => setSaveAsTemplate(event.target.checked)}
+                />
+                Also save as reusable template
+              </label>
+            ) : null}
+          </div>
+          <div className="flex shrink-0 items-center justify-end gap-2 border-t border-black/10 px-6 py-4">
+            <GhostButton type="button" onClick={onClose} disabled={busy}>
+              Cancel
+            </GhostButton>
+            <PrimaryButton
+              type="button"
+              disabled={busy || loading}
+              onClick={() => void save()}
+            >
+              {busy
+                ? "Saving..."
+                : standalone
+                  ? "Create Template"
+                  : "Save Ideal Profile"}
+            </PrimaryButton>
+          </div>
         </div>
       </div>
-    </div>
+      {skillOpen ? (
+        <AddSkillDialog
+          onClose={() => setSkillOpen(false)}
+          onError={onError}
+          onCreated={(skill) => {
+            setSkills((current) => [...current, skill]);
+            setSkillIds((current) =>
+              current.includes(skill.id) ? current : [...current, skill.id],
+            );
+            setSkillOpen(false);
+          }}
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -331,13 +371,13 @@ function IdealProfileTemplatePicker({
   onSelectTemplate: (id: number | "") => void;
 }) {
   return (
-    <div className="rounded-xl border border-black/10 bg-amal-sheet p-4">
+    <div className="rounded-xl border border-black/10 bg-amal-sheet/50 p-4">
       <h3 className="text-sm font-semibold">Assign Template</h3>
       <p className="mt-1 text-xs text-zinc-500">
         Select a reusable template and clone it for this role.
       </p>
       <select
-        className={`${inputClass} mt-3`}
+        className={fieldClass}
         value={selectedTemplateId === "" ? "" : String(selectedTemplateId)}
         onChange={(event) =>
           onSelectTemplate(event.target.value ? Number(event.target.value) : "")
@@ -358,28 +398,44 @@ function IdealProfileForm({
   name,
   departmentId,
   titleId,
+  skillIds,
   departments,
   titles,
+  skills,
   catalog,
   metrics,
   onName,
   onDepartment,
   onTitle,
+  onSkillIds,
   onMetrics,
+  onRequestAddSkill,
 }: {
   name: string;
   departmentId: number | "";
   titleId: number | "";
+  skillIds: number[];
   departments: Department[];
   titles: OrgTitle[];
+  skills: Skill[];
   catalog: IdealProfileMetricCatalogItem[];
   metrics: IdealProfileMetric[];
   onName: (value: string) => void;
   onDepartment: (value: number | "") => void;
   onTitle: (value: number | "") => void;
+  onSkillIds: (value: number[]) => void;
   onMetrics: (value: IdealProfileMetric[]) => void;
+  onRequestAddSkill: () => void;
 }) {
   const [tab, setTab] = useState<"profile" | "metrics">("profile");
+
+  function toggleSkill(id: number) {
+    onSkillIds(
+      skillIds.includes(id)
+        ? skillIds.filter((row) => row !== id)
+        : [...skillIds, id],
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -389,7 +445,7 @@ function IdealProfileForm({
           className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
             tab === "profile"
               ? "bg-amal-red text-amal-white"
-              : "border border-black/15 bg-amal-white text-zinc-700"
+              : "border border-black/15 bg-amal-white text-zinc-700 hover:bg-amal-sheet"
           }`}
           onClick={() => setTab("profile")}
         >
@@ -400,7 +456,7 @@ function IdealProfileForm({
           className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
             tab === "metrics"
               ? "bg-amal-red text-amal-white"
-              : "border border-black/15 bg-amal-white text-zinc-700"
+              : "border border-black/15 bg-amal-white text-zinc-700 hover:bg-amal-sheet"
           }`}
           onClick={() => setTab("metrics")}
         >
@@ -409,19 +465,23 @@ function IdealProfileForm({
       </div>
       {tab === "profile" ? (
         <>
-          <Field label="Profile Name">
-            <input
-              className={inputClass}
-              value={name}
-              onChange={(event) => onName(event.target.value)}
-            />
-          </Field>
-          <div className="rounded-xl border border-black/10 bg-amal-sheet p-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <label className="text-xs font-medium text-zinc-600">
+              Profile Name
+              <input
+                className={fieldClass}
+                value={name}
+                onChange={(event) => onName(event.target.value)}
+              />
+            </label>
+          </div>
+          <div className="rounded-xl border border-black/10 bg-amal-sheet/50 p-4">
             <h3 className="text-sm font-semibold">Core Role Alignment</h3>
             <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-              <Field label="Department">
+              <label className="text-xs font-medium text-zinc-600">
+                Department
                 <select
-                  className={inputClass}
+                  className={fieldClass}
                   value={departmentId === "" ? "" : String(departmentId)}
                   onChange={(event) =>
                     onDepartment(
@@ -436,10 +496,11 @@ function IdealProfileForm({
                     </option>
                   ))}
                 </select>
-              </Field>
-              <Field label="Title">
+              </label>
+              <label className="text-xs font-medium text-zinc-600 md:col-span-2">
+                Title
                 <select
-                  className={inputClass}
+                  className={fieldClass}
                   value={titleId === "" ? "" : String(titleId)}
                   onChange={(event) =>
                     onTitle(event.target.value ? Number(event.target.value) : "")
@@ -452,7 +513,36 @@ function IdealProfileForm({
                     </option>
                   ))}
                 </select>
-              </Field>
+              </label>
+            </div>
+            <div className="mt-3 rounded-lg border border-black/10 bg-amal-white p-2">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <p className="text-xs font-medium text-zinc-600">
+                  Skills (all assessments)
+                </p>
+                <button
+                  type="button"
+                  onClick={onRequestAddSkill}
+                  className="shrink-0 text-xs font-semibold text-amal-red hover:text-amal-ink"
+                >
+                  + Add New Skill
+                </button>
+              </div>
+              <div className="flex max-h-28 flex-wrap gap-2 overflow-y-auto">
+                {skills.map((row) => (
+                  <label
+                    key={row.id}
+                    className="inline-flex items-center gap-2 rounded-md border border-black/10 px-2 py-1 text-xs"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={skillIds.includes(row.id)}
+                      onChange={() => toggleSkill(row.id)}
+                    />
+                    {row.name}
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
         </>
@@ -498,7 +588,7 @@ function IdealProfileMetricsTable({
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-black/10 bg-amal-sheet p-4">
+    <div className="overflow-x-auto rounded-xl border border-black/10 bg-amal-sheet/50 p-4">
       <h3 className="text-sm font-semibold">Ideal Profile Metrics</h3>
       <p className="mt-1 text-xs text-zinc-500">
         Client weight for each metric (1–10).
@@ -507,6 +597,7 @@ function IdealProfileMetricsTable({
         <thead>
           <tr className="border-b border-black/10 text-zinc-600">
             <th className="py-2 pr-3 font-medium">Metric</th>
+            <th className="py-2 pr-3 font-medium">Description</th>
             <th className="w-28 py-2 font-medium">Client weight</th>
           </tr>
         </thead>
@@ -518,12 +609,15 @@ function IdealProfileMetricsTable({
             return (
               <tr key={row.id} className="border-b border-black/5 align-top">
                 <td className="py-2 pr-3 font-medium">{row.label}</td>
+                <td className="py-2 pr-3 text-zinc-600">
+                  {row.description || "—"}
+                </td>
                 <td className="py-2">
                   <input
                     type="number"
                     min={1}
                     max={10}
-                    className="h-10 w-20 rounded-lg border border-black/15 bg-amal-white px-2 text-center text-sm outline-none focus:border-amal-red focus:ring-2 focus:ring-amal-red/20"
+                    className="w-20 rounded-lg border border-black/15 bg-amal-white px-2 py-1.5 text-center text-sm outline-none focus:border-amal-red focus:ring-2 focus:ring-amal-red/20"
                     value={weight}
                     onChange={(event) => setWeight(row.id, event.target.value)}
                   />

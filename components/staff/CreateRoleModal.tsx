@@ -4,9 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ApiError } from "@/lib/api";
 import {
   assignIdealProfileTemplate,
-  createIdealProfileTemplate,
   createJobOpening,
-  createSkill,
   getClientUsers,
   getClients,
   getIdealProfileTemplates,
@@ -23,8 +21,10 @@ import type {
   Skill,
   StaffJobOpening,
 } from "@/lib/types";
+import { AddSkillDialog } from "./AddSkillDialog";
+import { IdealProfileModal } from "./IdealProfileModal";
 import { JobDescriptionEditor } from "./JobDescriptionEditor";
-import { Field, GhostButton, Modal, PrimaryButton, WideModal, inputClass } from "./ui";
+import { Field, GhostButton, PrimaryButton, WideModal, inputClass } from "./ui";
 
 const WORK_TYPES = [
   { id: "onsite", label: "Onsite" },
@@ -532,213 +532,19 @@ export function CreateRoleModal({
       ) : null}
 
       {idealOpen ? (
-        <CreateIdealNested
-          departments={departments}
-          titles={titles}
+        <IdealProfileModal
+          role={null}
           onClose={() => setIdealOpen(false)}
           onError={onError}
-          onCreated={(row) => {
-            setTemplates((current) => [...current, row]);
-            setTemplateId(String(row.id));
+          onSaved={(created) => {
+            if (created) {
+              setTemplates((current) => [...current, created]);
+              setTemplateId(String(created.id));
+            }
             setIdealOpen(false);
           }}
         />
       ) : null}
     </>
-  );
-}
-
-function AddSkillDialog({
-  onClose,
-  onCreated,
-  onError,
-}: {
-  onClose: () => void;
-  onCreated: (skill: Skill) => void;
-  onError: (value: string) => void;
-}) {
-  const [name, setName] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClose();
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  async function submit() {
-    if (busy || !name.trim()) {
-      return;
-    }
-    setBusy(true);
-    try {
-      onCreated(await createSkill(name.trim()));
-    } catch (error) {
-      onError(errorText(error));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <div
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-amal-black/45 p-4"
-      onClick={onClose}
-      role="presentation"
-    >
-      <div
-        className="w-full max-w-md rounded-2xl border border-black/10 bg-amal-white shadow-2xl"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="add-skill-title"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="flex items-start justify-between border-b border-black/10 p-5">
-          <div>
-            <h3 id="add-skill-title" className="text-lg font-bold">
-              Add New Skill
-            </h3>
-            <p className="mt-1 text-sm text-zinc-500">
-              Create a new skill for job requirements.
-            </p>
-          </div>
-          <button
-            type="button"
-            className="rounded-full px-2 py-1 text-sm font-semibold text-zinc-500 hover:bg-amal-sheet hover:text-amal-ink"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            ×
-          </button>
-        </div>
-        <div className="p-5">
-          <label
-            htmlFor="modal-skill-name"
-            className="text-xs font-semibold uppercase tracking-wide text-zinc-500"
-          >
-            Skill Name
-          </label>
-          <input
-            id="modal-skill-name"
-            className={`${inputClass} mt-1`}
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="e.g., React, Python, Project Management"
-            autoFocus
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                void submit();
-              }
-            }}
-          />
-        </div>
-        <div className="flex justify-end gap-3 border-t border-black/10 p-5">
-          <GhostButton type="button" onClick={onClose} disabled={busy}>
-            Cancel
-          </GhostButton>
-          <PrimaryButton
-            type="button"
-            disabled={busy || !name.trim()}
-            onClick={() => void submit()}
-          >
-            {busy ? "Creating..." : "Create Skill"}
-          </PrimaryButton>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function CreateIdealNested({
-  departments,
-  titles,
-  onClose,
-  onCreated,
-  onError,
-}: {
-  departments: Department[];
-  titles: OrgTitle[];
-  onClose: () => void;
-  onCreated: (row: { id: number; name: string }) => void;
-  onError: (value: string) => void;
-}) {
-  const [name, setName] = useState("");
-  const [department, setDepartment] = useState("");
-  const [title, setTitle] = useState("");
-  const [busy, setBusy] = useState(false);
-  const filtered = titles.filter(
-    (row) => !department || String(row.department.id) === department,
-  );
-
-  async function onSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    setBusy(true);
-    try {
-      const created = (await createIdealProfileTemplate({
-        name,
-        department_id: department ? Number(department) : null,
-        title_id: title ? Number(title) : null,
-      })) as { id: number; name: string };
-      onCreated({ id: created.id, name: created.name ?? name });
-    } catch (error) {
-      onError(errorText(error));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Modal title="Create Ideal Profile" onClose={onClose}>
-      <form onSubmit={onSubmit}>
-        <Field label="Name">
-          <input
-            className={inputClass}
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            required
-          />
-        </Field>
-        <Field label="Department">
-          <select
-            className={inputClass}
-            value={department}
-            onChange={(event) => {
-              setDepartment(event.target.value);
-              setTitle("");
-            }}
-          >
-            <option value="">Any</option>
-            {departments.map((row) => (
-              <option key={row.id} value={row.id}>
-                {row.name}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Title">
-          <select
-            className={inputClass}
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-          >
-            <option value="">Any</option>
-            {filtered.map((row) => (
-              <option key={row.id} value={row.id}>
-                {row.name}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <PrimaryButton type="submit" disabled={busy}>
-          {busy ? "Saving…" : "Save template"}
-        </PrimaryButton>
-      </form>
-    </Modal>
   );
 }
