@@ -12,7 +12,10 @@ import { PageHero } from "./PageHero";
 const LEGAL = "https://www.amalacademy.org/";
 
 const fieldClass =
-  "w-full rounded-full border border-zinc-200 bg-amal-white px-5 py-3 text-base text-amal-ink placeholder:text-zinc-400 focus:border-amal-red focus:outline-none disabled:opacity-60";
+  "h-[52.5px] w-full rounded-[27px] border border-zinc-200 bg-amal-white px-5 text-base text-amal-ink placeholder:text-zinc-400 focus:border-amal-red focus:outline-none disabled:opacity-60";
+
+const labelClass =
+  "mb-[7px] block text-lg font-medium leading-[1.3] text-zinc-950";
 
 function isPublished(role: JobOpening): boolean {
   return role.is_active === true && role.is_draft !== true;
@@ -109,16 +112,17 @@ export function ApplyForm({ slug }: { slug: string }) {
         subtitle="Submit your application and take the next step in your career."
       />
       <section className="py-[var(--section-y)]">
-        <div className="page-container max-w-2xl">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+        <div className="page-container">
+          <div className="page-article">
+          <form className="space-y-[1.3125rem]" onSubmit={handleSubmit}>
             <div>
-              <label className="mb-2 block font-semibold text-zinc-950" htmlFor="resume">
+              <label className={labelClass} htmlFor="resume">
                 Resume
               </label>
               <input
                 required
                 aria-required
-                className={fieldClass}
+                className="apply-file"
                 disabled={submitting}
                 id="resume"
                 name="resume"
@@ -126,10 +130,7 @@ export function ApplyForm({ slug }: { slug: string }) {
               />
             </div>
             <div>
-              <label
-                className="mb-2 block font-semibold text-zinc-950"
-                htmlFor="applicant_name"
-              >
+              <label className={labelClass} htmlFor="applicant_name">
                 Name
               </label>
               <input
@@ -144,10 +145,7 @@ export function ApplyForm({ slug }: { slug: string }) {
               />
             </div>
             <div>
-              <label
-                className="mb-2 block font-semibold text-zinc-950"
-                htmlFor="applicant_email"
-              >
+              <label className={labelClass} htmlFor="applicant_email">
                 Email
               </label>
               <input
@@ -162,10 +160,7 @@ export function ApplyForm({ slug }: { slug: string }) {
               />
             </div>
             <div>
-              <label
-                className="mb-2 block font-semibold text-zinc-950"
-                htmlFor="applicant_city"
-              >
+              <label className={labelClass} htmlFor="applicant_city">
                 City
               </label>
               <input
@@ -180,10 +175,7 @@ export function ApplyForm({ slug }: { slug: string }) {
               />
             </div>
             <div>
-              <label
-                className="mb-2 block font-semibold text-zinc-950"
-                htmlFor="applicant_contact"
-              >
+              <label className={labelClass} htmlFor="applicant_contact">
                 Contact
               </label>
               <input
@@ -203,13 +195,13 @@ export function ApplyForm({ slug }: { slug: string }) {
               </p>
             ) : null}
             <button
-              className="inline-flex w-full items-center justify-center rounded-full bg-amal-red px-8 py-3 text-[1.125rem] font-semibold tracking-[0.05em] text-amal-white hover:opacity-90 disabled:opacity-60"
+              className="mt-12 inline-flex w-full items-center justify-center rounded-full bg-amal-red px-8 py-3 text-[1.125rem] font-semibold tracking-[0.05em] text-amal-white hover:opacity-90 disabled:opacity-60"
               disabled={submitting}
               type="submit"
             >
               {submitting ? "Submitting…" : "Submit Application"}
             </button>
-            <p className="text-sm text-zinc-500">
+            <p className="pt-[1.875rem] text-sm text-zinc-500">
               All fields are required. By sending this form, you agree to the{" "}
               <a className="text-zinc-950 underline" href={LEGAL}>
                 Terms &amp; Conditions
@@ -221,6 +213,7 @@ export function ApplyForm({ slug }: { slug: string }) {
               .
             </p>
           </form>
+          </div>
         </div>
       </section>
     </>
