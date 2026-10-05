@@ -8,9 +8,11 @@ import type { AuthLanding } from "@/lib/types";
 
 export function SignedInShell({
   landing,
+  wide,
   children,
 }: {
   landing: Exclude<AuthLanding, "">;
+  wide?: boolean;
   children: React.ReactNode;
 }) {
   const router = useRouter();
@@ -38,7 +40,7 @@ export function SignedInShell({
     <div className="flex min-h-full flex-col bg-amal-sheet text-amal-ink">
       <AppNav session={session} />
       <main className="flex-1">
-        <div className="page-container py-10">{children}</div>
+        {wide ? children : <div className="page-container py-10">{children}</div>}
       </main>
     </div>
   );

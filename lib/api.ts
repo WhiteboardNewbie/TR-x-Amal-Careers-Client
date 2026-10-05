@@ -56,7 +56,7 @@ function messageFor(status: number, body: unknown): string {
   return `Request failed with ${status}`;
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers);
   const token = sessionToken();
   if (token && !headers.has("Authorization")) {
@@ -136,4 +136,30 @@ export function createAuthToken(fields: {
 
 export function getNotifications(): Promise<Notice[]> {
   return request<Notice[]>("/notifications/");
+}
+
+export function sendJson<T>(
+  path: string,
+  method: string,
+  body?: unknown,
+): Promise<T> {
+  return request<T>(path, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+}
+
+export function queryString(
+  params: Record<string, string | number | boolean | undefined | null>,
+): string {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null || value === "") {
+      continue;
+    }
+    query.set(key, String(value));
+  }
+  const suffix = query.toString();
+  return suffix ? `?${suffix}` : "";
 }

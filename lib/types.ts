@@ -85,3 +85,169 @@ export type Notice = {
   is_read: boolean;
   created_at: string;
 };
+
+export type Page<T> = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+};
+
+export type JobApplicationStatus =
+  | "new"
+  | "in-review"
+  | "manager-review"
+  | "client-review"
+  | "shortlisted"
+  | "interviewed"
+  | "offered"
+  | "rejected"
+  | "parking-lot";
+
+export type StaffJobOpening = JobOpening & {
+  client_users?: { id: number; first_name: string; last_name: string; email: string }[];
+};
+
+export type StaffApplication = {
+  id: number;
+  job_opening: string;
+  job_opening_name: string;
+  applicant: Applicant;
+  resume: string;
+  cover_letter: string;
+  notes: string;
+  status: JobApplicationStatus;
+  applied_at: string;
+};
+
+export type ApplicationStage = {
+  id: number;
+  job_application: number;
+  order: number;
+  name: string;
+  assigned_to: number;
+  assigned_by: number | null;
+  status: string;
+  hr_notes: string;
+  created_at: string;
+  completed_at: string | null;
+  interview_type: string;
+  scheduled_at: string | null;
+  meeting_link: string;
+  interview_feedback: string;
+};
+
+export type OrgTitle = {
+  id: number;
+  name: string;
+  level: { id: number; code: string; order: number };
+  department: { id: number; name: string };
+};
+
+export type Employee = {
+  id: number;
+  user: number | null;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  email: string;
+  title: number | null;
+  reports_to: number | null;
+  left_at: string | null;
+};
+
+export type DepartmentManager = {
+  id: number;
+  full_name: string;
+  email: string;
+};
+
+export type ApplicantRow = Applicant & {
+  application_count: number;
+  last_applied_at: string | null;
+};
+
+export type OrgLevel = {
+  id: number;
+  code: string;
+  order: number;
+  promotion_timeline: string;
+};
+
+export type OrgClient = {
+  id: number;
+  name: string;
+};
+
+export type OrgClientUser = {
+  id: number;
+  client: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  job_title?: string;
+  status?: string;
+  user?: number | null;
+};
+
+export type BankQuestion = {
+  id: number;
+  question_text: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  correct_option: string;
+  is_active: boolean;
+};
+
+export type VideoPrompt = {
+  id: number;
+  prompt: string;
+  is_active: boolean;
+};
+
+export type AssessmentSetting = {
+  test_type: string;
+  total_questions: number;
+  technical_question_count: number;
+  behavioral_question_count: number;
+  time_limit_minutes: number;
+  validity_days: number;
+  estimated_minutes: number;
+};
+
+export type Comment = {
+  id: number;
+  text: string;
+  author: number | null;
+  application_stage: number | null;
+  source: string;
+  created_at: string;
+};
+
+export type ShareLink = {
+  id: string;
+  job_application_id?: number;
+  job_application?: number;
+  comment: string;
+  expires_at: string | null;
+  is_active: boolean;
+  share_url: string;
+  created_at: string;
+};
+
+export type ClientRole = {
+  id: number;
+  slug: string;
+  title: string;
+  department_name: string;
+  location: string;
+};
+
+export type ClientApplicationRow = {
+  id: number;
+  status: string;
+  applicant_name: string;
+  review_status: string | null;
+};
