@@ -21,13 +21,11 @@ export function SignInBranding() {
         </Link>
         <div className="max-w-md">
           <h1 className="text-4xl font-bold leading-tight text-amal-white">
-            Hiring for Amal
-            <br />
-            Hire in one place.
+            Careers at Amal
           </h1>
           <p className="mt-4 text-base leading-relaxed text-amal-white/80">
-            Roles, applications, stage reviews, and assessments in one
-            workspace.
+            Empowering Pakistan&apos;s youth through developing soft skills and
+            mindsets.
           </p>
           <div className="mt-8 grid grid-cols-2 gap-4">
             {FEATURES.map((feature) => (
