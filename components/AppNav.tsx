@@ -9,33 +9,34 @@ import type { AuthSession } from "@/lib/types";
 
 type LinkItem = { href: string; label: string };
 
+function homeFor(landing: AuthSession["landing"]): LinkItem {
+  if (landing === "reviews") {
+    return { href: "/reviews", label: "Reviews" };
+  }
+  if (landing === "client") {
+    return { href: "/client", label: "Hiring" };
+  }
+  return { href: "/staff", label: "Careers" };
+}
+
 function linksFor(landing: AuthSession["landing"]): LinkItem[] {
   if (landing === "staff") {
     return [
-      { href: "/staff", label: "Careers" },
       { href: "/staff/organization", label: "Organizational Configuration" },
       { href: "/staff/questions", label: "Assessment database" },
     ];
-  }
-  if (landing === "reviews") {
-    return [{ href: "/reviews", label: "Reviews" }];
-  }
-  if (landing === "client") {
-    return [{ href: "/client", label: "Hiring" }];
   }
   return [];
 }
 
 function isActive(pathname: string, href: string): boolean {
-  if (href === "/staff") {
-    return pathname === "/staff";
-  }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export function AppNav({ session }: { session: AuthSession }) {
   const pathname = usePathname();
   const router = useRouter();
+  const home = homeFor(session.landing);
   const links = linksFor(session.landing);
 
   function signOut() {
@@ -44,40 +45,44 @@ export function AppNav({ session }: { session: AuthSession }) {
   }
 
   return (
-    <header className="sticky top-0 z-20 border-b border-black/10 bg-amal-white/95 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-[1600px] min-w-0 items-center justify-between gap-3 px-[var(--page-gutter)]">
+    <header className="sticky top-0 z-20 border-b border-black/10 bg-amal-white/95 shadow-sm backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-[1600px] min-w-0 items-center justify-between gap-2 px-3 md:gap-3 md:px-4">
         <Link
-          href={links[0]?.href ?? "/"}
-          className="flex min-w-0 shrink-0 items-center md:min-w-[220px]"
+          href={home.href}
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 overflow-hidden md:min-w-[220px] md:flex-none md:gap-4 md:overflow-visible"
         >
-          <AmalMark className="h-auto w-28 max-w-full bg-transparent" />
+          <AmalMark className="h-8 w-auto max-w-full shrink-0 bg-transparent" />
+          <span className="hidden h-6 w-px shrink-0 bg-black/15 md:block" />
+          <span className="hidden shrink-0 text-lg font-bold tracking-tight text-zinc-500 md:inline">
+            {home.label}
+          </span>
         </Link>
         <nav className="hidden items-center gap-8 md:flex">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`whitespace-nowrap text-sm font-bold ${
+              className={`rounded-md px-3 py-2 text-sm font-bold transition-colors ${
                 isActive(pathname, link.href)
-                  ? "text-amal-red"
-                  : "text-zinc-500 hover:text-amal-ink"
+                  ? "bg-amal-sheet text-amal-red"
+                  : "text-zinc-500 hover:bg-amal-sheet hover:text-amal-ink"
               }`}
             >
               {link.label}
             </Link>
           ))}
         </nav>
-        <div className="flex shrink-0 items-center justify-end gap-2 md:min-w-[220px]">
+        <div className="flex shrink-0 items-center justify-end gap-2 md:min-w-[220px] md:gap-3">
           <NoticeBell />
           <details className="relative">
             <summary
-              className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-full bg-amal-red text-xs font-bold text-amal-white"
+              className="flex h-9 w-9 cursor-pointer list-none items-center justify-center overflow-hidden rounded-full border border-black/15 bg-amal-sheet text-sm font-semibold text-zinc-600 md:h-8 md:w-8"
               aria-label="Account menu"
             >
               {session.username.slice(0, 1).toUpperCase()}
             </summary>
-            <div className="absolute right-0 z-30 mt-2 w-48 overflow-hidden rounded-lg border border-black/10 bg-amal-white shadow-lg">
-              <p className="truncate border-b border-black/5 bg-amal-sheet px-3 py-2 text-sm font-semibold text-amal-ink">
+            <div className="absolute right-0 z-30 mt-2 w-56 overflow-hidden rounded-lg border border-black/10 bg-amal-white shadow-xl">
+              <p className="truncate border-b border-black/5 bg-amal-sheet/50 px-3 py-2 text-sm font-bold text-amal-ink">
                 {session.username}
               </p>
               <button
@@ -91,15 +96,25 @@ export function AppNav({ session }: { session: AuthSession }) {
           </details>
         </div>
       </div>
-      <nav className="flex gap-4 overflow-auto border-t border-black/5 px-[var(--page-gutter)] py-2 md:hidden">
+      <nav className="flex gap-2 overflow-auto border-t border-black/5 px-3 py-2 md:hidden">
+        <Link
+          href={home.href}
+          className={`rounded-md px-3 py-2 text-sm font-bold ${
+            pathname === home.href
+              ? "bg-amal-sheet text-amal-red"
+              : "text-zinc-500"
+          }`}
+        >
+          {home.label}
+        </Link>
         {links.map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            className={`whitespace-nowrap text-sm font-bold ${
+            className={`whitespace-nowrap rounded-md px-3 py-2 text-sm font-bold ${
               isActive(pathname, link.href)
-                ? "text-amal-red"
-                : "text-zinc-500 hover:text-amal-ink"
+                ? "bg-amal-sheet text-amal-red"
+                : "text-zinc-500"
             }`}
           >
             {link.label}
