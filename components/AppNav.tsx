@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AmalMark } from "@/components/AmalMark";
 import { NoticeBell } from "@/components/NoticeBell";
+import { preventFocusScroll } from "@/lib/prevent-focus-scroll";
 import { clearSession } from "@/lib/session";
 import type { AuthSession } from "@/lib/types";
 
@@ -62,6 +63,7 @@ export function AppNav({ session }: { session: AuthSession }) {
             <Link
               key={link.href}
               href={link.href}
+              onMouseDown={preventFocusScroll}
               className={`rounded-md px-3 py-2 text-sm font-bold transition-colors ${
                 isActive(pathname, link.href)
                   ? "bg-amal-sheet text-amal-red"
@@ -99,6 +101,7 @@ export function AppNav({ session }: { session: AuthSession }) {
       <nav className="flex gap-2 overflow-auto border-t border-black/5 px-3 py-2 md:hidden">
         <Link
           href={home.href}
+          onMouseDown={preventFocusScroll}
           className={`rounded-md px-3 py-2 text-sm font-bold ${
             pathname === home.href
               ? "bg-amal-sheet text-amal-red"
@@ -111,6 +114,7 @@ export function AppNav({ session }: { session: AuthSession }) {
           <Link
             key={link.href}
             href={link.href}
+            onMouseDown={preventFocusScroll}
             className={`whitespace-nowrap rounded-md px-3 py-2 text-sm font-bold ${
               isActive(pathname, link.href)
                 ? "bg-amal-sheet text-amal-red"

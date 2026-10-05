@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
+import { preventFocusScroll } from "@/lib/prevent-focus-scroll";
 import {
   createAuthUser,
   createClient,
@@ -57,7 +58,7 @@ export function OrganizationScreen() {
           {notice}
         </p>
       ) : null}
-      <div className="mt-6 rounded-2xl border border-black/10 bg-amal-white p-4 md:p-6">
+      <div className="overflow-anchor-none mt-6 rounded-2xl border border-black/10 bg-amal-white p-4 md:p-6">
         <div className="mb-5 flex flex-wrap gap-2">
           {TABS.map((item) => (
             <button
@@ -68,6 +69,7 @@ export function OrganizationScreen() {
                   ? "bg-amal-red text-amal-white"
                   : "bg-amal-sheet text-zinc-600"
               }`}
+              onMouseDown={preventFocusScroll}
               onClick={() => setTab(item.id)}
             >
               {item.label}

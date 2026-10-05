@@ -12,6 +12,7 @@ import {
 } from "@/lib/staff-api";
 import type { ShareLink, StaffApplication } from "@/lib/types";
 import { Field, GhostButton, Modal, PrimaryButton, TablePager, inputClass } from "./ui";
+import { CareersBackLink } from "./CareersBackLink";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
@@ -47,9 +48,12 @@ export function ShareLinksScreen() {
 
   return (
     <div>
-      <Link href="/staff" className="text-sm font-semibold text-amal-red">
+      <CareersBackLink
+        href="/staff"
+        className="text-sm font-semibold text-amal-red"
+      >
         ← Careers
-      </Link>
+      </CareersBackLink>
       <h1 className="mt-3 text-2xl font-semibold tracking-tight">Share links</h1>
       <p className="mt-2 max-w-2xl text-sm text-zinc-600">
         Create a public link to an application, edit it, or turn it off.

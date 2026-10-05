@@ -9,6 +9,11 @@ import {
 } from "react";
 import { ApiError } from "@/lib/api";
 import {
+  scheduleClearCareersApplicationsReturnCache,
+  takeCareersApplicationsReturn,
+} from "@/lib/careers-return";
+import { preventFocusScroll } from "@/lib/prevent-focus-scroll";
+import {
   getAssignedStages,
   getEmployees,
   getHrStages,
@@ -119,7 +124,19 @@ function errorText(error: unknown): string {
 }
 
 export function StaffHub() {
-  const [tab, setTab] = useState<Tab>("roles");
+  const [restored] = useState(() => takeCareersApplicationsReturn());
+  const [tab, setTab] = useState<Tab>(
+    restored?.tab === "applications" ? "applications" : "roles",
+  );
+  const [applicationsRestore, setApplicationsRestore] = useState(
+    restored?.tab === "applications"
+      ? {
+          filters: restored.filters,
+          page: restored.page,
+          pageSize: restored.pageSize,
+        }
+      : null,
+  );
   const [notice, setNotice] = useState("");
   const onError = useCallback((value: string) => setNotice(value), []);
   const [roleCount, setRoleCount] = useState(0);
@@ -136,8 +153,25 @@ export function StaffHub() {
   );
 
   const [countsTick, setCountsTick] = useState(0);
-  const [applicationRole, setApplicationRole] = useState("");
-  const [applicationStatus, setApplicationStatus] = useState("");
+  const [applicationRole, setApplicationRole] = useState(() =>
+    restored?.filters.jobFilter && restored.filters.jobFilter !== "all"
+      ? restored.filters.jobFilter
+      : "",
+  );
+  const [applicationStatus, setApplicationStatus] = useState(() =>
+    restored?.filters.statusFilter && restored.filters.statusFilter !== "all"
+      ? restored.filters.statusFilter
+      : "",
+  );
+
+  useEffect(() => {
+    return () => scheduleClearCareersApplicationsReturnCache();
+  }, []);
+
+  function goToTab(next: Tab) {
+    setApplicationsRestore(null);
+    setTab(next);
+  }
 
   useEffect(() => {
     let ignore = false;
@@ -214,14 +248,14 @@ export function StaffHub() {
               value: roleCount,
               tone: "bg-amal-sheet text-amal-ink hover:bg-zinc-200/70",
               icon: BriefcaseIcon,
-              onClick: () => setTab("roles"),
+              onClick: () => goToTab("roles"),
             },
             {
               label: "Unique Applicants",
               value: applicantCount,
               tone: "bg-amal-red/10 text-amal-red hover:bg-amal-red/20",
               icon: UserIcon,
-              onClick: () => setTab("applicants"),
+              onClick: () => goToTab("applicants"),
             },
             {
               label: "Total Applications",
@@ -229,6 +263,7 @@ export function StaffHub() {
               tone: "bg-amal-ink/5 text-amal-ink hover:bg-amal-ink/10",
               icon: UsersIcon,
               onClick: () => {
+                setApplicationsRestore(null);
                 setApplicationRole("");
                 setTab("applications");
               },
@@ -239,6 +274,7 @@ export function StaffHub() {
             key={card.label}
             type="button"
             onClick={card.onClick}
+            onMouseDown={preventFocusScroll}
             className={`rounded-xl border border-black/10 p-4 text-left transition ${card.tone}`}
           >
             <div className="flex items-center justify-between">
@@ -260,7 +296,8 @@ export function StaffHub() {
               <button
                 key={item.id}
                 type="button"
-                onClick={() => setTab(item.id)}
+                onMouseDown={preventFocusScroll}
+                onClick={() => goToTab(item.id)}
                 className={`flex min-h-[4.25rem] min-w-0 flex-col justify-start rounded-lg px-3 py-3 text-left transition-colors sm:min-h-[4.5rem] ${
                   active
                     ? "bg-amal-red text-amal-white shadow-sm"
@@ -284,7 +321,7 @@ export function StaffHub() {
         </div>
       </div>
 
-      <div className="mt-6 rounded-2xl border border-black/10 bg-amal-white p-4 shadow-sm md:p-6">
+      <div className="overflow-anchor-none mt-6 rounded-2xl border border-black/10 bg-amal-white p-4 shadow-sm md:p-6">
           {tab === "roles" ? (
             <RolesTab
               key={countsTick}
@@ -298,6 +335,7 @@ export function StaffHub() {
                 setIdealRole(row);
               }}
               onViewApplications={(slug, status) => {
+                setApplicationsRestore(null);
                 setApplicationRole(slug);
                 setApplicationStatus(status ?? "");
                 setTab("applications");
@@ -308,6 +346,7 @@ export function StaffHub() {
             <ApplicantsTab
               onError={onError}
               onViewApplications={(slug) => {
+                setApplicationsRestore(null);
                 setApplicationRole(slug);
                 setApplicationStatus("");
                 setTab("applications");
@@ -316,9 +355,16 @@ export function StaffHub() {
           ) : null}
           {tab === "applications" ? (
             <ApplicationsTab
-              key={`${applicationRole}:${applicationStatus}`}
+              key={
+                applicationsRestore
+                  ? `restore:${applicationsRestore.page}:${applicationsRestore.pageSize}`
+                  : `${applicationRole}:${applicationStatus}`
+              }
               jobOpening={applicationRole}
               status={applicationStatus}
+              initialFilters={applicationsRestore?.filters}
+              initialPage={applicationsRestore?.page}
+              initialPageSize={applicationsRestore?.pageSize}
               onJobOpeningChange={setApplicationRole}
               onStatusChange={setApplicationStatus}
               refreshTick={countsTick}
@@ -374,6 +420,7 @@ export function StaffHub() {
           onClose={() => setModal(null)}
           onSaved={() => {
             setModal(null);
+            setApplicationsRestore(null);
             setTab("applications");
             setCountsTick((value) => value + 1);
           }}

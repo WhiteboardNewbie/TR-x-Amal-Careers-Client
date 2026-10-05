@@ -81,6 +81,22 @@ export function dateRangeForPreset(preset: JobApplicationsDatePreset): {
   return { from: "", to: "" };
 }
 
+export function inferDatePreset(
+  appliedFrom: string,
+  appliedTo: string,
+): JobApplicationsDatePreset {
+  if (!appliedFrom && !appliedTo) {
+    return "any";
+  }
+  for (const preset of ["last7", "last30", "quarter"] as const) {
+    const range = dateRangeForPreset(preset);
+    if (range.from === appliedFrom && range.to === appliedTo) {
+      return preset;
+    }
+  }
+  return "custom";
+}
+
 export function jobApplicationsFiltersToApiParams(
   debouncedSearch: string,
   filters: JobApplicationsFilterState,

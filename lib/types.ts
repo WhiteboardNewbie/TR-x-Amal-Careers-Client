@@ -155,6 +155,19 @@ export type StaffApplication = {
   manager_score_avg?: string | number | null;
 };
 
+export type CvMatchType = "exact" | "starts_with" | "ends_with" | "contains";
+
+export type JobApplicationCvMatch = {
+  term: string;
+  match_type: CvMatchType | string;
+  snippet: string;
+};
+
+export type StaffApplicationCvSearchResult = StaffApplication & {
+  cv_matches: JobApplicationCvMatch[];
+  match_score: number;
+};
+
 export type ApplicationStage = {
   id: number;
   job_application: number;

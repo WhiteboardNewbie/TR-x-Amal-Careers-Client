@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
+import { preventFocusScroll } from "@/lib/prevent-focus-scroll";
 import {
   createBankQuestion,
   createVideoPrompt,
@@ -67,6 +68,7 @@ export function QuestionsScreen() {
           <button
             type="button"
             className="inline-flex shrink-0 self-start rounded-xl border border-amal-white/40 bg-amal-white/10 px-4 py-2 text-sm font-semibold hover:bg-amal-white/20"
+            onMouseDown={preventFocusScroll}
             onClick={() => setTab("defaults")}
           >
             Assessment Defaults
@@ -81,7 +83,7 @@ export function QuestionsScreen() {
           {notice}
         </p>
       ) : null}
-      <div className="mt-6 rounded-2xl border border-black/10 bg-amal-white p-4 md:p-6">
+      <div className="overflow-anchor-none mt-6 rounded-2xl border border-black/10 bg-amal-white p-4 md:p-6">
         <div className="mb-5 flex flex-wrap gap-2">
           {TABS.map((item) => (
             <button
@@ -92,6 +94,7 @@ export function QuestionsScreen() {
                   ? "bg-amal-red text-amal-white"
                   : "bg-amal-sheet text-zinc-600"
               }`}
+              onMouseDown={preventFocusScroll}
               onClick={() => setTab(item.id)}
             >
               {item.label}
