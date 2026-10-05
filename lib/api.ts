@@ -21,17 +21,33 @@ export class ApiError extends Error {
   }
 }
 
+function firstString(value: unknown): string | null {
+  if (typeof value === "string" && value.trim()) {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return firstString(value[0]);
+  }
+  return null;
+}
+
 function messageFor(status: number, body: unknown): string {
-  if (typeof body === "string" && body.trim()) {
-    return body;
+  const asText = firstString(body);
+  if (asText) {
+    return asText;
   }
   if (body && typeof body === "object") {
-    const detail = (body as { detail?: unknown }).detail;
-    if (typeof detail === "string") {
-      return detail;
+    const record = body as Record<string, unknown>;
+    const preferred =
+      firstString(record.detail) ?? firstString(record.non_field_errors);
+    if (preferred) {
+      return preferred;
     }
-    if (Array.isArray(detail) && typeof detail[0] === "string") {
-      return detail[0];
+    for (const value of Object.values(record)) {
+      const message = firstString(value);
+      if (message) {
+        return message;
+      }
     }
   }
   return `Request failed with ${status}`;
