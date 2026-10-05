@@ -121,6 +121,14 @@
   box-shadow: 0 10px 40px rgb(255 51 51 / 0.3);
 }
 
+details > summary {
+  list-style: none;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
 @theme inline {
   --color-amal-red: var(--amal-red);
   --color-amal-blue: var(--amal-blue);

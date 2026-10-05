@@ -1,8 +1,11 @@
+import { sessionToken } from "./session";
 import type {
   ApplyFields,
+  AuthToken,
   CreatedJobApplication,
   Department,
   JobOpening,
+  Notice,
 } from "./types";
 
 const API_URL = (
@@ -54,7 +57,12 @@ function messageFor(status: number, body: unknown): string {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, init);
+  const headers = new Headers(init?.headers);
+  const token = sessionToken();
+  if (token && !headers.has("Authorization")) {
+    headers.set("Authorization", `Token ${token}`);
+  }
+  const response = await fetch(`${API_URL}${path}`, { ...init, headers });
   const text = await response.text();
   let body: unknown = null;
   if (text) {
@@ -110,4 +118,22 @@ export function createJobApplication(
     method: "POST",
     body: data,
   });
+}
+
+export function createAuthToken(fields: {
+  username: string;
+  password: string;
+}): Promise<AuthToken> {
+  return request<AuthToken>("/auth/api-token-auth/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username: fields.username,
+      password: fields.password,
+    }),
+  });
+}
+
+export function getNotifications(): Promise<Notice[]> {
+  return request<Notice[]>("/notifications/");
 }
