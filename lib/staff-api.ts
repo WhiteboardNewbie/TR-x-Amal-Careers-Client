@@ -242,10 +242,12 @@ export function updateIdealProfileForRole(
 }
 
 export function getIdealProfileMetricCatalog(): Promise<
-  Page<IdealProfileMetricCatalogItem>
+  IdealProfileMetricCatalogItem[]
 > {
-  return request<Page<IdealProfileMetricCatalogItem>>(
-    "/careers/ideal-profiles/metrics-catalog/?page_size=150",
+  return request<
+    IdealProfileMetricCatalogItem[] | Page<IdealProfileMetricCatalogItem>
+  >("/careers/ideal-profiles/metrics-catalog/").then((data) =>
+    Array.isArray(data) ? data : (data.results ?? []),
   );
 }
 

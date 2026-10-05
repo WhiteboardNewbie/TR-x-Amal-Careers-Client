@@ -6,6 +6,7 @@ import type {
   Department,
   JobOpening,
   Notice,
+  Page,
 } from "./types";
 
 export const API_URL = (
@@ -66,13 +67,17 @@ function messageFor(status: number, body: unknown): string {
   return `Request failed with ${status}`;
 }
 
-export async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const headers = new Headers(init?.headers);
+export async function request<T>(
+  path: string,
+  init?: RequestInit & { anonymous?: boolean },
+): Promise<T> {
+  const { anonymous, ...rest } = init ?? {};
+  const headers = new Headers(rest.headers);
   const token = sessionToken();
-  if (token && !headers.has("Authorization")) {
+  if (token && !anonymous && !headers.has("Authorization")) {
     headers.set("Authorization", `Token ${token}`);
   }
-  const response = await fetch(`${API_URL}${path}`, { ...init, headers });
+  const response = await fetch(`${API_URL}${path}`, { ...rest, headers });
   const text = await response.text();
   let body: unknown = null;
   if (text) {
@@ -105,7 +110,10 @@ export function getJobOpenings(params?: {
     query.set("search", search);
   }
   const suffix = query.toString() ? `?${query.toString()}` : "";
-  return request<JobOpening[]>(`/careers/job-openings/${suffix}`);
+  return request<JobOpening[] | Page<JobOpening>>(
+    `/careers/job-openings/${suffix}`,
+    { anonymous: true },
+  ).then((data) => (Array.isArray(data) ? data : (data.results ?? [])));
 }
 
 export function getJobOpening(slug: string): Promise<JobOpening> {

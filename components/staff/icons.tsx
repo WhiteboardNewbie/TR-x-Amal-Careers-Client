@@ -78,3 +78,30 @@ export function ChecksIcon({ className }: { className?: string }) {
     </Icon>
   );
 }
+
+export function CalendarIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M8 3v4M16 3v4M3 11h18" />
+    </Icon>
+  );
+}
+
+export function TargetIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <circle cx="12" cy="12" r="8" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="12" cy="12" r="1" />
+    </Icon>
+  );
+}
+
+export function ChartIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M4 19V9M10 19V5M16 19v-7M22 19H2" />
+    </Icon>
+  );
+}

@@ -31,12 +31,14 @@ import type {
   Department,
   DepartmentManager,
   Employee,
+  JobApplicationStatus,
   StaffApplication,
   StaffJobOpening,
 } from "@/lib/types";
 import { ApplicantsTab } from "./ApplicantsTab";
 import { CreateRoleModal } from "./CreateRoleModal";
 import { IdealProfileModal } from "./IdealProfileModal";
+import { RoleDetailModal } from "./RoleDetailModal";
 import { StaffBanner } from "./StaffBanner";
 import {
   BriefcaseIcon,
@@ -141,6 +143,7 @@ export function StaffHub() {
 
   const [countsTick, setCountsTick] = useState(0);
   const [applicationRole, setApplicationRole] = useState("");
+  const [applicationStatus, setApplicationStatus] = useState("");
 
   useEffect(() => {
     let ignore = false;
@@ -215,21 +218,21 @@ export function StaffHub() {
             {
               label: "Roles",
               value: roleCount,
-              tone: "bg-amal-sheet text-amal-ink",
+              tone: "bg-amal-sheet text-amal-ink hover:bg-zinc-200/70",
               icon: BriefcaseIcon,
               onClick: () => setTab("roles"),
             },
             {
               label: "Unique Applicants",
               value: applicantCount,
-              tone: "bg-amal-red/10 text-amal-red",
+              tone: "bg-amal-red/10 text-amal-red hover:bg-amal-red/20",
               icon: UserIcon,
               onClick: () => setTab("applicants"),
             },
             {
               label: "Total Applications",
               value: appCount,
-              tone: "bg-amal-ink/5 text-amal-ink",
+              tone: "bg-amal-ink/5 text-amal-ink hover:bg-amal-ink/10",
               icon: UsersIcon,
               onClick: () => {
                 setApplicationRole("");
@@ -242,7 +245,7 @@ export function StaffHub() {
             key={card.label}
             type="button"
             onClick={card.onClick}
-            className={`rounded-xl border border-black/10 p-4 text-left transition hover:opacity-90 ${card.tone}`}
+            className={`rounded-xl border border-black/10 p-4 text-left transition ${card.tone}`}
           >
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-wide opacity-90">
@@ -288,7 +291,7 @@ export function StaffHub() {
       <div className="mt-6 rounded-2xl border border-black/10 bg-amal-white p-4 shadow-sm md:p-6">
           {tab === "roles" ? (
             <RolesTab
-              reload={countsTick}
+              key={countsTick}
               onError={onError}
               onEdit={(row) => {
                 setEditingRole(row);
@@ -298,8 +301,9 @@ export function StaffHub() {
                 setIdealStandalone(false);
                 setIdealRole(row);
               }}
-              onViewApplications={(slug) => {
+              onViewApplications={(slug, status) => {
                 setApplicationRole(slug);
+                setApplicationStatus(status ?? "");
                 setTab("applications");
               }}
             />
@@ -314,19 +318,23 @@ export function StaffHub() {
                 <Link href="/staff/share-links" className="text-amal-red">
                   Share links
                 </Link>
-                {applicationRole ? (
+                {applicationRole || applicationStatus ? (
                   <button
                     type="button"
                     className="text-zinc-500"
-                    onClick={() => setApplicationRole("")}
+                    onClick={() => {
+                      setApplicationRole("");
+                      setApplicationStatus("");
+                    }}
                   >
                     Clear role filter
                   </button>
                 ) : null}
               </div>
               <ApplicationsTab
-                key={applicationRole || "all"}
+                key={`${applicationRole}:${applicationStatus}`}
                 jobOpening={applicationRole}
+                status={applicationStatus}
                 onError={onError}
                 onAssign={(row) => {
                   setStageTarget(row);
@@ -414,17 +422,15 @@ export function StaffHub() {
 }
 
 function RolesTab({
-  reload,
   onError,
   onEdit,
   onIdeal,
   onViewApplications,
 }: {
-  reload: number;
   onError: (value: string) => void;
   onEdit: (row: StaffJobOpening) => void;
   onIdeal: (row: StaffJobOpening) => void;
-  onViewApplications: (slug: string) => void;
+  onViewApplications: (slug: string, status?: JobApplicationStatus) => void;
 }) {
   const [page, setPage] = useState(1);
   const [tick, setTick] = useState(0);
@@ -435,6 +441,9 @@ function RolesTab({
   const [department, setDepartment] = useState("all");
   const [sort, setSort] = useState<"new-to-old" | "old-to-new">("new-to-old");
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [selectedRole, setSelectedRole] = useState<StaffJobOpening | null>(
+    null,
+  );
 
   useEffect(() => {
     void getOrgDepartments()
@@ -453,8 +462,8 @@ function RolesTab({
     })
       .then((data) => {
         if (!ignore) {
-          setRows(data.results);
-          setCount(data.count);
+          setRows(data.results ?? []);
+          setCount(data.count ?? 0);
         }
       })
       .catch((error) => {
@@ -465,7 +474,7 @@ function RolesTab({
     return () => {
       ignore = true;
     };
-  }, [page, tick, reload, search, status, department, onError]);
+  }, [page, tick, search, status, department, onError]);
 
   const sorted = useMemo(() => {
     if (sort === "old-to-new") {
@@ -476,8 +485,13 @@ function RolesTab({
 
   async function toggle(row: StaffJobOpening) {
     try {
-      await patchJobOpening(row.slug, { is_active: !row.is_active });
+      const updated = await patchJobOpening(row.slug, {
+        is_active: !row.is_active,
+      });
       setTick((value) => value + 1);
+      setSelectedRole((current) =>
+        current?.slug === row.slug ? { ...current, ...updated } : current,
+      );
     } catch (error) {
       onError(errorText(error));
     }
@@ -571,81 +585,93 @@ function RolesTab({
             sorted.map((row) => (
               <div
                 key={row.id}
-                className="rounded-2xl border border-black/10 bg-amal-white p-4 shadow-sm"
+                className="relative w-full rounded-2xl border border-black/10 bg-amal-white shadow-sm transition hover:border-black/25 hover:shadow-md"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-base font-bold">{row.title}</h3>
-                    <p className="mt-1 text-sm text-zinc-500">
-                      {row.department_name} • {row.location}
-                    </p>
-                  </div>
-                  <span
-                    className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                      row.is_draft
-                        ? "bg-zinc-100 text-zinc-700"
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole(row)}
+                  className="absolute inset-0 z-0 rounded-2xl"
+                  aria-label={`View role ${row.title}`}
+                />
+                <div className="pointer-events-none relative z-10 p-4 text-left">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-base font-bold">{row.title}</h3>
+                      <p className="mt-1 text-sm text-zinc-500">
+                        {row.department_name} • {row.location}
+                      </p>
+                    </div>
+                    <span
+                      className={`rounded-full px-2 py-1 text-xs font-semibold ${
+                        row.is_draft
+                          ? "bg-zinc-100 text-zinc-700"
+                          : row.is_active
+                            ? "bg-amal-red/10 text-amal-red"
+                            : "bg-amal-sheet text-zinc-600"
+                      }`}
+                    >
+                      {row.is_draft
+                        ? "Draft"
                         : row.is_active
-                          ? "bg-amal-red/10 text-amal-red"
-                          : "bg-amal-sheet text-zinc-600"
-                    }`}
-                  >
-                    {row.is_draft ? "Draft" : row.is_active ? "Active" : "Closed"}
-                  </span>
+                          ? "Active"
+                          : "Closed"}
+                    </span>
+                  </div>
+                  {row.description ? (
+                    <p className="mt-2 text-sm text-zinc-600">
+                      {compactText(row.description, 160)}
+                    </p>
+                  ) : null}
+                  <div className="mt-3 grid grid-cols-3 gap-2">
+                    <div className="rounded-lg border border-black/10 bg-amal-sheet p-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
+                        Work Type
+                      </p>
+                      <p className="mt-1 text-sm font-semibold">
+                        {WORK_TYPE_LABEL[row.work_type] ?? row.work_type}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-black/10 bg-amal-sheet p-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
+                        Employment
+                      </p>
+                      <p className="mt-1 text-sm font-semibold">
+                        {EMPLOYMENT_LABEL[row.employment_type] ??
+                          row.employment_type}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onViewApplications(row.slug)}
+                      className="pointer-events-auto relative z-10 rounded-lg border border-amal-red/20 bg-amal-red/10 p-2 text-left hover:bg-amal-red/15"
+                    >
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-amal-red">
+                        Applications
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-amal-red">
+                        {row.application_count ?? 0}
+                      </p>
+                    </button>
+                  </div>
+                  {row.skills.length > 0 ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {row.skills.slice(0, 4).map((skill) => (
+                        <span
+                          key={skill.id}
+                          className="rounded-full bg-amal-sheet px-2 py-1 text-xs font-medium text-zinc-600"
+                        >
+                          {skill.name}
+                        </span>
+                      ))}
+                      {row.skills.length > 4 ? (
+                        <span className="rounded-full bg-amal-sheet px-2 py-1 text-xs font-medium text-zinc-600">
+                          +{row.skills.length - 4}
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
-                {row.description ? (
-                  <p className="mt-2 text-sm text-zinc-600">
-                    {compactText(row.description, 160)}
-                  </p>
-                ) : null}
-                <div className="mt-3 grid grid-cols-3 gap-2">
-                  <div className="rounded-lg border border-black/10 bg-amal-sheet p-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
-                      Work Type
-                    </p>
-                    <p className="mt-1 text-sm font-semibold">
-                      {WORK_TYPE_LABEL[row.work_type] ?? row.work_type}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-black/10 bg-amal-sheet p-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
-                      Employment
-                    </p>
-                    <p className="mt-1 text-sm font-semibold">
-                      {EMPLOYMENT_LABEL[row.employment_type] ??
-                        row.employment_type}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => onViewApplications(row.slug)}
-                    className="rounded-lg border border-amal-red/20 bg-amal-red/10 p-2 text-left"
-                  >
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-amal-red">
-                      Applications
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-amal-red">
-                      {row.application_count ?? 0}
-                    </p>
-                  </button>
-                </div>
-                {row.skills.length > 0 ? (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {row.skills.slice(0, 4).map((skill) => (
-                      <span
-                        key={skill.id}
-                        className="rounded-full bg-amal-sheet px-2 py-1 text-xs font-medium text-zinc-600"
-                      >
-                        {skill.name}
-                      </span>
-                    ))}
-                    {row.skills.length > 4 ? (
-                      <span className="rounded-full bg-amal-sheet px-2 py-1 text-xs font-medium text-zinc-600">
-                        +{row.skills.length - 4}
-                      </span>
-                    ) : null}
-                  </div>
-                ) : null}
-                <div className="mt-4 flex flex-wrap items-center gap-2">
+                <div className="pointer-events-auto relative z-10 flex flex-wrap items-center gap-2 px-4 pb-4">
                   <button
                     type="button"
                     onClick={() => onIdeal(row)}
@@ -680,6 +706,23 @@ function RolesTab({
         </div>
       </div>
       <TablePager page={page} pageSize={10} count={count} onPage={setPage} />
+      {selectedRole ? (
+        <RoleDetailModal
+          key={selectedRole.slug}
+          role={selectedRole}
+          onClose={() => setSelectedRole(null)}
+          onIdeal={() => onIdeal(selectedRole)}
+          onEdit={() => {
+            setSelectedRole(null);
+            onEdit(selectedRole);
+          }}
+          onToggle={() => void toggle(selectedRole)}
+          onViewApplications={(status) => {
+            setSelectedRole(null);
+            onViewApplications(selectedRole.slug, status);
+          }}
+        />
+      ) : null}
     </div>
   );
 }
@@ -688,10 +731,12 @@ function ApplicationsTab({
   onError,
   onAssign,
   jobOpening,
+  status,
 }: {
   onError: (value: string) => void;
   onAssign: (row: StaffApplication) => void;
   jobOpening?: string;
+  status?: string;
 }) {
   const [page, setPage] = useState(1);
   const [tick, setTick] = useState(0);
@@ -704,6 +749,7 @@ function ApplicationsTab({
       page,
       page_size: 10,
       job_opening: jobOpening || undefined,
+      status: status || undefined,
     })
       .then((data) => {
         if (!ignore) {
@@ -719,7 +765,7 @@ function ApplicationsTab({
     return () => {
       ignore = true;
     };
-  }, [page, tick, onError, jobOpening]);
+  }, [page, tick, onError, jobOpening, status]);
 
   async function changeStatus(row: StaffApplication, status: string) {
     try {

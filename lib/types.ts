@@ -8,6 +8,23 @@ export type Skill = {
   name: string;
 };
 
+export type JobOpeningAnalytics = {
+  total_applications: number;
+  by_status: Record<string, number>;
+  assessments: {
+    first_test_completed: number;
+    video_completed: number;
+    questionnaire_completed: number;
+    all_three_complete: number;
+  };
+  pipeline: Record<string, number>;
+  averages: {
+    first_test_score: number | null;
+    manager_overall: number | null;
+  };
+  days_open: number | null;
+};
+
 export type JobOpening = {
   id: number;
   title: string;
@@ -25,6 +42,7 @@ export type JobOpening = {
   is_active: boolean;
   is_draft: boolean;
   application_count?: number;
+  analytics?: JobOpeningAnalytics;
   client_users?: { id: number; first_name: string; last_name: string; email: string }[];
 };
 
@@ -279,6 +297,9 @@ export type ClientRole = {
 export type IdealProfileMetric = {
   metric_id: number;
   client_weight: number;
+  key?: string;
+  label?: string;
+  description?: string;
 };
 
 export type IdealProfileTestConfig = {
@@ -294,6 +315,7 @@ export type IdealProfile = {
   job_opening: number | null;
   department: { id: number; name: string } | null;
   title: { id: number; name: string } | null;
+  skills: Skill[];
   metric_weights: IdealProfileMetric[];
   test_configurations: IdealProfileTestConfig[];
 };
@@ -302,6 +324,7 @@ export type IdealProfilePayload = {
   name: string;
   department_id?: number | null;
   title_id?: number | null;
+  skill_ids?: number[];
   metric_weights?: IdealProfileMetric[];
   test_configurations?: IdealProfileTestConfig[];
 };
@@ -310,7 +333,9 @@ export type IdealProfileMetricCatalogItem = {
   id: number;
   key: string;
   label: string;
+  description: string;
   display_order: number;
+  is_active?: boolean;
 };
 
 export type ClientApplicationRow = {
