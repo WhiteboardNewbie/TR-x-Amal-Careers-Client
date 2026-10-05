@@ -193,13 +193,20 @@ export function StaffHub() {
           ) : null}
           {tab === "applicants" ? <ApplicantsTab onError={onError} /> : null}
           {tab === "applications" ? (
-            <ApplicationsTab
-              onError={onError}
-              onAssign={(row) => {
-                setStageTarget(row);
-                setModal("stage");
-              }}
-            />
+            <div>
+              <div className="mb-4 flex flex-wrap gap-3 text-sm font-semibold">
+                <Link href="/staff/cv-search" className="text-amal-red">
+                  CV search
+                </Link>
+              </div>
+              <ApplicationsTab
+                onError={onError}
+                onAssign={(row) => {
+                  setStageTarget(row);
+                  setModal("stage");
+                }}
+              />
+            </div>
           ) : null}
           {tab === "stages" ? (
             <StagesTab
