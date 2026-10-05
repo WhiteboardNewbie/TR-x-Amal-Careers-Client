@@ -12,6 +12,7 @@ import {
   getHrStages,
   getOrgDepartments,
   getOrgTitles,
+  getApplicants,
   getStaffApplication,
   getStaffApplications,
   getStaffJobOpenings,
@@ -30,6 +31,7 @@ import type {
   StaffApplication,
   StaffJobOpening,
 } from "@/lib/types";
+import { ApplicantsTab } from "./ApplicantsTab";
 import {
   Field,
   GhostButton,
@@ -39,10 +41,11 @@ import {
   inputClass,
 } from "./ui";
 
-type Tab = "roles" | "applications" | "stages" | "manage";
+type Tab = "roles" | "applicants" | "applications" | "stages" | "manage";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "roles", label: "Roles" },
+  { id: "applicants", label: "Applicants" },
   { id: "applications", label: "Job Applications" },
   { id: "stages", label: "Stage Assignments" },
   { id: "manage", label: "Manage Applications" },
@@ -58,6 +61,7 @@ export function StaffHub() {
   const onError = useCallback((value: string) => setNotice(value), []);
   const [roleCount, setRoleCount] = useState(0);
   const [appCount, setAppCount] = useState(0);
+  const [applicantCount, setApplicantCount] = useState(0);
   const [modal, setModal] = useState<
     "role" | "application" | "ideal" | "stage" | "schedule" | null
   >(null);
@@ -78,6 +82,11 @@ export function StaffHub() {
     getStaffApplications({ page: 1, page_size: 1 }).then((page) => {
       if (!ignore) {
         setAppCount(page.count);
+      }
+    });
+    getApplicants({ page: 1, page_size: 1 }).then((page) => {
+      if (!ignore) {
+        setApplicantCount(page.count);
       }
     });
     return () => {
@@ -127,7 +136,7 @@ export function StaffHub() {
           </p>
         ) : null}
 
-        <div className="mb-6 grid gap-3 sm:grid-cols-2">
+        <div className="mb-6 grid gap-3 sm:grid-cols-3">
           <button
             type="button"
             className="rounded-2xl border border-black/10 bg-amal-white p-5 text-left"
@@ -137,6 +146,16 @@ export function StaffHub() {
               Roles
             </p>
             <p className="mt-2 text-3xl font-bold">{roleCount}</p>
+          </button>
+          <button
+            type="button"
+            className="rounded-2xl border border-black/10 bg-amal-white p-5 text-left"
+            onClick={() => setTab("applicants")}
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              Unique Applicants
+            </p>
+            <p className="mt-2 text-3xl font-bold">{applicantCount}</p>
           </button>
           <button
             type="button"
@@ -171,6 +190,7 @@ export function StaffHub() {
           {tab === "roles" ? (
             <RolesTab onError={onError} />
           ) : null}
+          {tab === "applicants" ? <ApplicantsTab onError={onError} /> : null}
           {tab === "applications" ? (
             <ApplicationsTab
               onError={onError}
