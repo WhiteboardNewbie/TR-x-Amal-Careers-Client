@@ -310,7 +310,16 @@ export function StaffHub() {
               }}
             />
           ) : null}
-          {tab === "applicants" ? <ApplicantsTab onError={onError} /> : null}
+          {tab === "applicants" ? (
+            <ApplicantsTab
+              onError={onError}
+              onViewApplications={(slug) => {
+                setApplicationRole(slug);
+                setApplicationStatus("");
+                setTab("applications");
+              }}
+            />
+          ) : null}
           {tab === "applications" ? (
             <div>
               <div className="mb-4 flex flex-wrap gap-3 text-sm font-semibold">
