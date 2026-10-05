@@ -25,9 +25,9 @@ function DetailRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid gap-2 border-t border-zinc-200 py-5 sm:grid-cols-3">
-      <dt className="font-semibold text-zinc-950">{label}</dt>
-      <dd className="text-zinc-600 sm:col-span-2">{children}</dd>
+    <div className="grid gap-x-[1.875rem] gap-y-2 border-t border-black/10 py-5 sm:grid-cols-12">
+      <dt className="font-semibold text-zinc-950 sm:col-span-4">{label}</dt>
+      <dd className="text-zinc-500 sm:col-span-8">{children}</dd>
     </div>
   );
 }
@@ -106,9 +106,10 @@ export function RoleDetail({ slug }: { slug: string }) {
         subtitle={`Join our innovative ${department} team today!`}
       />
       <section className="py-[var(--section-y)]">
-        <div className="page-container max-w-4xl">
+        <div className="page-container">
+          <div className="page-article">
           <div className="mb-[3.75rem] flex flex-wrap items-center justify-between gap-4">
-            <h2 className="text-[clamp(1.5rem,2vw,2rem)] font-medium tracking-[-0.03em]">
+            <h2 className="text-[clamp(1.5rem,calc(1.136rem+1.82vw),2.5rem)] font-medium leading-[1.2] tracking-[-0.03em]">
               Job Details
             </h2>
             <Link
@@ -144,6 +145,7 @@ export function RoleDetail({ slug }: { slug: string }) {
             <DetailRow label="Skills">{skills}</DetailRow>
             <DetailRow label="Status">Active</DetailRow>
           </dl>
+          </div>
         </div>
       </section>
     </>
