@@ -323,8 +323,16 @@ export function createBankQuestion(body: {
   option_c: string;
   option_d: string;
   correct_option: string;
+  is_active?: boolean;
 }): Promise<BankQuestion> {
   return sendJson<BankQuestion>("/questions/", "POST", body);
+}
+
+export function patchBankQuestion(
+  id: number,
+  body: Partial<BankQuestion>,
+): Promise<BankQuestion> {
+  return sendJson<BankQuestion>(`/questions/${id}/`, "PATCH", body);
 }
 
 export function getVideoPrompts(): Promise<VideoPrompt[]> {
@@ -333,6 +341,13 @@ export function getVideoPrompts(): Promise<VideoPrompt[]> {
 
 export function createVideoPrompt(prompt: string): Promise<VideoPrompt> {
   return sendJson<VideoPrompt>("/video-test/questions/", "POST", { prompt });
+}
+
+export function patchVideoPrompt(
+  id: number,
+  body: Partial<VideoPrompt>,
+): Promise<VideoPrompt> {
+  return sendJson<VideoPrompt>(`/video-test/questions/${id}/`, "PATCH", body);
 }
 
 export function getAssessmentSettings(): Promise<AssessmentSetting[]> {
