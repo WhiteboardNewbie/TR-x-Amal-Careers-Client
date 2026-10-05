@@ -13,6 +13,7 @@ import {
   patchVideoPrompt,
 } from "@/lib/staff-api";
 import type { AssessmentSetting, BankQuestion, VideoPrompt } from "@/lib/types";
+import { CheckIcon, XIcon } from "./icons";
 import { StaffBanner } from "./StaffBanner";
 import { Field, GhostButton, Modal, PrimaryButton, inputClass } from "./ui";
 
@@ -32,6 +33,25 @@ const SETTING_LABEL: Record<string, string> = {
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
+}
+
+function QuestionStatusBadge({ active }: { active: boolean }) {
+  return (
+    <span
+      className={`inline-flex h-7 items-center justify-center gap-1 rounded-full px-3 text-xs font-semibold ${
+        active
+          ? "bg-emerald-100 text-emerald-800"
+          : "bg-amal-sheet text-zinc-600"
+      }`}
+    >
+      {active ? (
+        <CheckIcon className="h-3.5 w-3.5" />
+      ) : (
+        <XIcon className="h-3.5 w-3.5" />
+      )}
+      {active ? "Active" : "Inactive"}
+    </span>
+  );
 }
 
 export function QuestionsScreen() {
@@ -125,7 +145,7 @@ function McqTab({ onError }: { onError: (value: string) => void }) {
               <tr className="text-xs uppercase tracking-wide text-zinc-500">
                 <th className="py-2">Question</th>
                 <th>Answer</th>
-                <th>Status</th>
+                <th className="text-center">Status</th>
                 <th />
               </tr>
             </thead>
@@ -134,7 +154,9 @@ function McqTab({ onError }: { onError: (value: string) => void }) {
                 <tr key={row.id} className="border-t border-black/5">
                   <td className="py-3 font-semibold">{row.question_text}</td>
                   <td>{row.correct_option}</td>
-                  <td>{row.is_active ? "Active" : "Inactive"}</td>
+                  <td className="text-center">
+                    <QuestionStatusBadge active={row.is_active} />
+                  </td>
                   <td className="text-right">
                     <GhostButton type="button" onClick={() => setEditing(row)}>
                       Edit
@@ -299,7 +321,7 @@ function VideoTab({ onError }: { onError: (value: string) => void }) {
             <thead>
               <tr className="text-xs uppercase tracking-wide text-zinc-500">
                 <th className="py-2">Prompt</th>
-                <th>Status</th>
+                <th className="text-center">Status</th>
                 <th />
               </tr>
             </thead>
@@ -307,7 +329,9 @@ function VideoTab({ onError }: { onError: (value: string) => void }) {
               {rows.map((row) => (
                 <tr key={row.id} className="border-t border-black/5">
                   <td className="py-3 font-semibold">{row.prompt}</td>
-                  <td>{row.is_active ? "Active" : "Inactive"}</td>
+                  <td className="text-center">
+                    <QuestionStatusBadge active={row.is_active} />
+                  </td>
                   <td className="text-right">
                     <GhostButton type="button" onClick={() => setEditing(row)}>
                       Edit

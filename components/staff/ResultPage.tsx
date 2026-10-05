@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { getAssessment } from "@/lib/staff-api";
-import { labelFor } from "@/lib/status";
 import type { ApplicationAssessment } from "@/lib/types";
+import { formatAssessmentStatusLabel } from "@/components/staff/assessment-status";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
@@ -73,7 +73,8 @@ export function ResultPage({
       ) : (
         <div className="mt-4 rounded-2xl border border-black/10 bg-amal-white p-5">
           <p className="text-sm text-zinc-600">
-            {labelFor(section.status)} · Score {section.score_percentage ?? "—"}
+            {formatAssessmentStatusLabel(section.status)} · Score{" "}
+            {section.score_percentage ?? "—"}
           </p>
           <ol className="mt-4 space-y-3">
             {kind === "video"

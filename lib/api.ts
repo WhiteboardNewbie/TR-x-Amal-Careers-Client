@@ -132,6 +132,12 @@ export function createJobApplication(
   data.set("applicant_city", fields.applicant_city);
   data.set("applicant_contact", fields.applicant_contact);
   data.set("resume", fields.resume);
+  if (fields.cover_letter?.trim()) {
+    data.set("cover_letter", fields.cover_letter.trim());
+  }
+  if (fields.notes?.trim()) {
+    data.set("notes", fields.notes.trim());
+  }
   return request<CreatedJobApplication>("/careers/job-applications/", {
     method: "POST",
     body: data,

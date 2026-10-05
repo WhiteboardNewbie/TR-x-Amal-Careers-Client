@@ -131,3 +131,156 @@ export function PhoneIcon({ className }: { className?: string }) {
     </Icon>
   );
 }
+
+export function SearchIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3-3" />
+    </Icon>
+  );
+}
+
+export function FilterIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M4 5h16l-6 7v5l-4 2v-7L4 5z" />
+    </Icon>
+  );
+}
+
+export function ChevronDownIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="m6 9 6 6 6-6" />
+    </Icon>
+  );
+}
+
+export function CheckIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="m5 12 4 4 10-10" />
+    </Icon>
+  );
+}
+
+export function XIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M6 6l12 12M18 6 6 18" />
+    </Icon>
+  );
+}
+
+export function EyeIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" />
+      <circle cx="12" cy="12" r="3" />
+    </Icon>
+  );
+}
+
+export function ShareIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4" />
+    </Icon>
+  );
+}
+
+export function MoreVerticalIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <circle cx="12" cy="5" r="1" />
+      <circle cx="12" cy="12" r="1" />
+      <circle cx="12" cy="19" r="1" />
+    </Icon>
+  );
+}
+
+export function ExternalLinkIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M14 4h6v6" />
+      <path d="M10 14 20 4" />
+      <path d="M20 14v6H4V4h6" />
+    </Icon>
+  );
+}
+
+export function FileTextIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+      <path d="M14 3v5h5M9 13h6M9 17h4" />
+    </Icon>
+  );
+}
+
+export function FileSearchIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+      <path d="M14 3v5h5" />
+      <circle cx="11" cy="14.5" r="2.5" />
+      <path d="m13 16.5 1.8 1.8" />
+    </Icon>
+  );
+}
+
+export function VideoIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <rect x="3" y="6" width="13" height="12" rx="2" />
+      <path d="m16 10 5-3v10l-5-3" />
+    </Icon>
+  );
+}
+
+export function MessageSquareIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M4 5h16v12H8l-4 4z" />
+    </Icon>
+  );
+}
+
+export function LockIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </Icon>
+  );
+}
+
+export function SendIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="m4 12 16-8-6 16-2-6z" />
+    </Icon>
+  );
+}
+
+export function ClockIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <circle cx="12" cy="12" r="8" />
+      <path d="M12 8v5l3 2" />
+    </Icon>
+  );
+}
+
+export function SparklesIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z" />
+      <path d="M19 14l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z" />
+    </Icon>
+  );
+}
