@@ -241,6 +241,17 @@ export function getEmployees(): Promise<Employee[]> {
   return request<Employee[]>("/employees/employees/");
 }
 
+export function createAuthUser(body: {
+  username: string;
+  password: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  groups?: string[];
+}): Promise<{ id: number; username: string; email: string; groups: string[] }> {
+  return sendJson("/auth/users/", "POST", body);
+}
+
 export function createEmployee(body: {
   first_name: string;
   last_name: string;
