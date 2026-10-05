@@ -105,3 +105,29 @@ export function ChartIcon({ className }: { className?: string }) {
     </Icon>
   );
 }
+
+export function MailIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m3 7 9 6 9-6" />
+    </Icon>
+  );
+}
+
+export function MapPinIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </Icon>
+  );
+}
+
+export function PhoneIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M6.5 3.5h3l1.5 3.5-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 3.5 1.5v3c0 1-1 2-2.5 2C9.5 21 3 14.5 3 6c0-1.5 1-2.5 2.5-2.5z" />
+    </Icon>
+  );
+}
