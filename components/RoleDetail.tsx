@@ -36,7 +36,7 @@ function Description({ text }: { text: string }) {
   if (/<[a-z][\s\S]*>/i.test(text)) {
     return (
       <div
-        className="[&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-5"
+        className="[&_a]:text-amal-red [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-5"
         dangerouslySetInnerHTML={{ __html: text }}
       />
     );

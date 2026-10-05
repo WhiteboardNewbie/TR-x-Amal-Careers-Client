@@ -24,7 +24,7 @@ The names below are the palette. Hex values live here and in `app/globals.css`. 
 | Black | `#000000` | `0, 0, 0` | `--amal-black` | Strong type |
 | White | `#FFFFFF` | `255, 255, 255` | `--amal-white` | Page and card surfaces |
 
-Staff banners use deep red `#8B0000` (`--amal-staff-banner`), dark into that red. That is not public-board red.
+Staff banners are the ERP card: rounded, padded, in the page. Gradient is `--amal-staff-banner` (Amal red mixed 38% into black) into `--amal-red`, left to right. Do not use a second maroon.
 
 Do not use:
 

@@ -40,7 +40,7 @@ export function SignedInShell({
     <div className="flex min-h-full flex-col bg-amal-sheet text-amal-ink">
       <AppNav session={session} />
       <main className="flex-1">
-        {wide ? children : <div className="page-container py-10">{children}</div>}
+        {wide ? children : <div className="staff-container py-10">{children}</div>}
       </main>
     </div>
   );
