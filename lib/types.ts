@@ -74,6 +74,8 @@ export type ApplyFields = {
   applicant_city: string;
   applicant_contact: string;
   resume: File;
+  cover_letter?: string;
+  notes?: string;
 };
 
 export type AuthLanding = "staff" | "reviews" | "client" | "";
@@ -128,16 +130,29 @@ export type StaffJobOpening = JobOpening & {
   client_users?: { id: number; first_name: string; last_name: string; email: string }[];
 };
 
+export type AssessmentSessionSummary = {
+  test_token: string;
+  status: string;
+  effective_status?: string;
+  expires_at?: string | null;
+  score_percentage?: string | number | null;
+};
+
 export type StaffApplication = {
   id: number;
   job_opening: string;
   job_opening_name: string;
   applicant: Applicant;
   resume: string;
-  cover_letter: string;
-  notes: string;
+  cover_letter?: string;
+  notes?: string;
   status: JobApplicationStatus;
   applied_at: string;
+  test_session?: AssessmentSessionSummary | null;
+  video_test_session?: AssessmentSessionSummary | null;
+  general_questionnaire_session?: AssessmentSessionSummary | null;
+  ai_relevance_score?: number | null;
+  manager_score_avg?: string | number | null;
 };
 
 export type ApplicationStage = {

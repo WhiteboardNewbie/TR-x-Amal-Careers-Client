@@ -87,6 +87,15 @@ export function getStaffApplications(params?: {
   search?: string;
   status?: string;
   job_opening?: string;
+  applied_from?: string;
+  applied_to?: string;
+  first_test_score_min?: string;
+  first_test_score_max?: string;
+  ai_relevance_score_min?: string;
+  ai_relevance_score_max?: string;
+  completed_first_test?: boolean;
+  completed_video_test?: boolean;
+  completed_general_questionnaire?: boolean;
 }): Promise<Page<StaffApplication>> {
   return request<Page<StaffApplication>>(
     `/careers/job-applications/${queryString(params ?? {})}`,

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   useCallback,
   useEffect,
@@ -8,34 +7,30 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { ApiError, createJobApplication, getJobOpening } from "@/lib/api";
+import { ApiError } from "@/lib/api";
 import {
-  createStage,
   getAssignedStages,
-  getDepartmentManagers,
   getEmployees,
   getHrStages,
   getOrgDepartments,
   getApplicants,
-  getStaffApplication,
   getStaffApplications,
   getStaffJobOpenings,
   patchJobOpening,
   scheduleStage,
   setHrStageStatus,
-  updateApplicationStatus,
 } from "@/lib/staff-api";
-import { APPLICATION_STATUSES, labelFor } from "@/lib/status";
+import { labelFor } from "@/lib/status";
 import type {
   ApplicationStage,
   Department,
-  DepartmentManager,
   Employee,
   JobApplicationStatus,
-  StaffApplication,
   StaffJobOpening,
 } from "@/lib/types";
 import { ApplicantsTab } from "./ApplicantsTab";
+import { ApplicationsTab } from "./ApplicationsTab";
+import { CreateApplicationModal } from "./CreateApplicationModal";
 import { CreateRoleModal } from "./CreateRoleModal";
 import { IdealProfileModal } from "./IdealProfileModal";
 import { RoleDetailModal } from "./RoleDetailModal";
@@ -130,13 +125,12 @@ export function StaffHub() {
   const [roleCount, setRoleCount] = useState(0);
   const [appCount, setAppCount] = useState(0);
   const [applicantCount, setApplicantCount] = useState(0);
-  const [modal, setModal] = useState<
-    "role" | "application" | "stage" | "schedule" | null
-  >(null);
+  const [modal, setModal] = useState<"role" | "application" | "schedule" | null>(
+    null,
+  );
   const [editingRole, setEditingRole] = useState<StaffJobOpening | null>(null);
   const [idealRole, setIdealRole] = useState<StaffJobOpening | null>(null);
   const [idealStandalone, setIdealStandalone] = useState(false);
-  const [stageTarget, setStageTarget] = useState<StaffApplication | null>(null);
   const [scheduleTarget, setScheduleTarget] = useState<ApplicationStage | null>(
     null,
   );
@@ -321,38 +315,15 @@ export function StaffHub() {
             />
           ) : null}
           {tab === "applications" ? (
-            <div>
-              <div className="mb-4 flex flex-wrap gap-3 text-sm font-semibold">
-                <Link href="/staff/cv-search" className="text-amal-red">
-                  CV search
-                </Link>
-                <Link href="/staff/share-links" className="text-amal-red">
-                  Share links
-                </Link>
-                {applicationRole || applicationStatus ? (
-                  <button
-                    type="button"
-                    className="text-zinc-500"
-                    onClick={() => {
-                      setApplicationRole("");
-                      setApplicationStatus("");
-                    }}
-                  >
-                    Clear role filter
-                  </button>
-                ) : null}
-              </div>
-              <ApplicationsTab
-                key={`${applicationRole}:${applicationStatus}`}
-                jobOpening={applicationRole}
-                status={applicationStatus}
-                onError={onError}
-                onAssign={(row) => {
-                  setStageTarget(row);
-                  setModal("stage");
-                }}
-              />
-            </div>
+            <ApplicationsTab
+              key={`${applicationRole}:${applicationStatus}`}
+              jobOpening={applicationRole}
+              status={applicationStatus}
+              onJobOpeningChange={setApplicationRole}
+              onStatusChange={setApplicationStatus}
+              refreshTick={countsTick}
+              onError={onError}
+            />
           ) : null}
           {tab === "stages" ? (
             <StagesTab
@@ -403,17 +374,8 @@ export function StaffHub() {
           onClose={() => setModal(null)}
           onSaved={() => {
             setModal(null);
+            setTab("applications");
             setCountsTick((value) => value + 1);
-          }}
-          onError={onError}
-        />
-      ) : null}
-      {modal === "stage" && stageTarget ? (
-        <AssignStageModal
-          application={stageTarget}
-          onClose={() => {
-            setModal(null);
-            setStageTarget(null);
           }}
           onError={onError}
         />
@@ -738,112 +700,6 @@ function RolesTab({
   );
 }
 
-function ApplicationsTab({
-  onError,
-  onAssign,
-  jobOpening,
-  status,
-}: {
-  onError: (value: string) => void;
-  onAssign: (row: StaffApplication) => void;
-  jobOpening?: string;
-  status?: string;
-}) {
-  const [page, setPage] = useState(1);
-  const [tick, setTick] = useState(0);
-  const [rows, setRows] = useState<StaffApplication[]>([]);
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    let ignore = false;
-    getStaffApplications({
-      page,
-      page_size: 10,
-      job_opening: jobOpening || undefined,
-      status: status || undefined,
-    })
-      .then((data) => {
-        if (!ignore) {
-          setRows(data.results);
-          setCount(data.count);
-        }
-      })
-      .catch((error) => {
-        if (!ignore) {
-          onError(errorText(error));
-        }
-      });
-    return () => {
-      ignore = true;
-    };
-  }, [page, tick, onError, jobOpening, status]);
-
-  async function changeStatus(row: StaffApplication, status: string) {
-    try {
-      await updateApplicationStatus(row.id, status);
-      setTick((value) => value + 1);
-    } catch (error) {
-      onError(errorText(error));
-    }
-  }
-
-  return (
-    <div>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead>
-            <tr className="text-xs uppercase tracking-wide text-zinc-500">
-              <th className="py-2">Applicant</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Applied</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.id} className="border-t border-black/5">
-                <td className="py-3">
-                  <Link
-                    href={`/staff/applications/${row.id}`}
-                    className="font-semibold text-amal-red"
-                  >
-                    {row.applicant.name}
-                  </Link>
-                  <p className="text-zinc-500">{row.applicant.email}</p>
-                </td>
-                <td>{row.job_opening_name}</td>
-                <td>
-                  <select
-                    className={inputClass}
-                    value={row.status}
-                    onChange={(event) =>
-                      void changeStatus(row, event.target.value)
-                    }
-                  >
-                    {APPLICATION_STATUSES.map((status) => (
-                      <option key={status} value={status}>
-                        {labelFor(status)}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td>{row.applied_at.slice(0, 10)}</td>
-                <td className="text-right">
-                  <GhostButton onClick={() => onAssign(row)}>
-                    Assign stage
-                  </GhostButton>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <TablePager page={page} pageSize={10} count={count} onPage={setPage} />
-    </div>
-  );
-}
-
 function StagesTab({
   onError,
   onSchedule,
@@ -999,167 +855,6 @@ function ManageTab({ onError }: { onError: (value: string) => void }) {
       </div>
       <TablePager page={page} pageSize={10} count={count} onPage={setPage} />
     </div>
-  );
-}
-
-function CreateApplicationModal({
-  onClose,
-  onSaved,
-  onError,
-}: {
-  onClose: () => void;
-  onSaved: () => void;
-  onError: (value: string) => void;
-}) {
-  const [roles, setRoles] = useState<StaffJobOpening[]>([]);
-  const [slug, setSlug] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [city, setCity] = useState("");
-  const [contact, setContact] = useState("");
-  const [resume, setResume] = useState<File | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    void getStaffJobOpenings({ page: 1, page_size: 50, is_active: true }).then(
-      (page) => setRoles(page.results.filter((row) => !row.is_draft)),
-    );
-  }, []);
-
-  async function onSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    if (!resume) {
-      onError("Resume is required.");
-      return;
-    }
-    setBusy(true);
-    try {
-      await createJobApplication({
-        job_opening: slug,
-        applicant_name: name,
-        applicant_email: email,
-        applicant_city: city,
-        applicant_contact: contact,
-        resume,
-      });
-      onSaved();
-    } catch (error) {
-      onError(errorText(error));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Modal title="Create Job Application" onClose={onClose}>
-      <form onSubmit={onSubmit}>
-        <Field label="Role">
-          <select className={inputClass} value={slug} onChange={(e) => setSlug(e.target.value)} required>
-            <option value="">Select</option>
-            {roles.map((row) => (
-              <option key={row.id} value={row.slug}>
-                {row.title}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Name">
-          <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} required />
-        </Field>
-        <Field label="Email">
-          <input className={inputClass} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </Field>
-        <Field label="City">
-          <input className={inputClass} value={city} onChange={(e) => setCity(e.target.value)} required />
-        </Field>
-        <Field label="Phone">
-          <input className={inputClass} value={contact} onChange={(e) => setContact(e.target.value)} required />
-        </Field>
-        <Field label="Resume">
-          <input className={inputClass} type="file" accept=".pdf,.doc,.docx" onChange={(e) => setResume(e.target.files?.[0] ?? null)} required />
-        </Field>
-        <PrimaryButton type="submit" disabled={busy}>
-          {busy ? "Saving…" : "Create application"}
-        </PrimaryButton>
-      </form>
-    </Modal>
-  );
-}
-
-function AssignStageModal({
-  application,
-  onClose,
-  onError,
-}: {
-  application: StaffApplication;
-  onClose: () => void;
-  onError: (value: string) => void;
-}) {
-  const [managers, setManagers] = useState<DepartmentManager[]>([]);
-  const [assignedTo, setAssignedTo] = useState("");
-  const [name, setName] = useState("Review");
-  const [notes, setNotes] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    let ignore = false;
-    getStaffApplication(application.id)
-      .then(async (detail) => {
-        const opening = await getJobOpening(detail.job_opening);
-        return getDepartmentManagers(opening.department);
-      })
-      .then((rows) => {
-        if (!ignore) {
-          setManagers(rows);
-        }
-      })
-      .catch((error) => onError(errorText(error)));
-    return () => {
-      ignore = true;
-    };
-  }, [application.id, onError]);
-
-  async function onSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    setBusy(true);
-    try {
-      await createStage(application.id, {
-        assigned_to: Number(assignedTo),
-        name,
-        hr_notes: notes,
-      });
-      onClose();
-    } catch (error) {
-      onError(errorText(error));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Modal title={`Assign stage — ${application.applicant.name}`} onClose={onClose}>
-      <form onSubmit={onSubmit}>
-        <Field label="Reviewer">
-          <select className={inputClass} value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} required>
-            <option value="">Select</option>
-            {managers.map((row) => (
-              <option key={row.id} value={row.id}>
-                {row.full_name}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Stage name">
-          <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
-        </Field>
-        <Field label="HR notes">
-          <textarea className={`${inputClass} h-20 py-2`} value={notes} onChange={(e) => setNotes(e.target.value)} />
-        </Field>
-        <PrimaryButton type="submit" disabled={busy || !assignedTo}>
-          {busy ? "Saving…" : "Assign"}
-        </PrimaryButton>
-      </form>
-    </Modal>
   );
 }
 

@@ -127,11 +127,15 @@ export function TablePager({
   pageSize,
   count,
   onPage,
+  pageSizeOptions,
+  onPageSizeChange,
 }: {
   page: number;
   pageSize: number;
   count: number;
   onPage: (page: number) => void;
+  pageSizeOptions?: readonly number[];
+  onPageSizeChange?: (size: number) => void;
 }) {
   if (count <= 0) {
     return null;
@@ -141,9 +145,28 @@ export function TablePager({
   const last = page * pageSize >= count;
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-black/10 pt-4 text-sm">
-      <p className="text-zinc-500">
-        Showing {start}–{end} of {count}
-      </p>
+      <div className="flex flex-wrap items-center gap-3">
+        {pageSizeOptions && onPageSizeChange ? (
+          <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+            Rows per page
+            <select
+              className="rounded-lg border border-black/15 bg-amal-white px-2 py-1.5 text-sm font-normal text-amal-ink"
+              value={pageSize}
+              onChange={(event) => onPageSizeChange(Number(event.target.value))}
+              aria-label="Rows per page"
+            >
+              {pageSizeOptions.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+        <p className="text-zinc-500">
+          Showing {start}–{end} of {count}
+        </p>
+      </div>
       <div className="flex gap-2">
         <GhostButton disabled={page <= 1} onClick={() => onPage(page - 1)}>
           Previous
