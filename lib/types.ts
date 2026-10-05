@@ -24,6 +24,7 @@ export type JobOpening = {
   qualifications: string;
   is_active: boolean;
   is_draft: boolean;
+  client_users?: { id: number; first_name: string; last_name: string; email: string }[];
 };
 
 export type Applicant = {
@@ -235,6 +236,35 @@ export type ShareLink = {
   is_active: boolean;
   share_url: string;
   created_at: string;
+};
+
+export type WrittenTestSection = {
+  status: string;
+  score_percentage: string | number | null;
+  questions: {
+    order: number;
+    question_text: string;
+    selected_option: string | null;
+  }[];
+};
+
+export type VideoTestSection = {
+  status: string;
+  score_percentage: string | number | null;
+  questions: {
+    order: number;
+    prompt: string;
+    transcript: string;
+  }[];
+};
+
+export type ApplicationAssessment = {
+  invite_token: string | null;
+  expires_at: string | null;
+  invite_url: string | null;
+  first_test: WrittenTestSection | null;
+  video_test: VideoTestSection | null;
+  questionnaire: WrittenTestSection | null;
 };
 
 export type ClientRole = {
