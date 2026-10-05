@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ApiError, createJobApplication, getJobOpening } from "@/lib/api";
 import {
@@ -402,7 +403,12 @@ function ApplicationsTab({
             {rows.map((row) => (
               <tr key={row.id} className="border-t border-black/5">
                 <td className="py-3">
-                  <p className="font-semibold">{row.applicant.name}</p>
+                  <Link
+                    href={`/staff/applications/${row.id}`}
+                    className="font-semibold text-amal-red"
+                  >
+                    {row.applicant.name}
+                  </Link>
                   <p className="text-zinc-500">{row.applicant.email}</p>
                 </td>
                 <td>{row.job_opening_name}</td>

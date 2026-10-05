@@ -8,9 +8,19 @@ import type {
   Notice,
 } from "./types";
 
-const API_URL = (
+export const API_URL = (
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8001"
 ).replace(/\/$/, "");
+
+export function mediaUrl(path: string | null | undefined): string | null {
+  if (!path) {
+    return null;
+  }
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+  return `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
+}
 
 export class ApiError extends Error {
   readonly status: number;

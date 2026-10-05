@@ -1,6 +1,7 @@
 import { queryString, request, sendJson } from "./api";
 import type {
   ApplicantRow,
+  ApplicationAssessment,
   ApplicationStage,
   AssessmentSetting,
   BankQuestion,
@@ -419,8 +420,28 @@ export function handoffToClients(
   return sendJson(
     `/careers/job-applications/${applicationId}/client-reviews/`,
     "POST",
-    { client_users },
+    client_users,
   );
+}
+
+export function getClientReviews(
+  applicationId: number,
+): Promise<Page<{ id: number; client_user: number; status: string }>> {
+  return request(
+    `/careers/job-applications/${applicationId}/client-reviews/`,
+  );
+}
+
+export function getTimeline(
+  applicationId: number,
+): Promise<{ type: string; date: string | null; label: string }[]> {
+  return request(`/careers/job-applications/${applicationId}/timeline/`);
+}
+
+export function getAssessment(
+  applicationId: number,
+): Promise<ApplicationAssessment> {
+  return request(`/careers/job-applications/${applicationId}/assessment/`);
 }
 
 export function searchResumes(
