@@ -25,6 +25,7 @@ import type {
   OrgLevel,
   OrgTitle,
 } from "@/lib/types";
+import { StaffBanner } from "./StaffBanner";
 import { Field, PrimaryButton, inputClass } from "./ui";
 
 type Tab = "departments" | "levels" | "titles" | "clients" | "reviewers";
@@ -48,12 +49,9 @@ export function OrganizationScreen() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold tracking-tight">
-        Organizational Configuration
-      </h1>
-      <p className="mt-2 max-w-2xl text-sm text-zinc-600">
+      <StaffBanner title="Organizational Configuration">
         Departments, levels, titles, clients, and reviewers for hiring.
-      </p>
+      </StaffBanner>
       {notice ? (
         <p className="mt-4 rounded-lg border border-amal-red/30 bg-amal-white px-3 py-2 text-sm text-amal-red">
           {notice}

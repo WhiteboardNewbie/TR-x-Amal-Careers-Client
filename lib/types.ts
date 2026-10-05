@@ -24,6 +24,7 @@ export type JobOpening = {
   qualifications: string;
   is_active: boolean;
   is_draft: boolean;
+  application_count?: number;
   client_users?: { id: number; first_name: string; last_name: string; email: string }[];
 };
 
@@ -273,6 +274,43 @@ export type ClientRole = {
   title: string;
   department_name: string;
   location: string;
+};
+
+export type IdealProfileMetric = {
+  metric_id: number;
+  client_weight: number;
+};
+
+export type IdealProfileTestConfig = {
+  test_type: string;
+  question_count: number;
+  time_limit_minutes: number;
+};
+
+export type IdealProfile = {
+  id: number;
+  name: string;
+  is_template: boolean;
+  job_opening: number | null;
+  department: { id: number; name: string } | null;
+  title: { id: number; name: string } | null;
+  metric_weights: IdealProfileMetric[];
+  test_configurations: IdealProfileTestConfig[];
+};
+
+export type IdealProfilePayload = {
+  name: string;
+  department_id?: number | null;
+  title_id?: number | null;
+  metric_weights?: IdealProfileMetric[];
+  test_configurations?: IdealProfileTestConfig[];
+};
+
+export type IdealProfileMetricCatalogItem = {
+  id: number;
+  key: string;
+  label: string;
+  display_order: number;
 };
 
 export type ClientApplicationRow = {

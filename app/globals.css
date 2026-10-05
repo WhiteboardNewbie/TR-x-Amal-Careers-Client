@@ -7,7 +7,7 @@
   --amal-black: #000000;
   --amal-white: #ffffff;
   --amal-ink: #171717;
-  --amal-staff-banner: #8b0000;
+  --amal-staff-banner: color-mix(in srgb, var(--amal-red) 38%, black);
   --amal-sheet: #f7f9fc;
   --background: var(--amal-white);
   --foreground: var(--amal-ink);
@@ -35,6 +35,20 @@
   max-width: var(--page-container);
   margin-inline: auto;
   padding-inline: var(--page-gutter);
+}
+
+/* Signed-in shell. Same 1600px + tight gutters as the ERP module main. */
+.staff-container {
+  width: 100%;
+  max-width: 100rem;
+  margin-inline: auto;
+  padding-inline: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .staff-container {
+    padding-inline: 1rem;
+  }
 }
 
 .page-bar {

@@ -13,6 +13,7 @@ import {
   patchVideoPrompt,
 } from "@/lib/staff-api";
 import type { AssessmentSetting, BankQuestion, VideoPrompt } from "@/lib/types";
+import { StaffBanner } from "./StaffBanner";
 import { Field, GhostButton, Modal, PrimaryButton, inputClass } from "./ui";
 
 type Tab = "mcq" | "video" | "defaults";
@@ -40,13 +41,21 @@ export function QuestionsScreen() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold tracking-tight">
-        Assessment database
-      </h1>
-      <p className="mt-2 max-w-2xl text-sm text-zinc-600">
+      <StaffBanner
+        title="Assessment database"
+        actions={
+          <button
+            type="button"
+            className="inline-flex shrink-0 self-start rounded-xl border border-amal-white/40 bg-amal-white/10 px-4 py-2 text-sm font-semibold hover:bg-amal-white/20"
+            onClick={() => setTab("defaults")}
+          >
+            Assessment Defaults
+          </button>
+        }
+      >
         Multiple-choice questions, video prompts, and the three assessment
         defaults.
-      </p>
+      </StaffBanner>
       {notice ? (
         <p className="mt-4 rounded-lg border border-amal-red/30 bg-amal-white px-3 py-2 text-sm text-amal-red">
           {notice}

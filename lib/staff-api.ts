@@ -9,6 +9,9 @@ import type {
   Department,
   DepartmentManager,
   Employee,
+  IdealProfile,
+  IdealProfileMetricCatalogItem,
+  IdealProfilePayload,
   OrgClient,
   OrgClientUser,
   OrgLevel,
@@ -28,6 +31,7 @@ export function getStaffJobOpenings(params?: {
   department?: number | string;
   is_draft?: boolean;
   is_active?: boolean;
+  status?: "all" | "active" | "closed" | "draft";
 }): Promise<Page<StaffJobOpening>> {
   return request<Page<StaffJobOpening>>(
     `/careers/job-openings/${queryString(params ?? {})}`,
@@ -44,6 +48,8 @@ export function createJobOpening(body: {
   positions?: number;
   experience_level?: string;
   qualifications?: string;
+  skills_required?: number[];
+  requested_by_client_users?: number[];
   is_draft?: boolean;
   is_active?: boolean;
 }): Promise<StaffJobOpening> {
@@ -52,7 +58,21 @@ export function createJobOpening(body: {
 
 export function patchJobOpening(
   slug: string,
-  body: Partial<{ is_active: boolean; is_draft: boolean }>,
+  body: Partial<{
+    is_active: boolean;
+    is_draft: boolean;
+    title: string;
+    description: string;
+    location: string;
+    department: number;
+    work_type: string;
+    employment_type: string;
+    positions: number;
+    experience_level: string;
+    qualifications: string;
+    skills_required: number[];
+    requested_by_client_users: number[];
+  }>,
 ): Promise<StaffJobOpening> {
   return sendJson<StaffJobOpening>(
     `/careers/job-openings/${encodeURIComponent(slug)}/`,
@@ -185,22 +205,47 @@ export function getDepartmentManagers(
   );
 }
 
-export function createIdealProfileTemplate(body: {
-  name: string;
-  department_id?: number | null;
-  title_id?: number | null;
-}): Promise<unknown> {
-  return sendJson("/careers/ideal-profiles/templates/", "POST", body);
+export function createIdealProfileTemplate(
+  body: IdealProfilePayload,
+): Promise<IdealProfile> {
+  return sendJson<IdealProfile>("/careers/ideal-profiles/templates/", "POST", body);
 }
 
 export function createIdealProfileForRole(
   slug: string,
-  body: { name: string; department_id?: number | null; title_id?: number | null },
-): Promise<unknown> {
-  return sendJson(
+  body: IdealProfilePayload,
+): Promise<IdealProfile> {
+  return sendJson<IdealProfile>(
     `/careers/job-openings/${encodeURIComponent(slug)}/create-ideal-profile/`,
     "POST",
     body,
+  );
+}
+
+export function getIdealProfileForRole(
+  slug: string,
+): Promise<IdealProfile | null> {
+  return request<IdealProfile | null>(
+    `/careers/job-openings/${encodeURIComponent(slug)}/ideal-profile/`,
+  );
+}
+
+export function updateIdealProfileForRole(
+  slug: string,
+  body: Partial<IdealProfilePayload>,
+): Promise<IdealProfile> {
+  return sendJson<IdealProfile>(
+    `/careers/job-openings/${encodeURIComponent(slug)}/ideal-profile/`,
+    "PATCH",
+    body,
+  );
+}
+
+export function getIdealProfileMetricCatalog(): Promise<
+  Page<IdealProfileMetricCatalogItem>
+> {
+  return request<Page<IdealProfileMetricCatalogItem>>(
+    "/careers/ideal-profiles/metrics-catalog/?page_size=150",
   );
 }
 
@@ -504,5 +549,26 @@ export function deactivateShareLink(id: string): Promise<ShareLink> {
 }
 
 export function getSkillsPage(): Promise<Page<Skill>> {
-  return request<Page<Skill>>("/careers/skills/");
+  return request<Page<Skill>>("/careers/skills/?page_size=150");
+}
+
+export function createSkill(name: string): Promise<Skill> {
+  return sendJson<Skill>("/careers/skills/", "POST", { name });
+}
+
+export function getIdealProfileTemplates(): Promise<Page<IdealProfile>> {
+  return request<Page<IdealProfile>>(
+    "/careers/ideal-profiles/templates/?page_size=150",
+  );
+}
+
+export function assignIdealProfileTemplate(
+  slug: string,
+  templateId: number,
+): Promise<unknown> {
+  return sendJson(
+    `/careers/job-openings/${encodeURIComponent(slug)}/assign-ideal-profile-template/`,
+    "POST",
+    { template_id: templateId },
+  );
 }
