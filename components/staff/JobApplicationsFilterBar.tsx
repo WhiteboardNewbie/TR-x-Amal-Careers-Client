@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { KeyboardEvent, MouseEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   dateRangeForPreset,
@@ -150,6 +151,14 @@ export function JobApplicationsFilterBar({
   onChange,
   onClearAll,
   onApplyPreset,
+  searchPlaceholder = "Search applicant, email, role, notes…",
+  onSearchKeyDown,
+  onSearchSubmit,
+  hidePresets = false,
+  hideCount = false,
+  countText,
+  showAdvancedSearch = true,
+  onAdvancedSearchClick,
 }: {
   filters: JobApplicationsFilterState;
   debouncedSearch: string;
@@ -157,7 +166,15 @@ export function JobApplicationsFilterBar({
   jobsForFilters: StaffJobOpening[];
   onChange: (patch: Partial<JobApplicationsFilterState>) => void;
   onClearAll: () => void;
-  onApplyPreset: (presetId: JobApplicationsFilterPresetId) => void;
+  onApplyPreset?: (presetId: JobApplicationsFilterPresetId) => void;
+  searchPlaceholder?: string;
+  onSearchKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
+  onSearchSubmit?: () => void;
+  hidePresets?: boolean;
+  hideCount?: boolean;
+  countText?: string;
+  showAdvancedSearch?: boolean;
+  onAdvancedSearchClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
 }) {
   const statusPills = useMemo(
     () => [
@@ -296,11 +313,22 @@ export function JobApplicationsFilterBar({
             id="careers-app-search"
             value={filters.searchInput}
             onChange={(event) => onChange({ searchInput: event.target.value })}
-            placeholder="Search applicant, email, role, notes…"
+            onKeyDown={onSearchKeyDown}
+            placeholder={searchPlaceholder}
             className="w-full bg-transparent text-sm outline-none placeholder:text-zinc-400"
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {onSearchSubmit ? (
+            <button
+              type="button"
+              onClick={onSearchSubmit}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-amal-ink px-3 py-2 text-sm font-semibold text-amal-white hover:bg-amal-ink/90"
+            >
+              <SearchIcon className="h-3.5 w-3.5" />
+              Search
+            </button>
+          ) : null}
           <SearchableFilterDropdown
             buttonId="careers-app-job"
             value={filters.jobFilter}
@@ -325,13 +353,16 @@ export function JobApplicationsFilterBar({
               className={`h-3.5 w-3.5 ${filters.advancedOpen ? "rotate-180" : ""}`}
             />
           </button>
-          <Link
-            href="/staff/cv-search"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-amal-sheet"
-          >
-            <SearchIcon className="h-3.5 w-3.5" />
-            Advanced Search
-          </Link>
+          {showAdvancedSearch ? (
+            <Link
+              href="/staff/cv-search"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-amal-sheet"
+              onClick={onAdvancedSearchClick}
+            >
+              <SearchIcon className="h-3.5 w-3.5" />
+              Advanced Search
+            </Link>
+          ) : null}
         </div>
       </div>
 
@@ -502,13 +533,16 @@ export function JobApplicationsFilterBar({
         </div>
       ) : null}
 
+      {(!hideCount || hasActive || !hidePresets) && (
       <div className="flex flex-col gap-3 border-t border-black/5 pt-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-semibold">
-              {applicationTotalCount} application
-              {applicationTotalCount === 1 ? "" : "s"}
-            </span>
+            {hideCount ? null : (
+              <span className="text-sm font-semibold">
+                {countText ??
+                  `${applicationTotalCount} application${applicationTotalCount === 1 ? "" : "s"}`}
+              </span>
+            )}
             {hasActive ? (
               <button
                 type="button"
@@ -520,6 +554,7 @@ export function JobApplicationsFilterBar({
               </button>
             ) : null}
           </div>
+          {hidePresets || !onApplyPreset ? null : (
           <div className="flex flex-wrap gap-2">
             {PRESET_VIEWS.map((preset) => {
               const active = matchesJobApplicationsPreset(
@@ -543,6 +578,7 @@ export function JobApplicationsFilterBar({
               );
             })}
           </div>
+          )}
         </div>
         {chips.length > 0 ? (
           <div className="flex flex-wrap gap-2 sm:max-w-xl sm:justify-end">
@@ -560,6 +596,7 @@ export function JobApplicationsFilterBar({
           </div>
         ) : null}
       </div>
+      )}
     </div>
   );
 }

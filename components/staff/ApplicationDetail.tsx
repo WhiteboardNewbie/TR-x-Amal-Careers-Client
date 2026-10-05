@@ -23,6 +23,7 @@ import type {
   StaffApplication,
 } from "@/lib/types";
 import { Field, GhostButton, PrimaryButton, inputClass } from "./ui";
+import { CareersBackLink } from "./CareersBackLink";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
@@ -118,9 +119,12 @@ export function ApplicationDetail({ id }: { id: number }) {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/staff" className="text-sm font-semibold text-amal-red">
+        <CareersBackLink
+          href="/staff"
+          className="text-sm font-semibold text-amal-red"
+        >
           ← Careers
-        </Link>
+        </CareersBackLink>
         <h1 className="mt-3 text-2xl font-semibold tracking-tight">
           {application.applicant.name}
         </h1>

@@ -20,6 +20,7 @@ import type {
   ShareLink,
   Skill,
   StaffApplication,
+  StaffApplicationCvSearchResult,
   StaffJobOpening,
   VideoPrompt,
 } from "./types";
@@ -500,12 +501,24 @@ export function getAssessment(
   return request(`/careers/job-applications/${applicationId}/assessment/`);
 }
 
-export function searchResumes(
-  q: string,
-  page = 1,
-): Promise<Page<StaffApplication>> {
-  return request<Page<StaffApplication>>(
-    `/careers/job-applications/cv-search/${queryString({ q, page, page_size: 10 })}`,
+export function searchResumes(params: {
+  q: string;
+  page?: number;
+  page_size?: number;
+  status?: string;
+  job_opening?: string;
+  applied_from?: string;
+  applied_to?: string;
+  first_test_score_min?: string;
+  first_test_score_max?: string;
+  ai_relevance_score_min?: string;
+  ai_relevance_score_max?: string;
+  completed_first_test?: boolean;
+  completed_video_test?: boolean;
+  completed_general_questionnaire?: boolean;
+}): Promise<Page<StaffApplicationCvSearchResult>> {
+  return request<Page<StaffApplicationCvSearchResult>>(
+    `/careers/job-applications/cv-search/${queryString(params)}`,
   );
 }
 

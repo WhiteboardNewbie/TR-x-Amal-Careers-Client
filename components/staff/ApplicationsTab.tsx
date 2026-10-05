@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { ApiError, getJobOpening, mediaUrl } from "@/lib/api";
+import {
+  persistCareersApplicationsReturn,
+  type CareersApplicationsReturn,
+} from "@/lib/careers-return";
+import { isModifiedClick } from "@/lib/is-modified-click";
 import {
   DEFAULT_JOB_APPLICATIONS_FILTERS,
   getJobApplicationsPresetState,
@@ -86,6 +91,9 @@ export function ApplicationsTab({
   onError,
   jobOpening,
   status,
+  initialFilters,
+  initialPage,
+  initialPageSize,
   onJobOpeningChange,
   onStatusChange,
   refreshTick,
@@ -93,18 +101,23 @@ export function ApplicationsTab({
   onError: (value: string) => void;
   jobOpening: string;
   status: string;
+  initialFilters?: JobApplicationsFilterState;
+  initialPage?: number;
+  initialPageSize?: number;
   onJobOpeningChange: (slug: string) => void;
   onStatusChange: (status: string) => void;
   refreshTick: number;
 }) {
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(initialPage ?? 1);
+  const [pageSize, setPageSize] = useState(initialPageSize ?? 10);
   const [tick, setTick] = useState(0);
-  const [filters, setFilters] = useState<JobApplicationsFilterState>(() => ({
-    ...DEFAULT_JOB_APPLICATIONS_FILTERS,
-    jobFilter: jobOpening || "all",
-    statusFilter: status || "all",
-  }));
+  const [filters, setFilters] = useState<JobApplicationsFilterState>(() =>
+    initialFilters ?? {
+      ...DEFAULT_JOB_APPLICATIONS_FILTERS,
+      jobFilter: jobOpening || "all",
+      statusFilter: status || "all",
+    },
+  );
   const [debouncedSearch, setDebouncedSearch] = useState(
     filters.searchInput,
   );
@@ -339,6 +352,45 @@ export function ApplicationsTab({
   const menuRow = rows.find((row) => row.id === menuOpenId) ?? null;
   const hasActive = hasActiveJobApplicationFilters(debouncedSearch, filters);
 
+  function applicationsReturn(): CareersApplicationsReturn {
+    return {
+      tab: "applications",
+      filters,
+      page,
+      pageSize,
+    };
+  }
+
+  function persistReturn() {
+    persistCareersApplicationsReturn(applicationsReturn());
+  }
+
+  function handleApplicationLinkClick(
+    event: MouseEvent<HTMLAnchorElement>,
+    id: number,
+  ) {
+    event.stopPropagation();
+    if (isModifiedClick(event)) {
+      persistReturn();
+      return;
+    }
+    event.preventDefault();
+    setSelectedId(id);
+  }
+
+  function handleRowClick(event: MouseEvent<HTMLTableRowElement>, id: number) {
+    const target = event.target as HTMLElement | null;
+    if (target?.closest("a, button, select, input, textarea, label")) {
+      return;
+    }
+    if (isModifiedClick(event)) {
+      persistReturn();
+      window.open(`/staff/applications/${id}`, "_blank", "noopener,noreferrer");
+      return;
+    }
+    setSelectedId(id);
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -355,6 +407,7 @@ export function ApplicationsTab({
             onChange={patchFilters}
             onClearAll={clearFilters}
             onApplyPreset={applyPreset}
+            onAdvancedSearchClick={() => persistReturn()}
           />
         </div>
       </div>
@@ -365,6 +418,7 @@ export function ApplicationsTab({
           <Link
             href="/staff/share-links"
             className="inline-flex items-center gap-2 rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-sm font-semibold text-zinc-700 hover:bg-amal-sheet"
+            onClick={() => persistReturn()}
           >
             <ShareIcon className="h-4 w-4" />
             Shared links
@@ -438,31 +492,29 @@ export function ApplicationsTab({
                     <tr
                       key={row.id}
                       className="cursor-pointer border-b border-black/5 hover:bg-amal-sheet/80"
-                      onClick={() => setSelectedId(row.id)}
+                      onClick={(event) => handleRowClick(event, row.id)}
                     >
                       <td className="px-3 py-3">
-                        <button
-                          type="button"
+                        <Link
+                          href={`/staff/applications/${row.id}`}
                           className="font-medium text-amal-red hover:underline"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setSelectedId(row.id);
-                          }}
+                          onClick={(event) =>
+                            handleApplicationLinkClick(event, row.id)
+                          }
                         >
                           {row.job_opening_name}
-                        </button>
+                        </Link>
                       </td>
                       <td className="px-3 py-3">
-                        <button
-                          type="button"
+                        <Link
+                          href={`/staff/applications/${row.id}`}
                           className="font-medium hover:underline"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setSelectedId(row.id);
-                          }}
+                          onClick={(event) =>
+                            handleApplicationLinkClick(event, row.id)
+                          }
                         >
                           {row.applicant.name}
-                        </button>
+                        </Link>
                       </td>
                       <td
                         className="px-3 py-3"
@@ -690,6 +742,9 @@ export function ApplicationsTab({
                             className={iconButtonClass}
                             title="Open application"
                             aria-label={`Open application for ${row.applicant.name}`}
+                            onClick={(event) =>
+                              handleApplicationLinkClick(event, row.id)
+                            }
                           >
                             <EyeIcon className="h-4 w-4" />
                           </Link>
