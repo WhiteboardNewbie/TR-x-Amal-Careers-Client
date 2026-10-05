@@ -74,13 +74,27 @@ export function NoticeBell() {
                   key={notice.id}
                   className="border-b border-black/5 px-4 py-3 last:border-0"
                 >
-                  <p className="text-sm font-semibold text-amal-ink">
-                    {notice.title}
-                    {!notice.is_read ? (
-                      <span className="ml-2 inline-block h-1.5 w-1.5 rounded-full bg-amal-red align-middle" />
-                    ) : null}
-                  </p>
-                  <p className="mt-1 text-sm text-zinc-600">{notice.message}</p>
+                  {notice.link ? (
+                    <a href={notice.link} className="block">
+                      <p className="text-sm font-semibold text-amal-ink">
+                        {notice.title}
+                        {!notice.is_read ? (
+                          <span className="ml-2 inline-block h-1.5 w-1.5 rounded-full bg-amal-red align-middle" />
+                        ) : null}
+                      </p>
+                      <p className="mt-1 text-sm text-zinc-600">{notice.message}</p>
+                    </a>
+                  ) : (
+                    <>
+                      <p className="text-sm font-semibold text-amal-ink">
+                        {notice.title}
+                        {!notice.is_read ? (
+                          <span className="ml-2 inline-block h-1.5 w-1.5 rounded-full bg-amal-red align-middle" />
+                        ) : null}
+                      </p>
+                      <p className="mt-1 text-sm text-zinc-600">{notice.message}</p>
+                    </>
+                  )}
                 </li>
               ))}
             </ul>
