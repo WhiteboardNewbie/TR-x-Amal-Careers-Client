@@ -40,22 +40,22 @@ export function NoticeBell() {
   const unread = notices.filter((notice) => !notice.is_read).length;
 
   return (
-    <div className="relative" ref={rootRef}>
+    <div className="relative flex h-8 shrink-0 items-center justify-center" ref={rootRef}>
       <button
         type="button"
-        className="relative flex h-10 w-10 items-center justify-center rounded-full text-amal-ink hover:bg-amal-sheet"
+        className="relative inline-flex h-8 w-8 items-center justify-center rounded-md text-amal-ink hover:bg-amal-sheet"
         onClick={() => setOpen((next) => !next)}
         aria-label={unread ? `${unread} unread notices` : "Notices"}
         aria-expanded={open}
       >
-        <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+        <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden="true">
           <path
             fill="currentColor"
             d="M12 22a2.4 2.4 0 0 0 2.4-2.4h-4.8A2.4 2.4 0 0 0 12 22zm7.2-6V11a7.2 7.2 0 0 0-5.4-7V3.2a1.8 1.8 0 1 0-3.6 0V4a7.2 7.2 0 0 0-5.4 7v5L3 18v1.2h18V18l-1.8-2z"
           />
         </svg>
         {unread > 0 ? (
-          <span className="absolute right-1 top-1 inline-flex min-w-4 items-center justify-center rounded-full bg-amal-red px-1 text-[0.65rem] font-semibold leading-4 text-amal-white">
+          <span className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-amal-red px-1 text-[9px] font-bold leading-none text-amal-white ring-2 ring-amal-white">
             {unread > 9 ? "9+" : unread}
           </span>
         ) : null}
