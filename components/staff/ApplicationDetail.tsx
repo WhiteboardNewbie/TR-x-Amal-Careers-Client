@@ -45,7 +45,7 @@ import {
 } from "./icons";
 import { ResultPage } from "./ResultPage";
 import { ShareApplicationModal } from "./ShareApplicationModal";
-import { PrimaryButton, inputClass } from "./ui";
+import { CenteredOverlay, PrimaryButton, inputClass } from "./ui";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
@@ -570,13 +570,12 @@ export function ApplicationDetail({ id }: { id: number }) {
       </div>
 
       {resultKind ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-amal-black/60 p-4"
-          onClick={() => setResultKind(null)}
-          role="presentation"
+        <CenteredOverlay
+          onClose={() => setResultKind(null)}
+          backdropClassName="bg-amal-black/60"
         >
           <div
-            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-amal-white p-6 shadow-2xl"
+            className="pointer-events-auto max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-amal-white p-6 shadow-2xl"
             role="dialog"
             aria-modal="true"
             onClick={(event) => event.stopPropagation()}
@@ -587,7 +586,7 @@ export function ApplicationDetail({ id }: { id: number }) {
               onClose={() => setResultKind(null)}
             />
           </div>
-        </div>
+        </CenteredOverlay>
       ) : null}
       {shareOpen ? (
         <ShareApplicationModal

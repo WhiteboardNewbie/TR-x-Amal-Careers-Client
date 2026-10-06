@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ApiError } from "@/lib/api";
 import { createShareLink } from "@/lib/staff-api";
-import { GhostButton, PrimaryButton, inputClass } from "./ui";
+import { CenteredOverlay, GhostButton, PrimaryButton, inputClass } from "./ui";
 
 const EXPIRY_PRESETS = [
   { label: "1 day", days: 1 },
@@ -53,13 +53,9 @@ export function ShareApplicationModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-amal-ink/45 p-4"
-      onClick={onClose}
-      role="presentation"
-    >
+    <CenteredOverlay onClose={onClose} backdropClassName="bg-amal-ink/45">
       <div
-        className="w-full max-w-md rounded-2xl border border-black/10 bg-amal-white p-5 shadow-xl"
+        className="pointer-events-auto w-full max-w-md rounded-2xl border border-black/10 bg-amal-white p-5 shadow-xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="share-application-title"
@@ -127,6 +123,6 @@ export function ShareApplicationModal({
           </div>
         )}
       </div>
-    </div>
+    </CenteredOverlay>
   );
 }

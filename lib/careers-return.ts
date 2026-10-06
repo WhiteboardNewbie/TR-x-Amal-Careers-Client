@@ -2,13 +2,25 @@ import {
   DEFAULT_JOB_APPLICATIONS_FILTERS,
   type JobApplicationsFilterState,
 } from "@/lib/job-applications-filters";
+import {
+  DEFAULT_STAGE_ASSIGNMENTS_FILTERS,
+  type StageAssignmentsFilterState,
+} from "@/lib/stage-assignments-filters";
 
-export type CareersApplicationsReturn = {
-  tab: "applications";
-  filters: JobApplicationsFilterState;
-  page: number;
-  pageSize: number;
-};
+export type CareersApplicationsReturn =
+  | {
+      tab: "applications";
+      filters: JobApplicationsFilterState;
+      page: number;
+      pageSize: number;
+    }
+  | {
+      tab: "stages";
+      filters: StageAssignmentsFilterState;
+      page: number;
+      pageSize: number;
+      reviewerTab?: "managers" | "clients";
+    };
 
 const CAREERS_RETURN_STORAGE_KEY = "careers:applications-return";
 
@@ -39,17 +51,41 @@ function readStoredReturn(): CareersApplicationsReturn | null {
 }
 
 function parseReturn(raw: string): CareersApplicationsReturn | null {
-  const parsed = JSON.parse(raw) as Partial<CareersApplicationsReturn>;
+  const parsed = JSON.parse(raw) as {
+    tab?: string;
+    filters?: Record<string, unknown>;
+    page?: number;
+    pageSize?: number;
+    reviewerTab?: "managers" | "clients";
+  };
+  const page = Number(parsed.page);
+  const pageSize = Number(parsed.pageSize);
+  const safePage = Number.isFinite(page) && page >= 1 ? page : 1;
+  const safePageSize =
+    Number.isFinite(pageSize) && pageSize >= 1 ? pageSize : 10;
+  if (parsed?.tab === "stages" && parsed.filters) {
+    return {
+      tab: "stages",
+      filters: {
+        ...DEFAULT_STAGE_ASSIGNMENTS_FILTERS,
+        ...parsed.filters,
+      },
+      page: safePage,
+      pageSize: safePageSize,
+      reviewerTab: parsed.reviewerTab === "clients" ? "clients" : "managers",
+    };
+  }
   if (parsed?.tab !== "applications" || !parsed.filters) {
     return null;
   }
-  const page = Number(parsed.page);
-  const pageSize = Number(parsed.pageSize);
   return {
     tab: "applications",
-    filters: { ...DEFAULT_JOB_APPLICATIONS_FILTERS, ...parsed.filters },
-    page: Number.isFinite(page) && page >= 1 ? page : 1,
-    pageSize: Number.isFinite(pageSize) && pageSize >= 1 ? pageSize : 10,
+    filters: {
+      ...DEFAULT_JOB_APPLICATIONS_FILTERS,
+      ...parsed.filters,
+    },
+    page: safePage,
+    pageSize: safePageSize,
   };
 }
 

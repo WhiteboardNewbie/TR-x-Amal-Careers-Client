@@ -63,7 +63,7 @@ import {
   UsersIcon,
   XIcon,
 } from "./icons";
-import { GhostButton, PrimaryButton, inputClass } from "./ui";
+import { CenteredOverlay, GhostButton, PrimaryButton, inputClass } from "./ui";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
@@ -418,13 +418,13 @@ export function ApplicationDetailModal({
     : [];
 
   return (
-    <div
-      className="fixed inset-0 z-40 flex items-center justify-center bg-amal-black/60 px-4 backdrop-blur-sm"
-      onClick={onClose}
-      role="presentation"
+    <CenteredOverlay
+      onClose={onClose}
+      zClass="z-40"
+      backdropClassName="bg-amal-black/60 backdrop-blur-sm"
     >
       <div
-        className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-amal-white shadow-2xl"
+        className="pointer-events-auto flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-amal-white shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="application-detail-title"
@@ -1256,6 +1256,6 @@ export function ApplicationDetailModal({
           </>
         )}
       </div>
-    </div>
+    </CenteredOverlay>
   );
 }

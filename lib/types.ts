@@ -187,6 +187,43 @@ export type ApplicationStage = {
   interview_feedback: string;
 };
 
+export type EmployeeMinimal = {
+  id: number;
+  full_name: string;
+};
+
+export type ApplicationStageHrOverview = Omit<ApplicationStage, "assigned_to"> & {
+  assigned_to: EmployeeMinimal | null;
+  applicant_name: string | null;
+  job_title: string | null;
+  job_opening_slug: string | null;
+  application_status: string | null;
+  application: StaffApplication | null;
+};
+
+export type ClientUserDisplay = {
+  id: number;
+  display_name: string;
+  client_name: string;
+};
+
+export type ClientApplicationReviewHr = {
+  id: number;
+  job_application: number;
+  client_user: number;
+  client_user_display: ClientUserDisplay | null;
+  status: string;
+  decided_by: number | null;
+  decided_at: string | null;
+  created_at: string;
+  updated_at: string;
+  applicant_name: string | null;
+  job_title: string | null;
+  job_opening_slug: string | null;
+  application_status: string | null;
+  application: StaffApplication | null;
+};
+
 export type OrgTitle = {
   id: number;
   name: string;

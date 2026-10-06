@@ -3,7 +3,9 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -15,23 +17,15 @@ import {
 import { getJobApplicationsPresetState } from "@/lib/job-applications-filters";
 import { preventFocusScroll } from "@/lib/prevent-focus-scroll";
 import {
-  getAssignedStages,
-  getEmployees,
-  getHrStages,
   getOrgDepartments,
   getApplicants,
   getPreScreeningCompleteCount,
   getStaffApplications,
   getStaffJobOpenings,
   patchJobOpening,
-  scheduleStage,
-  setHrStageStatus,
 } from "@/lib/staff-api";
-import { stageStatusBadge } from "@/lib/status";
 import type {
-  ApplicationStage,
   Department,
-  Employee,
   JobApplicationStatus,
   StaffJobOpening,
 } from "@/lib/types";
@@ -40,7 +34,9 @@ import { ApplicationsTab } from "./ApplicationsTab";
 import { CreateApplicationModal } from "./CreateApplicationModal";
 import { CreateRoleModal } from "./CreateRoleModal";
 import { IdealProfileModal } from "./IdealProfileModal";
+import { ManageApplicationsTab } from "./ManageApplicationsTab";
 import { RoleDetailModal } from "./RoleDetailModal";
+import { StageAssignmentsTab } from "./StageAssignmentsTab";
 import { StaffBanner } from "./StaffBanner";
 import {
   BriefcaseIcon,
@@ -50,28 +46,10 @@ import {
   UserIcon,
   UsersIcon,
 } from "./icons";
-import {
-  Field,
-  GhostButton,
-  Modal,
-  PrimaryButton,
-  TablePager,
-  inputClass,
-} from "./ui";
+import { TablePager, inputClass } from "./ui";
 
 type Tab = "roles" | "applicants" | "applications" | "stages" | "manage";
 type RoleStatus = "all" | "active" | "closed" | "draft";
-
-function StageStatusPill({ status }: { status: string }) {
-  const badge = stageStatusBadge(status);
-  return (
-    <span
-      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${badge.className}`}
-    >
-      {badge.label}
-    </span>
-  );
-}
 
 const TABS: {
   id: Tab;
@@ -136,10 +114,49 @@ function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
 }
 
+function rememberScrollY(ref: { current: number | null }) {
+  ref.current = window.scrollY;
+}
+
+function StatCard({
+  label,
+  value,
+  tone,
+  icon: Icon,
+  onClick,
+}: {
+  label: string;
+  value: number;
+  tone: string;
+  icon: (props: { className?: string }) => ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      onMouseDown={preventFocusScroll}
+      className={`rounded-xl border border-black/10 p-4 text-left transition ${tone}`}
+    >
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wide opacity-90">
+          {label}
+        </p>
+        <Icon className="h-4 w-4" />
+      </div>
+      <p className="mt-1 text-2xl font-bold">{value}</p>
+    </button>
+  );
+}
+
 export function StaffHub() {
   const [restored] = useState(() => takeCareersApplicationsReturn());
   const [tab, setTab] = useState<Tab>(
-    restored?.tab === "applications" ? "applications" : "roles",
+    restored?.tab === "applications"
+      ? "applications"
+      : restored?.tab === "stages"
+        ? "stages"
+        : "roles",
   );
   const [applicationsRestore, setApplicationsRestore] = useState(
     restored?.tab === "applications"
@@ -150,30 +167,40 @@ export function StaffHub() {
         }
       : null,
   );
+  const [stagesRestore, setStagesRestore] = useState(
+    restored?.tab === "stages"
+      ? {
+          filters: restored.filters,
+          page: restored.page,
+          pageSize: restored.pageSize,
+          reviewerTab: restored.reviewerTab,
+        }
+      : null,
+  );
   const [notice, setNotice] = useState("");
   const onError = useCallback((value: string) => setNotice(value), []);
   const [roleCount, setRoleCount] = useState(0);
   const [appCount, setAppCount] = useState(0);
   const [applicantCount, setApplicantCount] = useState(0);
   const [preScreeningCount, setPreScreeningCount] = useState(0);
-  const [modal, setModal] = useState<"role" | "application" | "schedule" | null>(
-    null,
-  );
+  const [modal, setModal] = useState<"role" | "application" | null>(null);
   const [editingRole, setEditingRole] = useState<StaffJobOpening | null>(null);
   const [idealRole, setIdealRole] = useState<StaffJobOpening | null>(null);
   const [idealStandalone, setIdealStandalone] = useState(false);
-  const [scheduleTarget, setScheduleTarget] = useState<ApplicationStage | null>(
-    null,
-  );
 
   const [countsTick, setCountsTick] = useState(0);
+  const pinnedScrollY = useRef<number | null>(null);
   const [applicationRole, setApplicationRole] = useState(() =>
-    restored?.filters.jobFilter && restored.filters.jobFilter !== "all"
+    restored?.tab === "applications" &&
+    restored.filters.jobFilter &&
+    restored.filters.jobFilter !== "all"
       ? restored.filters.jobFilter
       : "",
   );
   const [applicationStatus, setApplicationStatus] = useState(() =>
-    restored?.filters.statusFilter && restored.filters.statusFilter !== "all"
+    restored?.tab === "applications" &&
+    restored.filters.statusFilter &&
+    restored.filters.statusFilter !== "all"
       ? restored.filters.statusFilter
       : "",
   );
@@ -182,10 +209,47 @@ export function StaffHub() {
     return () => scheduleClearCareersApplicationsReturnCache();
   }, []);
 
-  function goToTab(next: Tab) {
+  const goToTab = useCallback((next: Tab) => {
+    rememberScrollY(pinnedScrollY);
     setApplicationsRestore(null);
+    setStagesRestore(null);
     setTab(next);
-  }
+  }, []);
+
+  const openApplicationsFromCard = useCallback(() => {
+    rememberScrollY(pinnedScrollY);
+    setStagesRestore(null);
+    setApplicationsRestore(null);
+    setApplicationRole("");
+    setApplicationStatus("");
+    setTab("applications");
+  }, []);
+
+  const openPreScreeningFromCard = useCallback(() => {
+    rememberScrollY(pinnedScrollY);
+    setStagesRestore(null);
+    setApplicationRole("");
+    setApplicationStatus("");
+    setApplicationsRestore({
+      filters: getJobApplicationsPresetState("pre-screening-complete"),
+      page: 1,
+      pageSize: 10,
+    });
+    setTab("applications");
+  }, []);
+
+  useLayoutEffect(() => {
+    const y = pinnedScrollY.current;
+    if (y == null) {
+      return;
+    }
+    window.scrollTo(0, y);
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo(0, y);
+      pinnedScrollY.current = null;
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [tab]);
 
   useEffect(() => {
     let ignore = false;
@@ -260,74 +324,38 @@ export function StaffHub() {
       ) : null}
 
       <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-        {(
-          [
-            {
-              label: "Roles",
-              value: roleCount,
-              tone: "bg-amal-sheet text-amal-ink hover:bg-zinc-200/70",
-              icon: BriefcaseIcon,
-              onClick: () => goToTab("roles"),
-            },
-            {
-              label: "Unique Applicants",
-              value: applicantCount,
-              tone: "bg-amal-red/10 text-amal-red hover:bg-amal-red/20",
-              icon: UserIcon,
-              onClick: () => goToTab("applicants"),
-            },
-            {
-              label: "Total Applications",
-              value: appCount,
-              tone: "bg-amal-ink/5 text-amal-ink hover:bg-amal-ink/10",
-              icon: UsersIcon,
-              onClick: () => {
-                setApplicationsRestore(null);
-                setApplicationRole("");
-                setApplicationStatus("");
-                setTab("applications");
-              },
-            },
-            {
-              label: "Completed Pre-screening",
-              value: preScreeningCount,
-              tone: "bg-emerald-50 text-emerald-800 hover:bg-emerald-100/80",
-              icon: ChecksIcon,
-              onClick: () => {
-                setApplicationRole("");
-                setApplicationStatus("");
-                setApplicationsRestore({
-                  filters: getJobApplicationsPresetState(
-                    "pre-screening-complete",
-                  ),
-                  page: 1,
-                  pageSize: 10,
-                });
-                setTab("applications");
-              },
-            },
-          ] as const
-        ).map((card) => (
-          <button
-            key={card.label}
-            type="button"
-            onClick={card.onClick}
-            onMouseDown={preventFocusScroll}
-            className={`rounded-xl border border-black/10 p-4 text-left transition ${card.tone}`}
-          >
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-wide opacity-90">
-                {card.label}
-              </p>
-              <card.icon className="h-4 w-4" />
-            </div>
-            <p className="mt-1 text-2xl font-bold">{card.value}</p>
-          </button>
-        ))}
+        <StatCard
+          label="Roles"
+          value={roleCount}
+          tone="bg-amal-sheet text-amal-ink hover:bg-zinc-200/70"
+          icon={BriefcaseIcon}
+          onClick={() => goToTab("roles")}
+        />
+        <StatCard
+          label="Unique Applicants"
+          value={applicantCount}
+          tone="bg-amal-red/10 text-amal-red hover:bg-amal-red/20"
+          icon={UserIcon}
+          onClick={() => goToTab("applicants")}
+        />
+        <StatCard
+          label="Total Applications"
+          value={appCount}
+          tone="bg-amal-ink/5 text-amal-ink hover:bg-amal-ink/10"
+          icon={UsersIcon}
+          onClick={openApplicationsFromCard}
+        />
+        <StatCard
+          label="Completed Pre-screening"
+          value={preScreeningCount}
+          tone="bg-emerald-50 text-emerald-800 hover:bg-emerald-100/80"
+          icon={ChecksIcon}
+          onClick={openPreScreeningFromCard}
+        />
       </div>
 
       <div className="mt-6 rounded-2xl border border-black/10 bg-amal-white p-2 shadow-sm sm:p-3">
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-nowrap">
           {TABS.map((item) => {
             const active = tab === item.id;
             return (
@@ -336,7 +364,7 @@ export function StaffHub() {
                 type="button"
                 onMouseDown={preventFocusScroll}
                 onClick={() => goToTab(item.id)}
-                className={`flex min-h-[4.25rem] min-w-0 flex-col justify-center rounded-lg px-3 py-3 text-left transition-colors sm:min-h-[4.5rem] ${
+                className={`overflow-anchor-none flex min-h-[4.25rem] flex-col justify-center rounded-lg px-3 py-3 text-left transition-colors sm:min-h-[4.5rem] lg:flex-1 ${
                   active
                     ? "bg-amal-red text-amal-white shadow-sm"
                     : "bg-amal-sheet text-zinc-600 hover:bg-black/5"
@@ -344,10 +372,12 @@ export function StaffHub() {
               >
                 <div className="flex items-center gap-2 text-xs font-semibold sm:text-sm">
                   <item.icon className="h-3.5 w-3.5 shrink-0" />
-                  <span className="min-w-0 leading-snug">{item.label}</span>
+                  <span className="whitespace-nowrap leading-snug">
+                    {item.label}
+                  </span>
                 </div>
                 {active ? (
-                  <p className="mt-2 text-[11px] leading-relaxed text-amal-white/80 sm:text-xs">
+                  <p className="mt-2 whitespace-nowrap text-[11px] leading-relaxed text-amal-white/80 sm:text-xs">
                     {item.description}
                   </p>
                 ) : null}
@@ -357,7 +387,17 @@ export function StaffHub() {
         </div>
       </div>
 
-      <div className="overflow-anchor-none mt-6 rounded-2xl border border-black/10 bg-amal-white p-4 shadow-sm md:p-6">
+      <div className="overflow-anchor-none">
+      {tab === "stages" ? (
+        <StageAssignmentsTab
+          onError={onError}
+          onScheduled={() => setCountsTick((value) => value + 1)}
+          refreshTick={countsTick}
+          restoreState={stagesRestore}
+          onRestoreConsumed={() => setStagesRestore(null)}
+        />
+      ) : (
+        <div className="overflow-anchor-none mt-6 rounded-2xl border border-black/10 bg-amal-white p-4 shadow-sm md:p-6">
           {tab === "roles" ? (
             <RolesTab
               key={countsTick}
@@ -371,7 +411,9 @@ export function StaffHub() {
                 setIdealRole(row);
               }}
               onViewApplications={(slug, status) => {
+                pinnedScrollY.current = window.scrollY;
                 setApplicationsRestore(null);
+                setStagesRestore(null);
                 setApplicationRole(slug);
                 setApplicationStatus(status ?? "");
                 setTab("applications");
@@ -382,7 +424,9 @@ export function StaffHub() {
             <ApplicantsTab
               onError={onError}
               onViewApplications={(slug) => {
+                pinnedScrollY.current = window.scrollY;
                 setApplicationsRestore(null);
+                setStagesRestore(null);
                 setApplicationRole(slug);
                 setApplicationStatus("");
                 setTab("applications");
@@ -407,17 +451,12 @@ export function StaffHub() {
               onError={onError}
             />
           ) : null}
-          {tab === "stages" ? (
-            <StagesTab
-              onError={onError}
-              onSchedule={(row) => {
-                setScheduleTarget(row);
-                setModal("schedule");
-              }}
-            />
+          {tab === "manage" ? (
+            <ManageApplicationsTab onError={onError} />
           ) : null}
-          {tab === "manage" ? <ManageTab onError={onError} /> : null}
         </div>
+      )}
+      </div>
 
       {modal === "role" ? (
         <CreateRoleModal
@@ -457,18 +496,9 @@ export function StaffHub() {
           onSaved={() => {
             setModal(null);
             setApplicationsRestore(null);
+            setStagesRestore(null);
             setTab("applications");
             setCountsTick((value) => value + 1);
-          }}
-          onError={onError}
-        />
-      ) : null}
-      {modal === "schedule" && scheduleTarget ? (
-        <ScheduleModal
-          stage={scheduleTarget}
-          onClose={() => {
-            setModal(null);
-            setScheduleTarget(null);
           }}
           onError={onError}
         />
@@ -780,216 +810,5 @@ function RolesTab({
         />
       ) : null}
     </div>
-  );
-}
-
-function StagesTab({
-  onError,
-  onSchedule,
-}: {
-  onError: (value: string) => void;
-  onSchedule: (row: ApplicationStage) => void;
-}) {
-  const [page, setPage] = useState(1);
-  const [tick, setTick] = useState(0);
-  const [rows, setRows] = useState<ApplicationStage[]>([]);
-  const [count, setCount] = useState(0);
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const names = useMemo(
-    () => Object.fromEntries(employees.map((row) => [row.id, row.full_name])),
-    [employees],
-  );
-
-  useEffect(() => {
-    let ignore = false;
-    getEmployees()
-      .then((data) => {
-        if (!ignore) {
-          setEmployees(data);
-        }
-      })
-      .catch(() => {
-        if (!ignore) {
-          setEmployees([]);
-        }
-      });
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    let ignore = false;
-    getHrStages({ page, page_size: 10 })
-      .then((data) => {
-        if (!ignore) {
-          setRows(data.results);
-          setCount(data.count);
-        }
-      })
-      .catch((error) => {
-        if (!ignore) {
-          onError(errorText(error));
-        }
-      });
-    return () => {
-      ignore = true;
-    };
-  }, [page, tick, onError]);
-
-  async function changeHr(row: ApplicationStage, status: string) {
-    try {
-      await setHrStageStatus(row.id, status);
-      setTick((value) => value + 1);
-    } catch (error) {
-      onError(errorText(error));
-    }
-  }
-
-  return (
-    <div>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead>
-            <tr className="text-xs uppercase tracking-wide text-zinc-500">
-              <th className="py-2">Stage</th>
-              <th>Application</th>
-              <th>Reviewer</th>
-              <th>Status</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.id} className="border-t border-black/5">
-                <td className="py-3 font-semibold">{row.name || "Review"}</td>
-                <td>#{row.job_application}</td>
-                <td>{names[row.assigned_to] ?? row.assigned_to}</td>
-                <td>
-                  <StageStatusPill status={row.status} />
-                </td>
-                <td className="space-x-2 text-right">
-                  <GhostButton
-                    onClick={() => void changeHr(row, "requested_interview")}
-                  >
-                    Request interview
-                  </GhostButton>
-                  <GhostButton onClick={() => onSchedule(row)}>
-                    Schedule
-                  </GhostButton>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <TablePager page={page} pageSize={10} count={count} onPage={setPage} />
-    </div>
-  );
-}
-
-function ManageTab({ onError }: { onError: (value: string) => void }) {
-  const [page, setPage] = useState(1);
-  const [rows, setRows] = useState<ApplicationStage[]>([]);
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    let ignore = false;
-    getAssignedStages({ page, page_size: 10 })
-      .then((data) => {
-        if (!ignore) {
-          setRows(data.results);
-          setCount(data.count);
-        }
-      })
-      .catch((error) => {
-        if (!ignore) {
-          onError(errorText(error));
-        }
-      });
-    return () => {
-      ignore = true;
-    };
-  }, [page, onError]);
-
-  return (
-    <div>
-      <p className="mb-4 text-sm text-zinc-500">
-        Stages assigned to the signed-in reviewer. The Reviews landing is the
-        employee view of this list.
-      </p>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-left text-sm">
-          <thead>
-            <tr className="text-xs uppercase tracking-wide text-zinc-500">
-              <th className="py-2">Stage</th>
-              <th>Application</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.id} className="border-t border-black/5">
-                <td className="py-3 font-semibold">{row.name || "Review"}</td>
-                <td>#{row.job_application}</td>
-                <td>
-                  <StageStatusPill status={row.status} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <TablePager page={page} pageSize={10} count={count} onPage={setPage} />
-    </div>
-  );
-}
-
-function ScheduleModal({
-  stage,
-  onClose,
-  onError,
-}: {
-  stage: ApplicationStage;
-  onClose: () => void;
-  onError: (value: string) => void;
-}) {
-  const [when, setWhen] = useState("");
-  const [kind, setKind] = useState("online");
-  const [busy, setBusy] = useState(false);
-
-  async function onSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    setBusy(true);
-    try {
-      await scheduleStage(stage.id, {
-        scheduled_at: when ? new Date(when).toISOString() : null,
-        interview_type: kind,
-      });
-      onClose();
-    } catch (error) {
-      onError(errorText(error));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Modal title="Schedule interview" onClose={onClose}>
-      <form onSubmit={onSubmit}>
-        <Field label="When">
-          <input className={inputClass} type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)} required />
-        </Field>
-        <Field label="Type">
-          <select className={inputClass} value={kind} onChange={(e) => setKind(e.target.value)}>
-            <option value="online">Online</option>
-            <option value="on_site">On site</option>
-          </select>
-        </Field>
-        <PrimaryButton type="submit" disabled={busy}>
-          {busy ? "Saving…" : "Schedule"}
-        </PrimaryButton>
-      </form>
-    </Modal>
   );
 }

@@ -319,3 +319,13 @@ export function SparklesIcon({ className }: { className?: string }) {
     </Icon>
   );
 }
+
+export function UserPlusIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M3 19a6 6 0 0 1 12 0" />
+      <path d="M19 8v6M16 11h6" />
+    </Icon>
+  );
+}
