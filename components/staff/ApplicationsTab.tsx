@@ -955,8 +955,8 @@ export function ApplicationsTab({
             <p className="mt-2 text-sm text-zinc-600">
               A new test will be sent to{" "}
               <span className="font-semibold">{resendTarget.applicant.name}</span>
-              . If an invite already exists, the server will reject a second
-              send.
+              . This replaces the current invite and emails a new Start
+              Assessment link.
             </p>
             <div className="mt-5 flex justify-end gap-2">
               <GhostButton type="button" onClick={() => setResendTarget(null)}>
