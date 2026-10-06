@@ -62,6 +62,7 @@ import {
   applicationFromStage,
   CompactAssessmentIndicator,
   FirstTestCell,
+  formatCompactDateTime,
   formatDate,
   formatDateTime,
   ScoreCell,
@@ -202,7 +203,7 @@ function AppStatusSelect({
         onDraftBlur(application.id);
         onChange(application, event.target.value as JobApplicationStatus);
       }}
-      className={`h-7 cursor-pointer rounded-full border-0 px-2 text-xs font-semibold leading-none ${tone} disabled:opacity-60`}
+      className={`h-7 w-full max-w-full cursor-pointer rounded-full border-0 px-2 text-xs font-semibold leading-none ${tone} disabled:opacity-60`}
     >
       {draft === "" ? (
         <option value="" disabled>
@@ -729,61 +730,61 @@ export function StageAssignmentsTab({
               </p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[960px] text-center text-sm">
+                <table className="w-full table-fixed text-center text-sm">
                   <thead>
                     <tr className="border-b border-black/10">
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[9%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Applicant
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[9%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Job
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[7%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Assigned to
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[5%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Stage
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[9%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Stage status
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[9%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         App status
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[3%] px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Resume
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[6%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Applied
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[7%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         First test
                       </th>
                       <th
-                        className="w-12 px-2 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500"
+                        className="w-[3%] px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500"
                         title="Video test"
                       >
                         Video
                       </th>
                       <th
-                        className="w-12 px-2 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500"
+                        className="w-[3%] px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500"
                         title="General questionnaire"
                       >
                         Quest.
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[5%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         AI
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[5%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Score
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[8%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Interview
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[5%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Completed
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[7%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Actions
                       </th>
                     </tr>
@@ -804,27 +805,37 @@ export function StageAssignmentsTab({
                           key={stage.id}
                           className="border-b border-black/5 hover:bg-amal-sheet/80"
                         >
-                          <td className="px-3 py-3 font-medium text-amal-ink">
+                          <td className="max-w-0 truncate px-1.5 py-2.5 font-medium text-amal-ink" title={applicantName}>
                             {applicantName}
                           </td>
-                          <td className="px-3 py-3 text-zinc-600">
+                          <td
+                            className="max-w-0 truncate px-1.5 py-2.5 text-zinc-600"
+                            title={
+                              stage.job_title ??
+                              application?.job_opening_name ??
+                              undefined
+                            }
+                          >
                             {stage.job_title ??
                               application?.job_opening_name ??
                               "—"}
                           </td>
-                          <td className="px-3 py-3 text-zinc-600">
+                          <td
+                            className="max-w-0 truncate px-1.5 py-2.5 text-zinc-600"
+                            title={assignedName(stage.assigned_to)}
+                          >
                             {assignedName(stage.assigned_to)}
                           </td>
-                          <td className="px-3 py-3 text-zinc-600">
+                          <td className="max-w-0 truncate px-1.5 py-2.5 text-zinc-600">
                             {stageName(stage)}
                           </td>
                           <td
-                            className="px-3 py-3"
+                            className="px-1.5 py-2.5"
                             onClick={(event) => event.stopPropagation()}
                           >
                             {locked ? (
                               <span
-                                className={`rounded-full px-2 py-1 text-xs font-semibold ${badge.className}`}
+                                className={`inline-block max-w-full truncate rounded-full px-2 py-1 text-xs font-semibold ${badge.className}`}
                               >
                                 {badge.label}
                               </span>
@@ -839,7 +850,7 @@ export function StageAssignmentsTab({
                                   )
                                 }
                                 aria-label={`Stage status for ${applicantName}`}
-                                className={`h-7 cursor-pointer rounded-full border-0 px-2 text-xs font-semibold leading-none ${badge.className} disabled:opacity-60`}
+                                className={`h-7 w-full max-w-full cursor-pointer rounded-full border-0 px-2 text-xs font-semibold leading-none ${badge.className} disabled:opacity-60`}
                               >
                                 {HR_STAGE_STATUS_OPTIONS.map((option) => (
                                   <option
@@ -853,7 +864,7 @@ export function StageAssignmentsTab({
                             )}
                           </td>
                           <td
-                            className="px-3 py-3"
+                            className="px-1.5 py-2.5"
                             onClick={(event) => event.stopPropagation()}
                           >
                             <AppStatusSelect
@@ -881,7 +892,7 @@ export function StageAssignmentsTab({
                             />
                           </td>
                           <td
-                            className="px-3 py-3"
+                            className="px-1 py-2.5"
                             onClick={(event) => event.stopPropagation()}
                           >
                             {resumeHref ? (
@@ -898,11 +909,11 @@ export function StageAssignmentsTab({
                               <span className="text-zinc-400">—</span>
                             )}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-3 text-zinc-600">
+                          <td className="whitespace-nowrap px-1.5 py-2.5 text-xs text-zinc-600">
                             {formatDate(application?.applied_at)}
                           </td>
                           <td
-                            className="px-3 py-3"
+                            className="px-1.5 py-2.5"
                             onClick={(event) => event.stopPropagation()}
                           >
                             <FirstTestCell
@@ -912,7 +923,7 @@ export function StageAssignmentsTab({
                             />
                           </td>
                           <td
-                            className="w-12 px-2 py-3"
+                            className="px-1 py-2.5"
                             onClick={(event) => event.stopPropagation()}
                           >
                             <CompactAssessmentIndicator
@@ -923,7 +934,7 @@ export function StageAssignmentsTab({
                             />
                           </td>
                           <td
-                            className="w-12 px-2 py-3"
+                            className="px-1 py-2.5"
                             onClick={(event) => event.stopPropagation()}
                           >
                             <CompactAssessmentIndicator
@@ -934,25 +945,28 @@ export function StageAssignmentsTab({
                             />
                           </td>
                           <td
-                            className="px-3 py-3 text-center"
+                            className="px-1.5 py-2.5 text-center"
                             onClick={(event) => event.stopPropagation()}
                           >
-                            <AiCell application={application} />
+                            <AiCell application={application} compact />
                           </td>
-                          <td className="px-3 py-3 tabular-nums text-zinc-700">
+                          <td className="px-1.5 py-2.5 tabular-nums text-zinc-700">
                             <ScoreCell application={application} />
                           </td>
-                          <td className="whitespace-nowrap px-3 py-3 text-zinc-600">
-                            {formatDateTime(stage.scheduled_at)}
+                          <td
+                            className="whitespace-nowrap px-1.5 py-2.5 text-xs text-zinc-600"
+                            title={formatDateTime(stage.scheduled_at)}
+                          >
+                            {formatCompactDateTime(stage.scheduled_at)}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-3 text-zinc-600">
+                          <td className="whitespace-nowrap px-1.5 py-2.5 text-xs text-zinc-600">
                             {formatDate(stage.completed_at)}
                           </td>
                           <td
-                            className="relative px-3 py-3"
+                            className="relative px-1.5 py-2.5"
                             onClick={(event) => event.stopPropagation()}
                           >
-                            <div className="flex items-center justify-center gap-1.5">
+                            <div className="flex items-center justify-center gap-1">
                               <Link
                                 href={`/staff/applications/${appId}`}
                                 className={iconButtonClass}
@@ -1008,55 +1022,55 @@ export function StageAssignmentsTab({
               </p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[960px] text-center text-sm">
+                <table className="w-full table-fixed text-center text-sm">
                   <thead>
                     <tr className="border-b border-black/10">
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[10%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Applicant
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[10%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Role
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[10%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Client user
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[9%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Review status
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[9%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         App status
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[5%] px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Resume
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[7%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Applied
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[8%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         First test
                       </th>
                       <th
-                        className="w-12 px-2 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500"
+                        className="w-[4%] px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500"
                         title="Video test"
                       >
                         Video
                       </th>
                       <th
-                        className="w-12 px-2 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500"
+                        className="w-[4%] px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500"
                         title="General questionnaire"
                       >
                         Quest.
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[6%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         AI
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[6%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Score
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[7%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Decided at
                       </th>
-                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="w-[5%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Actions
                       </th>
                     </tr>
@@ -1078,22 +1092,32 @@ export function StageAssignmentsTab({
                           key={review.id}
                           className="border-b border-black/5 hover:bg-amal-sheet/80"
                         >
-                          <td className="px-3 py-3 font-medium text-amal-ink">
+                          <td className="max-w-0 truncate px-1.5 py-2.5 font-medium text-amal-ink" title={applicantName}>
                             {applicantName}
                           </td>
-                          <td className="px-3 py-3 text-zinc-700">
+                          <td
+                            className="max-w-0 truncate px-1.5 py-2.5 text-zinc-700"
+                            title={
+                              review.job_title ??
+                              application?.job_opening_name ??
+                              undefined
+                            }
+                          >
                             {review.job_title ??
                               application?.job_opening_name ??
                               "—"}
                           </td>
-                          <td className="px-3 py-3 text-zinc-700">
+                          <td
+                            className="max-w-0 truncate px-1.5 py-2.5 text-zinc-700"
+                            title={clientLabel}
+                          >
                             {clientLabel}
                           </td>
-                          <td className="px-3 py-3">
+                          <td className="px-1.5 py-2.5">
                             <ReviewStatusBadge status={review.status} />
                           </td>
                           <td
-                            className="px-3 py-3"
+                            className="px-1.5 py-2.5"
                             onClick={(event) => event.stopPropagation()}
                           >
                             <AppStatusSelect
@@ -1121,7 +1145,7 @@ export function StageAssignmentsTab({
                             />
                           </td>
                           <td
-                            className="px-3 py-3"
+                            className="px-1 py-2.5"
                             onClick={(event) => event.stopPropagation()}
                           >
                             {resumeHref ? (
@@ -1138,11 +1162,11 @@ export function StageAssignmentsTab({
                               <span className="text-zinc-400">—</span>
                             )}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-3 text-zinc-600">
+                          <td className="whitespace-nowrap px-1.5 py-2.5 text-xs text-zinc-600">
                             {formatDate(application?.applied_at)}
                           </td>
                           <td
-                            className="px-3 py-3"
+                            className="px-1.5 py-2.5"
                             onClick={(event) => event.stopPropagation()}
                           >
                             <FirstTestCell
@@ -1152,7 +1176,7 @@ export function StageAssignmentsTab({
                             />
                           </td>
                           <td
-                            className="w-12 px-2 py-3"
+                            className="px-1 py-2.5"
                             onClick={(event) => event.stopPropagation()}
                           >
                             <CompactAssessmentIndicator
@@ -1163,7 +1187,7 @@ export function StageAssignmentsTab({
                             />
                           </td>
                           <td
-                            className="w-12 px-2 py-3"
+                            className="px-1 py-2.5"
                             onClick={(event) => event.stopPropagation()}
                           >
                             <CompactAssessmentIndicator
@@ -1176,18 +1200,21 @@ export function StageAssignmentsTab({
                             />
                           </td>
                           <td
-                            className="px-3 py-3 text-center"
+                            className="px-1.5 py-2.5 text-center"
                             onClick={(event) => event.stopPropagation()}
                           >
-                            <AiCell application={application} />
+                            <AiCell application={application} compact />
                           </td>
-                          <td className="px-3 py-3 tabular-nums text-zinc-700">
+                          <td className="px-1.5 py-2.5 tabular-nums text-zinc-700">
                             <ScoreCell application={application} />
                           </td>
-                          <td className="whitespace-nowrap px-3 py-3 text-zinc-600">
-                            {formatDateTime(review.decided_at)}
+                          <td
+                            className="whitespace-nowrap px-1.5 py-2.5 text-xs text-zinc-600"
+                            title={formatDateTime(review.decided_at)}
+                          >
+                            {formatCompactDateTime(review.decided_at)}
                           </td>
-                          <td className="px-3 py-3">
+                          <td className="px-1.5 py-2.5">
                             <Link
                               href={`/staff/applications/${appId}`}
                               className={iconButtonClass}

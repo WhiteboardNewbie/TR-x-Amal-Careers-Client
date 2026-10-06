@@ -51,6 +51,22 @@ export function formatDateTime(value: string | null | undefined): string {
   });
 }
 
+export function formatCompactDateTime(value: string | null | undefined): string {
+  if (!value) {
+    return "—";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export function stageStatusLocked(status: string): boolean {
   return (
     status === "interview" || status === "completed" || status === "rejected"
@@ -210,26 +226,33 @@ export function FirstTestCell({
 
 export function AiCell({
   application,
+  compact = false,
 }: {
   application: StaffApplication | null;
+  compact?: boolean;
 }) {
   if (!application) {
     return <span className="text-zinc-400">—</span>;
   }
+  const resumePart =
+    application.ai_relevance_score == null ? (
+      <span className="inline-flex items-center gap-1 text-zinc-400">
+        <FileTextIcon className="h-3 w-3" />—
+      </span>
+    ) : (
+      <span
+        className={`${ASSESSMENT_BADGE_BASE} ${firstTestScoreBadgeClass(application.ai_relevance_score)}`}
+      >
+        <FileTextIcon className="h-3 w-3" />
+        {application.ai_relevance_score}%
+      </span>
+    );
+  if (compact) {
+    return resumePart;
+  }
   return (
     <div className="inline-flex items-center justify-center gap-1.5">
-      {application.ai_relevance_score == null ? (
-        <span className="inline-flex items-center gap-1 text-zinc-400">
-          <FileTextIcon className="h-3 w-3" />—
-        </span>
-      ) : (
-        <span
-          className={`${ASSESSMENT_BADGE_BASE} ${firstTestScoreBadgeClass(application.ai_relevance_score)}`}
-        >
-          <FileTextIcon className="h-3 w-3" />
-          {application.ai_relevance_score}%
-        </span>
-      )}
+      {resumePart}
       <span className="text-xs text-zinc-300">/</span>
       <span className="inline-flex items-center gap-1 text-zinc-400">
         <VideoIcon className="h-3 w-3" />—

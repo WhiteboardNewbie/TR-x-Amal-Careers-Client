@@ -64,7 +64,7 @@ export function OrganizationScreen() {
             <button
               key={item.id}
               type="button"
-              className={`rounded-lg px-3 py-2 text-sm font-bold ${
+              className={`rounded-lg border-0 px-3 py-2 text-sm font-bold outline-none ${
                 tab === item.id
                   ? "bg-amal-red text-amal-white"
                   : "bg-amal-sheet text-zinc-600"

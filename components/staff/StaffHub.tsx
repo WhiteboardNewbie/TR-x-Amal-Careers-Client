@@ -86,7 +86,7 @@ const TABS: {
   {
     id: "stages",
     label: "Stage Assignments",
-    description: "All manager stage assignments and pipeline status.",
+    description: "Manager stages and pipeline status.",
     icon: ListIcon,
     permission: PERM.viewJobApplication,
   },
@@ -477,18 +477,21 @@ export function StaffHub() {
                 type="button"
                 onMouseDown={preventFocusScroll}
                 onClick={() => goToTab(item.id)}
-                className={`overflow-anchor-none flex min-h-[4.25rem] min-w-0 flex-col justify-center rounded-lg px-3 py-3 text-left transition-colors sm:min-h-[4.5rem] ${
+                className={`overflow-anchor-none flex min-h-[4.25rem] min-w-0 flex-col justify-center rounded-lg border-0 px-3 py-3 text-left outline-none transition-colors sm:min-h-[4.5rem] ${
                   active
                     ? "bg-amal-red text-amal-white shadow-sm"
                     : "bg-amal-sheet text-zinc-600 hover:bg-black/5"
                 }`}
               >
-                <div className="flex items-start gap-2 text-xs font-semibold sm:items-center sm:text-sm">
-                  <item.icon className="mt-0.5 h-3.5 w-3.5 shrink-0 sm:mt-0" />
-                  <span className="min-w-0 leading-snug">{item.label}</span>
+                <div className="flex min-w-0 items-center gap-2 text-xs font-semibold sm:text-sm">
+                  <item.icon className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate leading-snug">{item.label}</span>
                 </div>
                 {active ? (
-                  <p className="mt-2 text-[11px] leading-relaxed text-amal-white/80 sm:text-xs">
+                  <p
+                    className="mt-2 truncate whitespace-nowrap text-[11px] leading-relaxed text-amal-white/80 sm:text-xs"
+                    title={item.description}
+                  >
                     {item.description}
                   </p>
                 ) : null}
