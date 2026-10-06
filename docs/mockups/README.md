@@ -62,8 +62,7 @@ Sign in also lands an assigned employee on Reviews and a client user on Hiring. 
 | Role closed | `/roles/[slug]` | A draft, inactive, or unknown slug | `visitor/role-closed.jpg` |
 | Apply | `/roles/[slug]/apply` | Apply on the role page | `visitor/apply.jpg` |
 | Thank you | `/roles/[slug]/applied` | A successful apply | `visitor/thank-you.jpg` |
-| Confirmation email | — | Sent by the apply call | `visitor/email-application-received.jpg` |
-| Assessment invite | — | Send Test on a Job Applications row | `visitor/email-assessment-invite.jpg` |
+| Assessment invite | — | Sent by the apply call, and again on Resend New Test | `visitor/email-assessment-invite.jpg` |
 | Application rejected | — | Status changes to rejected | `visitor/email-application-rejected.jpg` |
 | Application on hold | — | Status changes to parking-lot | `visitor/email-application-parking-lot.jpg` |
 
