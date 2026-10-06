@@ -185,6 +185,13 @@ export type ApplicationStage = {
   scheduled_at: string | null;
   meeting_link: string;
   interview_feedback: string;
+  manager_overall_score?: string | number | null;
+  manager_metric_scores?: Array<{
+    metric_id: number;
+    label?: string;
+    client_weight?: number;
+    raw_score: string | number;
+  }>;
 };
 
 export type EmployeeMinimal = {
@@ -308,8 +315,10 @@ export type Comment = {
   id: number;
   text: string;
   author: number | null;
+  author_display_name?: string;
   application_stage: number | null;
   source: string;
+  source_label?: string;
   created_at: string;
 };
 
@@ -341,6 +350,7 @@ export type VideoTestSection = {
     order: number;
     prompt: string;
     transcript: string;
+    video?: string;
   }[];
 };
 
@@ -359,6 +369,15 @@ export type ClientRole = {
   title: string;
   department_name: string;
   location: string;
+  is_active?: boolean;
+  work_type?: string;
+  employment_type?: string;
+  application_count?: number;
+  awaiting_client_review_count?: number;
+  requested_by_client_user_display?: {
+    id: number;
+    display_name: string;
+  } | null;
 };
 
 export type IdealProfileMetric = {
@@ -409,5 +428,7 @@ export type ClientApplicationRow = {
   id: number;
   status: string;
   applicant_name: string;
+  applicant_email?: string;
+  applied_at?: string;
   review_status: string | null;
 };

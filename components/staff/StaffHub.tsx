@@ -7,15 +7,19 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
+import { can, canAny, PERM } from "@/lib/ability";
 import { ApiError } from "@/lib/api";
 import {
   scheduleClearCareersApplicationsReturnCache,
   takeCareersApplicationsReturn,
 } from "@/lib/careers-return";
 import { getJobApplicationsPresetState } from "@/lib/job-applications-filters";
+import type { ManageApplicationsRestoreState } from "@/lib/manage-applications-filters";
 import { preventFocusScroll } from "@/lib/prevent-focus-scroll";
+import { readSession, subscribeSession } from "@/lib/session";
 import {
   getOrgDepartments,
   getApplicants,
@@ -56,38 +60,72 @@ const TABS: {
   label: string;
   description: string;
   icon: (props: { className?: string }) => ReactNode;
+  permission: string | readonly string[];
 }[] = [
   {
     id: "roles",
     label: "Roles",
     description: "Manage roles and candidates.",
     icon: BriefcaseIcon,
+    permission: PERM.changeJobOpening,
   },
   {
     id: "applicants",
     label: "Applicants",
     description: "Candidate profiles and sourcing details.",
     icon: UsersIcon,
+    permission: PERM.viewApplicant,
   },
   {
     id: "applications",
     label: "Job Applications",
     description: "Track all candidate applications.",
     icon: ClipboardIcon,
+    permission: PERM.viewJobApplication,
   },
   {
     id: "stages",
     label: "Stage Assignments",
     description: "All manager stage assignments and pipeline status.",
     icon: ListIcon,
+    permission: PERM.viewJobApplication,
   },
   {
     id: "manage",
     label: "Manage Applications",
     description: "Stages assigned to you.",
     icon: ChecksIcon,
+    permission: PERM.viewApplicationStage,
   },
 ];
+
+function tabAllowed(
+  session: Parameters<typeof can>[0],
+  item: (typeof TABS)[number],
+): boolean {
+  const perms = Array.isArray(item.permission)
+    ? item.permission
+    : [item.permission];
+  return canAny(session, perms);
+}
+
+function firstAllowedTab(
+  restored: ReturnType<typeof takeCareersApplicationsReturn>,
+  allowed: Tab[],
+): Tab {
+  const requested: Tab =
+    restored?.tab === "applications"
+      ? "applications"
+      : restored?.tab === "stages"
+        ? "stages"
+        : restored?.tab === "manage"
+          ? "manage"
+          : "roles";
+  if (allowed.includes(requested)) {
+    return requested;
+  }
+  return allowed[0] ?? "manage";
+}
 
 const WORK_TYPE_LABEL: Record<string, string> = {
   remote: "Remote",
@@ -150,13 +188,38 @@ function StatCard({
 }
 
 export function StaffHub() {
+  const session = useSyncExternalStore(
+    subscribeSession,
+    readSession,
+    () => null,
+  );
+  const visibleTabs = useMemo(
+    () => TABS.filter((item) => tabAllowed(session, item)),
+    [session],
+  );
+  const allowedIds = useMemo(
+    () => visibleTabs.map((item) => item.id),
+    [visibleTabs],
+  );
+  const canChangeJobOpening = can(session, PERM.changeJobOpening);
+  const canViewApplicant = can(session, PERM.viewApplicant);
+  const canViewJobApplication = can(session, PERM.viewJobApplication);
+  const canAddJobOpening = can(session, PERM.addJobOpening);
+  const canAddJobApplication = can(session, PERM.addJobApplication);
+  const showBannerActions = canAddJobOpening || canAddJobApplication;
+  const kpiCount =
+    Number(canChangeJobOpening) +
+    Number(canViewApplicant) +
+    Number(canViewJobApplication) * 2;
+
   const [restored] = useState(() => takeCareersApplicationsReturn());
   const [tab, setTab] = useState<Tab>(
-    restored?.tab === "applications"
-      ? "applications"
-      : restored?.tab === "stages"
-        ? "stages"
-        : "roles",
+    firstAllowedTab(
+      restored,
+      TABS.filter((item) => tabAllowed(readSession(), item)).map(
+        (item) => item.id,
+      ),
+    ),
   );
   const [applicationsRestore, setApplicationsRestore] = useState(
     restored?.tab === "applications"
@@ -177,6 +240,16 @@ export function StaffHub() {
         }
       : null,
   );
+  const [manageRestore, setManageRestore] =
+    useState<ManageApplicationsRestoreState | null>(
+      restored?.tab === "manage"
+        ? {
+            filters: restored.filters,
+            page: restored.page,
+            pageSize: restored.pageSize,
+          }
+        : null,
+    );
   const [notice, setNotice] = useState("");
   const onError = useCallback((value: string) => setNotice(value), []);
   const [roleCount, setRoleCount] = useState(0);
@@ -213,12 +286,19 @@ export function StaffHub() {
     rememberScrollY(pinnedScrollY);
     setApplicationsRestore(null);
     setStagesRestore(null);
+    setManageRestore(null);
     setTab(next);
   }, []);
+
+  const activeTab =
+    allowedIds.length === 0 || allowedIds.includes(tab)
+      ? tab
+      : allowedIds[0];
 
   const openApplicationsFromCard = useCallback(() => {
     rememberScrollY(pinnedScrollY);
     setStagesRestore(null);
+    setManageRestore(null);
     setApplicationsRestore(null);
     setApplicationRole("");
     setApplicationStatus("");
@@ -228,6 +308,7 @@ export function StaffHub() {
   const openPreScreeningFromCard = useCallback(() => {
     rememberScrollY(pinnedScrollY);
     setStagesRestore(null);
+    setManageRestore(null);
     setApplicationRole("");
     setApplicationStatus("");
     setApplicationsRestore({
@@ -249,69 +330,83 @@ export function StaffHub() {
       pinnedScrollY.current = null;
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [tab]);
+  }, [activeTab]);
 
   useEffect(() => {
     let ignore = false;
-    getStaffJobOpenings({ page: 1, page_size: 1 }).then((page) => {
-      if (!ignore) {
-        setRoleCount(page.count);
-      }
-    });
-    getStaffApplications({ page: 1, page_size: 1 }).then((page) => {
-      if (!ignore) {
-        setAppCount(page.count);
-      }
-    });
-    getApplicants({ page: 1, page_size: 1 }).then((page) => {
-      if (!ignore) {
-        setApplicantCount(page.count);
-      }
-    });
-    getPreScreeningCompleteCount().then((data) => {
-      if (!ignore) {
-        setPreScreeningCount(data.count);
-      }
-    });
+    if (canChangeJobOpening) {
+      getStaffJobOpenings({ page: 1, page_size: 1 }).then((page) => {
+        if (!ignore) {
+          setRoleCount(page.count);
+        }
+      });
+    }
+    if (canViewJobApplication) {
+      getStaffApplications({ page: 1, page_size: 1 }).then((page) => {
+        if (!ignore) {
+          setAppCount(page.count);
+        }
+      });
+      getPreScreeningCompleteCount().then((data) => {
+        if (!ignore) {
+          setPreScreeningCount(data.count);
+        }
+      });
+    }
+    if (canViewApplicant) {
+      getApplicants({ page: 1, page_size: 1 }).then((page) => {
+        if (!ignore) {
+          setApplicantCount(page.count);
+        }
+      });
+    }
     return () => {
       ignore = true;
     };
-  }, [countsTick]);
+  }, [countsTick, canChangeJobOpening, canViewApplicant, canViewJobApplication]);
 
   return (
     <div className="staff-container py-8">
       <StaffBanner
         title="Careers"
         footer={
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              className="rounded-xl bg-amal-white px-4 py-2 text-sm font-semibold text-amal-ink hover:bg-amal-sheet"
-              onClick={() => {
-                setEditingRole(null);
-                setModal("role");
-              }}
-            >
-              Create Role
-            </button>
-            <button
-              type="button"
-              className="rounded-xl border border-amal-white/40 bg-amal-white/10 px-4 py-2 text-sm font-semibold hover:bg-amal-white/20"
-              onClick={() => setModal("application")}
-            >
-              Create Job Application
-            </button>
-            <button
-              type="button"
-              className="rounded-xl border border-amal-white/40 bg-amal-white/10 px-4 py-2 text-sm font-semibold hover:bg-amal-white/20"
-              onClick={() => {
-                setIdealRole(null);
-                setIdealStandalone(true);
-              }}
-            >
-              Create Ideal Profile
-            </button>
-          </div>
+          showBannerActions ? (
+            <div className="flex flex-wrap items-center gap-3">
+              {canAddJobOpening ? (
+                <button
+                  type="button"
+                  className="rounded-xl bg-amal-white px-4 py-2 text-sm font-semibold text-amal-ink hover:bg-amal-sheet"
+                  onClick={() => {
+                    setEditingRole(null);
+                    setModal("role");
+                  }}
+                >
+                  Create Role
+                </button>
+              ) : null}
+              {canAddJobApplication ? (
+                <button
+                  type="button"
+                  className="rounded-xl border border-amal-white/40 bg-amal-white/10 px-4 py-2 text-sm font-semibold hover:bg-amal-white/20"
+                  onClick={() => setModal("application")}
+                >
+                  Create Job Application
+                </button>
+              ) : null}
+              {canAddJobOpening ? (
+                <button
+                  type="button"
+                  className="rounded-xl border border-amal-white/40 bg-amal-white/10 px-4 py-2 text-sm font-semibold hover:bg-amal-white/20"
+                  onClick={() => {
+                    setIdealRole(null);
+                    setIdealStandalone(true);
+                  }}
+                >
+                  Create Ideal Profile
+                </button>
+              ) : null}
+            </div>
+          ) : undefined
         }
       >
         Roles, applications, stage assignments, and interviews.
@@ -323,61 +418,77 @@ export function StaffHub() {
         </p>
       ) : null}
 
-      <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-        <StatCard
-          label="Roles"
-          value={roleCount}
-          tone="bg-amal-sheet text-amal-ink hover:bg-zinc-200/70"
-          icon={BriefcaseIcon}
-          onClick={() => goToTab("roles")}
-        />
-        <StatCard
-          label="Unique Applicants"
-          value={applicantCount}
-          tone="bg-amal-red/10 text-amal-red hover:bg-amal-red/20"
-          icon={UserIcon}
-          onClick={() => goToTab("applicants")}
-        />
-        <StatCard
-          label="Total Applications"
-          value={appCount}
-          tone="bg-amal-ink/5 text-amal-ink hover:bg-amal-ink/10"
-          icon={UsersIcon}
-          onClick={openApplicationsFromCard}
-        />
-        <StatCard
-          label="Completed Pre-screening"
-          value={preScreeningCount}
-          tone="bg-emerald-50 text-emerald-800 hover:bg-emerald-100/80"
-          icon={ChecksIcon}
-          onClick={openPreScreeningFromCard}
-        />
-      </div>
+      {kpiCount > 0 ? (
+        <div
+          className={`mt-6 grid grid-cols-2 gap-4 ${
+            kpiCount >= 4
+              ? "md:grid-cols-4"
+              : kpiCount === 3
+                ? "md:grid-cols-3"
+                : "md:grid-cols-2"
+          }`}
+        >
+          {canChangeJobOpening ? (
+            <StatCard
+              label="Roles"
+              value={roleCount}
+              tone="bg-amal-sheet text-amal-ink hover:bg-zinc-200/70"
+              icon={BriefcaseIcon}
+              onClick={() => goToTab("roles")}
+            />
+          ) : null}
+          {canViewApplicant ? (
+            <StatCard
+              label="Unique Applicants"
+              value={applicantCount}
+              tone="bg-amal-red/10 text-amal-red hover:bg-amal-red/20"
+              icon={UserIcon}
+              onClick={() => goToTab("applicants")}
+            />
+          ) : null}
+          {canViewJobApplication ? (
+            <StatCard
+              label="Total Applications"
+              value={appCount}
+              tone="bg-amal-ink/5 text-amal-ink hover:bg-amal-ink/10"
+              icon={UsersIcon}
+              onClick={openApplicationsFromCard}
+            />
+          ) : null}
+          {canViewJobApplication ? (
+            <StatCard
+              label="Completed Pre-screening"
+              value={preScreeningCount}
+              tone="bg-emerald-50 text-emerald-800 hover:bg-emerald-100/80"
+              icon={ChecksIcon}
+              onClick={openPreScreeningFromCard}
+            />
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="mt-6 rounded-2xl border border-black/10 bg-amal-white p-2 shadow-sm sm:p-3">
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-nowrap">
-          {TABS.map((item) => {
-            const active = tab === item.id;
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+          {visibleTabs.map((item) => {
+            const active = activeTab === item.id;
             return (
               <button
                 key={item.id}
                 type="button"
                 onMouseDown={preventFocusScroll}
                 onClick={() => goToTab(item.id)}
-                className={`overflow-anchor-none flex min-h-[4.25rem] flex-col justify-center rounded-lg px-3 py-3 text-left transition-colors sm:min-h-[4.5rem] lg:flex-1 ${
+                className={`overflow-anchor-none flex min-h-[4.25rem] min-w-0 flex-col justify-center rounded-lg px-3 py-3 text-left transition-colors sm:min-h-[4.5rem] ${
                   active
                     ? "bg-amal-red text-amal-white shadow-sm"
                     : "bg-amal-sheet text-zinc-600 hover:bg-black/5"
                 }`}
               >
-                <div className="flex items-center gap-2 text-xs font-semibold sm:text-sm">
-                  <item.icon className="h-3.5 w-3.5 shrink-0" />
-                  <span className="whitespace-nowrap leading-snug">
-                    {item.label}
-                  </span>
+                <div className="flex items-start gap-2 text-xs font-semibold sm:items-center sm:text-sm">
+                  <item.icon className="mt-0.5 h-3.5 w-3.5 shrink-0 sm:mt-0" />
+                  <span className="min-w-0 leading-snug">{item.label}</span>
                 </div>
                 {active ? (
-                  <p className="mt-2 whitespace-nowrap text-[11px] leading-relaxed text-amal-white/80 sm:text-xs">
+                  <p className="mt-2 text-[11px] leading-relaxed text-amal-white/80 sm:text-xs">
                     {item.description}
                   </p>
                 ) : null}
@@ -388,7 +499,11 @@ export function StaffHub() {
       </div>
 
       <div className="overflow-anchor-none">
-      {tab === "stages" ? (
+      {visibleTabs.length === 0 ? (
+        <p className="mt-6 text-sm text-zinc-500">
+          You do not have permission to view this page.
+        </p>
+      ) : activeTab === "stages" ? (
         <StageAssignmentsTab
           onError={onError}
           onScheduled={() => setCountsTick((value) => value + 1)}
@@ -396,9 +511,16 @@ export function StaffHub() {
           restoreState={stagesRestore}
           onRestoreConsumed={() => setStagesRestore(null)}
         />
+      ) : activeTab === "manage" ? (
+        <ManageApplicationsTab
+          mode={session?.landing === "reviews" ? "reviews" : "staff"}
+          onError={onError}
+          restoreState={manageRestore}
+          onRestoreConsumed={() => setManageRestore(null)}
+        />
       ) : (
         <div className="overflow-anchor-none mt-6 rounded-2xl border border-black/10 bg-amal-white p-4 shadow-sm md:p-6">
-          {tab === "roles" ? (
+          {activeTab === "roles" ? (
             <RolesTab
               key={countsTick}
               onError={onError}
@@ -414,26 +536,28 @@ export function StaffHub() {
                 pinnedScrollY.current = window.scrollY;
                 setApplicationsRestore(null);
                 setStagesRestore(null);
+                setManageRestore(null);
                 setApplicationRole(slug);
                 setApplicationStatus(status ?? "");
                 setTab("applications");
               }}
             />
           ) : null}
-          {tab === "applicants" ? (
+          {activeTab === "applicants" ? (
             <ApplicantsTab
               onError={onError}
               onViewApplications={(slug) => {
                 pinnedScrollY.current = window.scrollY;
                 setApplicationsRestore(null);
                 setStagesRestore(null);
+                setManageRestore(null);
                 setApplicationRole(slug);
                 setApplicationStatus("");
                 setTab("applications");
               }}
             />
           ) : null}
-          {tab === "applications" ? (
+          {activeTab === "applications" ? (
             <ApplicationsTab
               key={
                 applicationsRestore
@@ -450,9 +574,6 @@ export function StaffHub() {
               refreshTick={countsTick}
               onError={onError}
             />
-          ) : null}
-          {tab === "manage" ? (
-            <ManageApplicationsTab onError={onError} />
           ) : null}
         </div>
       )}

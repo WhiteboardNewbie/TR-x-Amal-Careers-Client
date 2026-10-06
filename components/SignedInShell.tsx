@@ -4,6 +4,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { AppFooter } from "@/components/AppFooter";
 import { AppNav } from "@/components/AppNav";
+import { can } from "@/lib/ability";
 import { pathForLanding, readSession, subscribeSession } from "@/lib/session";
 import type { AuthLanding } from "@/lib/types";
 
@@ -19,16 +20,21 @@ function serverFalse() {
   return false;
 }
 
+type SignedInLanding = Exclude<AuthLanding, "">;
+
 export function SignedInShell({
   landing,
+  permission,
   wide,
   children,
 }: {
-  landing: Exclude<AuthLanding, "">;
+  landing: SignedInLanding | readonly SignedInLanding[];
+  permission?: string;
   wide?: boolean;
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const allowedKey = (Array.isArray(landing) ? landing : [landing]).join(",");
   const sessionReady = useSyncExternalStore(
     subscribeClientOnly,
     clientTrue,
@@ -49,12 +55,18 @@ export function SignedInShell({
       router.replace("/sign-in");
       return;
     }
-    if (current.landing !== landing) {
+    const allowed = allowedKey.split(",") as SignedInLanding[];
+    if (!allowed.includes(current.landing as SignedInLanding)) {
       router.replace(pathForLanding(current.landing) ?? "/sign-in");
     }
-  }, [landing, router, session, sessionReady]);
+  }, [allowedKey, router, session, sessionReady]);
 
-  if (!sessionReady || !session || session.landing !== landing) {
+  const allowed = allowedKey.split(",") as SignedInLanding[];
+  if (
+    !sessionReady ||
+    !session ||
+    !allowed.includes(session.landing as SignedInLanding)
+  ) {
     return null;
   }
 
@@ -62,7 +74,17 @@ export function SignedInShell({
     <div className="flex min-h-full flex-col bg-amal-sheet text-amal-ink">
       <AppNav session={session} />
       <main className="overflow-anchor-none flex-1">
-        {wide ? children : <div className="staff-container py-10">{children}</div>}
+        {!permission || can(session, permission) ? (
+          wide ? (
+            children
+          ) : (
+            <div className="staff-container py-10">{children}</div>
+          )
+        ) : (
+          <div className="staff-container py-8 text-sm text-zinc-600">
+            You do not have permission to view this page.
+          </div>
+        )}
       </main>
       <AppFooter />
     </div>

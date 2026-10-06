@@ -3,6 +3,10 @@ import {
   type JobApplicationsFilterState,
 } from "@/lib/job-applications-filters";
 import {
+  DEFAULT_MANAGE_APPLICATIONS_FILTERS,
+  type ManageApplicationsFilterState,
+} from "@/lib/manage-applications-filters";
+import {
   DEFAULT_STAGE_ASSIGNMENTS_FILTERS,
   type StageAssignmentsFilterState,
 } from "@/lib/stage-assignments-filters";
@@ -20,6 +24,12 @@ export type CareersApplicationsReturn =
       page: number;
       pageSize: number;
       reviewerTab?: "managers" | "clients";
+    }
+  | {
+      tab: "manage";
+      filters: ManageApplicationsFilterState;
+      page: number;
+      pageSize: number;
     };
 
 const CAREERS_RETURN_STORAGE_KEY = "careers:applications-return";
@@ -73,6 +83,17 @@ function parseReturn(raw: string): CareersApplicationsReturn | null {
       page: safePage,
       pageSize: safePageSize,
       reviewerTab: parsed.reviewerTab === "clients" ? "clients" : "managers",
+    };
+  }
+  if (parsed?.tab === "manage" && parsed.filters) {
+    return {
+      tab: "manage",
+      filters: {
+        ...DEFAULT_MANAGE_APPLICATIONS_FILTERS,
+        ...parsed.filters,
+      },
+      page: safePage,
+      pageSize: safePageSize,
     };
   }
   if (parsed?.tab !== "applications" || !parsed.filters) {
