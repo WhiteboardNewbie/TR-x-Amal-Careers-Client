@@ -12,6 +12,7 @@ import {
   scheduleClearCareersApplicationsReturnCache,
   takeCareersApplicationsReturn,
 } from "@/lib/careers-return";
+import { getJobApplicationsPresetState } from "@/lib/job-applications-filters";
 import { preventFocusScroll } from "@/lib/prevent-focus-scroll";
 import {
   getAssignedStages,
@@ -19,6 +20,7 @@ import {
   getHrStages,
   getOrgDepartments,
   getApplicants,
+  getPreScreeningCompleteCount,
   getStaffApplications,
   getStaffJobOpenings,
   patchJobOpening,
@@ -153,6 +155,7 @@ export function StaffHub() {
   const [roleCount, setRoleCount] = useState(0);
   const [appCount, setAppCount] = useState(0);
   const [applicantCount, setApplicantCount] = useState(0);
+  const [preScreeningCount, setPreScreeningCount] = useState(0);
   const [modal, setModal] = useState<"role" | "application" | "schedule" | null>(
     null,
   );
@@ -199,6 +202,11 @@ export function StaffHub() {
     getApplicants({ page: 1, page_size: 1 }).then((page) => {
       if (!ignore) {
         setApplicantCount(page.count);
+      }
+    });
+    getPreScreeningCompleteCount().then((data) => {
+      if (!ignore) {
+        setPreScreeningCount(data.count);
       }
     });
     return () => {
@@ -251,7 +259,7 @@ export function StaffHub() {
         </p>
       ) : null}
 
-      <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3">
+      <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         {(
           [
             {
@@ -276,6 +284,25 @@ export function StaffHub() {
               onClick: () => {
                 setApplicationsRestore(null);
                 setApplicationRole("");
+                setApplicationStatus("");
+                setTab("applications");
+              },
+            },
+            {
+              label: "Completed Pre-screening",
+              value: preScreeningCount,
+              tone: "bg-emerald-50 text-emerald-800 hover:bg-emerald-100/80",
+              icon: ChecksIcon,
+              onClick: () => {
+                setApplicationRole("");
+                setApplicationStatus("");
+                setApplicationsRestore({
+                  filters: getJobApplicationsPresetState(
+                    "pre-screening-complete",
+                  ),
+                  page: 1,
+                  pageSize: 10,
+                });
                 setTab("applications");
               },
             },
@@ -366,7 +393,7 @@ export function StaffHub() {
             <ApplicationsTab
               key={
                 applicationsRestore
-                  ? `restore:${applicationsRestore.page}:${applicationsRestore.pageSize}`
+                  ? `restore:${applicationsRestore.page}:${applicationsRestore.pageSize}:${applicationsRestore.filters.requireFirstTest}:${applicationsRestore.filters.requireVideo}:${applicationsRestore.filters.requireQuestionnaire}`
                   : `${applicationRole}:${applicationStatus}`
               }
               jobOpening={applicationRole}

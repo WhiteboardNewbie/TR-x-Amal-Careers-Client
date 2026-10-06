@@ -107,6 +107,12 @@ export function getStaffApplication(id: number): Promise<StaffApplication> {
   return request<StaffApplication>(`/careers/job-applications/${id}/`);
 }
 
+export function getPreScreeningCompleteCount(): Promise<{ count: number }> {
+  return request<{ count: number }>(
+    "/careers/job-applications/pre-screening-complete-count/",
+  );
+}
+
 export function updateApplicationStatus(
   id: number,
   status: string,
