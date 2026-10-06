@@ -157,6 +157,41 @@ export function ChevronDownIcon({ className }: { className?: string }) {
   );
 }
 
+export function ChevronUpIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="m18 15-6-6-6 6" />
+    </Icon>
+  );
+}
+
+export function AwardIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <circle cx="12" cy="9" r="6" />
+      <path d="M8.5 14.5 7 21l5-2 5 2-1.5-6.5" />
+    </Icon>
+  );
+}
+
+export function PlusIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M12 5v14M5 12h14" />
+    </Icon>
+  );
+}
+
+export function BuildingIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" />
+      <path d="M16 10h4v11H4" />
+      <path d="M8 8h2M12 8h2M8 12h2M12 12h2M8 16h2M12 16h2" />
+    </Icon>
+  );
+}
+
 export function CheckIcon({ className }: { className?: string }) {
   return (
     <Icon className={className}>

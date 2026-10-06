@@ -14,9 +14,11 @@ function errorText(error: unknown): string {
 export function ResultPage({
   id,
   kind,
+  onClose,
 }: {
   id: number;
   kind: "first-test" | "video" | "questionnaire";
+  onClose?: () => void;
 }) {
   const [assessment, setAssessment] = useState<ApplicationAssessment | null>(
     null,
@@ -56,12 +58,22 @@ export function ResultPage({
 
   return (
     <div>
-      <Link
-        href={`/staff/applications/${id}`}
-        className="text-sm font-semibold text-amal-red"
-      >
-        ← Application
-      </Link>
+      {onClose ? (
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-sm font-semibold text-amal-red"
+        >
+          Close
+        </button>
+      ) : (
+        <Link
+          href={`/staff/applications/${id}`}
+          className="text-sm font-semibold text-amal-red"
+        >
+          ← Application
+        </Link>
+      )}
       <h1 className="mt-3 text-2xl font-semibold tracking-tight">{title}</h1>
       {notice ? (
         <p className="mt-4 text-sm text-amal-red">{notice}</p>

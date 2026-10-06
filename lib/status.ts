@@ -28,39 +28,39 @@ export const TERMINAL_STATUSES: JobApplicationStatus[] = [
 ];
 
 export const STATUS_BAR_FILL: Record<string, string> = {
-  new: "bg-zinc-400",
-  "in-review": "bg-zinc-500",
-  "manager-review": "bg-amal-ink",
-  "client-review": "bg-amal-ink/80",
-  interviewed: "bg-amal-red/70",
-  shortlisted: "bg-amal-red",
-  offered: "bg-amal-red",
-  rejected: "bg-zinc-600",
-  "parking-lot": "bg-zinc-300",
+  new: "bg-slate-400",
+  "in-review": "bg-amber-500",
+  "manager-review": "bg-violet-500",
+  "client-review": "bg-violet-700",
+  interviewed: "bg-amal-blue",
+  shortlisted: "bg-teal-500",
+  offered: "bg-emerald-500",
+  rejected: "bg-amal-red",
+  "parking-lot": "bg-slate-400",
 };
 
 export const STATUS_BADGE: Record<string, string> = {
-  new: "bg-amal-sheet text-zinc-700",
-  "in-review": "bg-zinc-100 text-zinc-700",
-  "manager-review": "bg-amal-ink/10 text-amal-ink",
-  "client-review": "bg-amal-ink/15 text-amal-ink",
-  interviewed: "bg-amal-red/10 text-amal-red",
-  shortlisted: "bg-amal-red/15 text-amal-red",
-  offered: "bg-amal-red/20 text-amal-red",
-  rejected: "bg-zinc-200 text-zinc-700",
-  "parking-lot": "bg-amal-sheet text-zinc-600",
+  new: "bg-slate-100 text-slate-700",
+  "in-review": "bg-amber-100 text-amber-800",
+  "manager-review": "bg-violet-100 text-violet-700",
+  "client-review": "bg-violet-200 text-violet-800",
+  interviewed: "bg-amal-blue/15 text-amal-blue",
+  shortlisted: "bg-teal-100 text-teal-800",
+  offered: "bg-emerald-100 text-emerald-700",
+  rejected: "bg-amal-red/15 text-amal-red",
+  "parking-lot": "bg-slate-100 text-slate-600",
 };
 
 export const STATUS_TONE: Record<JobApplicationStatus, string> = {
-  new: "bg-zinc-100 text-zinc-700",
-  "in-review": "bg-zinc-200 text-zinc-800",
-  "manager-review": "bg-amal-ink/10 text-amal-ink",
-  "client-review": "bg-amal-ink/15 text-amal-ink",
-  interviewed: "bg-amber-100 text-amber-800",
-  shortlisted: "bg-emerald-100 text-emerald-800",
-  offered: "bg-emerald-200 text-emerald-900",
+  new: "bg-slate-100 text-slate-700",
+  "in-review": "bg-amal-blue/15 text-amal-blue",
+  "manager-review": "bg-violet-100 text-violet-700",
+  "client-review": "bg-violet-200 text-violet-800",
+  interviewed: "bg-amber-100 text-amber-700",
+  shortlisted: "bg-teal-100 text-teal-800",
+  offered: "bg-emerald-100 text-emerald-700",
   rejected: "bg-amal-red/15 text-amal-red",
-  "parking-lot": "bg-zinc-200 text-zinc-700",
+  "parking-lot": "bg-slate-200 text-slate-700",
 };
 
 export const STATUS_LABEL: Record<string, string> = {
@@ -84,4 +84,26 @@ export const STATUS_LABEL: Record<string, string> = {
 
 export function labelFor(status: string): string {
   return STATUS_LABEL[status] ?? status;
+}
+
+export function stageStatusBadge(status: string): {
+  label: string;
+  className: string;
+} {
+  if (status === "completed") {
+    return { label: "Completed", className: "bg-emerald-100 text-emerald-800" };
+  }
+  if (status === "interview") {
+    return { label: "Interview", className: "bg-teal-100 text-teal-800" };
+  }
+  if (status === "requested_interview") {
+    return {
+      label: "Requested Interview",
+      className: "bg-amber-100 text-amber-800",
+    };
+  }
+  if (status === "rejected") {
+    return { label: "Rejected", className: "bg-amal-red/15 text-amal-red" };
+  }
+  return { label: "Pending", className: "bg-amal-blue/15 text-amal-blue" };
 }

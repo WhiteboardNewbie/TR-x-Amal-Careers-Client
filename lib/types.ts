@@ -152,6 +152,8 @@ export type StaffApplication = {
   video_test_session?: AssessmentSessionSummary | null;
   general_questionnaire_session?: AssessmentSessionSummary | null;
   ai_relevance_score?: number | null;
+  ai_relevance_rationale?: string | null;
+  ai_relevance_analyzed_at?: string | null;
   manager_score_avg?: string | number | null;
 };
 
