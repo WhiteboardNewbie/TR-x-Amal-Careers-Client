@@ -12,22 +12,22 @@ type LinkItem = { href: string; label: string };
 
 function homeFor(landing: AuthSession["landing"]): LinkItem {
   if (landing === "reviews") {
-    return { href: "/reviews", label: "Reviews" };
+    return { href: "/reviews", label: "Careers" };
   }
   if (landing === "client") {
-    return { href: "/client", label: "Hiring" };
+    return { href: "/client", label: "Careers" };
   }
   return { href: "/staff", label: "Careers" };
 }
 
-function linksFor(landing: AuthSession["landing"]): LinkItem[] {
-  if (landing === "staff") {
-    return [
-      { href: "/staff/organization", label: "Organizational Configuration" },
-      { href: "/staff/questions", label: "Assessment database" },
-    ];
+function linksFor(session: AuthSession): LinkItem[] {
+  if (session.landing !== "staff") {
+    return [];
   }
-  return [];
+  return [
+    { href: "/staff/organization", label: "Organizational Configuration" },
+    { href: "/staff/questions", label: "Assessment database" },
+  ];
 }
 
 function isActive(pathname: string, href: string): boolean {
@@ -38,7 +38,7 @@ export function AppNav({ session }: { session: AuthSession }) {
   const pathname = usePathname();
   const router = useRouter();
   const home = homeFor(session.landing);
-  const links = linksFor(session.landing);
+  const links = linksFor(session);
 
   function signOut() {
     clearSession();

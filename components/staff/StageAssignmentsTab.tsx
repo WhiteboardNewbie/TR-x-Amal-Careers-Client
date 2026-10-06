@@ -48,24 +48,26 @@ import {
 import type { FilterOption } from "./JobApplicationsFilterBar";
 import { StageAssignmentsFilterBar } from "./StageAssignmentsFilterBar";
 import {
-  ASSESSMENT_BADGE_BASE,
-  firstTestScoreBadgeClass,
-  formatAssessmentStatusLabel,
-  getAssessmentEffectiveStatus,
-} from "./assessment-status";
-import {
   CalendarIcon,
-  CheckIcon,
   ExternalLinkIcon,
   EyeIcon,
   FileSearchIcon,
-  FileTextIcon,
   ListIcon,
   MoreVerticalIcon,
   UserPlusIcon,
-  VideoIcon,
   XIcon,
 } from "./icons";
+import {
+  AiCell,
+  applicationFromStage,
+  CompactAssessmentIndicator,
+  FirstTestCell,
+  formatDate,
+  formatDateTime,
+  ScoreCell,
+  stageName,
+  stageStatusLocked,
+} from "./stage-row-cells";
 import { TableActionsMenu } from "./TableActionsMenu";
 import {
   CenteredOverlay,
@@ -89,38 +91,6 @@ function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
 }
 
-function formatDate(value: string | null | undefined): string {
-  if (!value) {
-    return "—";
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "—";
-  }
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) {
-    return "—";
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "—";
-  }
-  return date.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 function toDateTimeLocalInput(iso?: string | null): string {
   if (!iso) {
     return "";
@@ -142,12 +112,6 @@ function dateTimeLocalToIso(value?: string | null): string | null {
     return null;
   }
   return date.toISOString();
-}
-
-function stageStatusLocked(status: string): boolean {
-  return (
-    status === "interview" || status === "completed" || status === "rejected"
-  );
 }
 
 function canReassign(status: string): boolean {
@@ -182,174 +146,6 @@ function clientUserColumnLabel(
     return display.client_name;
   }
   return "—";
-}
-
-function stageName(stage: ApplicationStageHrOverview): string {
-  if (stage.name?.trim()) {
-    return stage.name;
-  }
-  return stage.order ? `Stage ${stage.order}` : "Review";
-}
-
-function applicationFromStage(
-  stage: ApplicationStageHrOverview,
-): StaffApplication | null {
-  if (stage.application) {
-    return stage.application;
-  }
-  if (!stage.job_application) {
-    return null;
-  }
-  return {
-    id: stage.job_application,
-    job_opening: stage.job_opening_slug ?? "",
-    job_opening_name: stage.job_title ?? "",
-    applicant: {
-      id: 0,
-      name: stage.applicant_name ?? "Applicant",
-      email: "",
-      city: "",
-      contact: "",
-      notes: "",
-    },
-    resume: "",
-    status: (stage.application_status ?? "new") as JobApplicationStatus,
-    applied_at: "",
-  };
-}
-
-function CompactAssessmentIndicator({
-  session,
-  completedHref,
-  onPersistReturn,
-  label,
-}: {
-  session: StaffApplication["test_session"];
-  completedHref?: string;
-  onPersistReturn: () => void;
-  label: string;
-}) {
-  const status = getAssessmentEffectiveStatus(session);
-  if (!session) {
-    return <span className="text-zinc-300">—</span>;
-  }
-  if (status === "completed" && completedHref) {
-    return (
-      <Link
-        href={completedHref}
-        onClick={onPersistReturn}
-        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-        title={`${label} completed`}
-      >
-        <CheckIcon className="h-3.5 w-3.5" />
-        <span className="sr-only">{label} completed</span>
-      </Link>
-    );
-  }
-  if (status === "in_progress") {
-    return (
-      <span
-        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-amber-200 bg-amber-50"
-        title={`${label}: in progress`}
-      >
-        <span className="h-2 w-2 animate-pulse rounded-full bg-amber-500" />
-        <span className="sr-only">{label}: in progress</span>
-      </span>
-    );
-  }
-  return (
-    <span
-      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-black/10 bg-amal-sheet"
-      title={`${label}: ${status ?? "pending"}`}
-    >
-      <span className="h-2 w-2 rounded-full bg-zinc-300" />
-      <span className="sr-only">
-        {label}: {status ?? "pending"}
-      </span>
-    </span>
-  );
-}
-
-function FirstTestCell({
-  application,
-  appId,
-  onPersistReturn,
-}: {
-  application: StaffApplication | null;
-  appId: number;
-  onPersistReturn: () => void;
-}) {
-  const session = application?.test_session;
-  const status = getAssessmentEffectiveStatus(session);
-  const firstScore = Number(session?.score_percentage ?? Number.NaN);
-  if (!session) {
-    return (
-      <span className="rounded-full bg-amal-sheet px-2.5 py-1 text-xs text-zinc-500">
-        No Test
-      </span>
-    );
-  }
-  if (status === "completed") {
-    return (
-      <Link
-        href={`/staff/applications/${appId}/results/first-test`}
-        onClick={onPersistReturn}
-        className={`${ASSESSMENT_BADGE_BASE} ${
-          Number.isNaN(firstScore)
-            ? "border-black/10 bg-amal-sheet text-zinc-700"
-            : firstTestScoreBadgeClass(firstScore)
-        }`}
-      >
-        <FileSearchIcon className="h-3.5 w-3.5" />
-        {Number.isNaN(firstScore) ? "View" : `${firstScore.toFixed(0)}%`}
-      </Link>
-    );
-  }
-  return (
-    <span className="rounded-full bg-amal-sheet px-2.5 py-1 text-xs text-zinc-500">
-      {formatAssessmentStatusLabel(status) || session.status}
-    </span>
-  );
-}
-
-function AiCell({ application }: { application: StaffApplication | null }) {
-  if (!application) {
-    return <span className="text-zinc-400">—</span>;
-  }
-  return (
-    <div className="inline-flex items-center justify-center gap-1.5">
-      {application.ai_relevance_score == null ? (
-        <span className="inline-flex items-center gap-1 text-zinc-400">
-          <FileTextIcon className="h-3 w-3" />—
-        </span>
-      ) : (
-        <span
-          className={`${ASSESSMENT_BADGE_BASE} ${firstTestScoreBadgeClass(application.ai_relevance_score)}`}
-        >
-          <FileTextIcon className="h-3 w-3" />
-          {application.ai_relevance_score}%
-        </span>
-      )}
-      <span className="text-xs text-zinc-300">/</span>
-      <span className="inline-flex items-center gap-1 text-zinc-400">
-        <VideoIcon className="h-3 w-3" />—
-      </span>
-    </div>
-  );
-}
-
-function ScoreCell({ application }: { application: StaffApplication | null }) {
-  const score = application?.manager_score_avg;
-  if (score == null || String(score).trim() === "") {
-    return <span className="text-zinc-400">—</span>;
-  }
-  return (
-    <span
-      className={`${ASSESSMENT_BADGE_BASE} border-transparent bg-amal-sheet text-zinc-800`}
-    >
-      {Number(score).toFixed(2)} / 10
-    </span>
-  );
 }
 
 function ReviewStatusBadge({ status }: { status: string }) {

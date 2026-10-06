@@ -1,22 +1,44 @@
 import { API_URL, request, sendJson } from "./api";
 import { sessionToken } from "./session";
-import type { ClientApplicationRow, ClientRole } from "./types";
+import type {
+  ClientApplicationRow,
+  ClientRole,
+  Comment,
+  WrittenTestSection,
+  VideoTestSection,
+} from "./types";
 
 export type ClientApplicationDetail = {
   id: number;
   status: string;
+  applied_at?: string;
   applicant_name: string;
-  role: { slug: string; title: string };
+  applicant?: {
+    name: string;
+    email: string;
+    city?: string;
+    contact?: string;
+  };
+  role: {
+    slug: string;
+    title: string;
+    location?: string;
+    department_name?: string;
+    work_type?: string;
+    employment_type?: string;
+  };
   review: { id: number; status: string };
+  client_review_status?: "pending" | "approved" | "rejected";
   has_resume: boolean;
+  cover_letter?: string;
+  ai_relevance_score?: number | null;
+  ai_relevance_rationale?: string | null;
+  ai_relevance_analyzed_at?: string | null;
   stages: { id: number; name: string; status: string }[];
-  comments: { id: number; text: string }[];
-  first_test: { status: string; score_percentage: string | number | null } | null;
-  video_test: { status: string; score_percentage: string | number | null } | null;
-  questionnaire: {
-    status: string;
-    score_percentage: string | number | null;
-  } | null;
+  comments: Comment[];
+  first_test: WrittenTestSection | null;
+  video_test: VideoTestSection | null;
+  questionnaire: WrittenTestSection | null;
 };
 
 export function getClientRoles(): Promise<ClientRole[]> {
@@ -37,6 +59,23 @@ export function getClientApplication(
   return request(`/clients/client-user-careers/applications/${id}/`);
 }
 
+export function getClientApplicationComments(id: number): Promise<Comment[]> {
+  return request(
+    `/clients/client-user-careers/applications/${id}/comments/`,
+  );
+}
+
+export function createClientApplicationComment(
+  id: number,
+  text: string,
+): Promise<Comment> {
+  return sendJson(
+    `/clients/client-user-careers/applications/${id}/comments/`,
+    "POST",
+    { text },
+  );
+}
+
 export function decideClientApplication(
   id: number,
   decision: "approved" | "rejected",
@@ -48,7 +87,7 @@ export function decideClientApplication(
   );
 }
 
-export async function openClientResume(id: number): Promise<void> {
+export async function fetchClientResumeBlob(id: number): Promise<Blob> {
   const headers = new Headers();
   const token = sessionToken();
   if (token) {
@@ -61,7 +100,11 @@ export async function openClientResume(id: number): Promise<void> {
   if (!response.ok) {
     throw new Error("Resume is not available.");
   }
-  const blob = await response.blob();
+  return response.blob();
+}
+
+export async function openClientResume(id: number): Promise<void> {
+  const blob = await fetchClientResumeBlob(id);
   const url = URL.createObjectURL(blob);
   window.open(url, "_blank", "noopener,noreferrer");
 }

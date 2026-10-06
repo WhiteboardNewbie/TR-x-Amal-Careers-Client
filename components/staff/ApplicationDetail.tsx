@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ApiError, getJobOpening, mediaUrl } from "@/lib/api";
 import { formatPhoneDisplay, phoneTelHref } from "@/lib/phone-format";
+import { ReviewStageModal } from "@/components/reviews/ReviewStageModal";
 import {
   addComment,
   getApplicationStages,
   getAssessment,
+  getAssignedStages,
   getComments,
   getDepartmentManagers,
   getStaffApplication,
@@ -19,6 +21,7 @@ import type {
   ApplicationStage,
   Comment,
   DepartmentManager,
+  ApplicationStageHrOverview,
   JobOpening,
   StaffApplication,
 } from "@/lib/types";
@@ -33,6 +36,7 @@ import {
   CalendarIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  ClipboardIcon,
   ClockIcon,
   ExternalLinkIcon,
   FileTextIcon,
@@ -69,6 +73,25 @@ const EMPLOYMENT_LABEL: Record<string, string> = {
 };
 
 type ResultKind = "first-test" | "video" | "questionnaire";
+
+function managerStageLabel(
+  stage: ApplicationStage | ApplicationStageHrOverview,
+): string {
+  return stage.name?.trim() ? stage.name : `Stage ${stage.order}`;
+}
+
+function getReviewStageButtonLabel(status: string): string {
+  if (status === "interview") {
+    return "Submit scorecard";
+  }
+  if (status === "completed") {
+    return "View scorecard";
+  }
+  if (status === "rejected") {
+    return "View stage";
+  }
+  return "Review stage";
+}
 
 function getInitials(name: string): string {
   return name
@@ -169,7 +192,16 @@ function scoreNumber(
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-export function ApplicationDetail({ id }: { id: number }) {
+export function ApplicationDetail({
+  id,
+  variant = "staff",
+  reviewStageId,
+}: {
+  id: number;
+  variant?: "staff" | "reviews";
+  reviewStageId?: number;
+}) {
+  const isReviews = variant === "reviews";
   const [application, setApplication] = useState<StaffApplication | null>(null);
   const [opening, setOpening] = useState<JobOpening | null>(null);
   const [stages, setStages] = useState<ApplicationStage[]>([]);
@@ -181,6 +213,11 @@ export function ApplicationDetail({ id }: { id: number }) {
     null,
   );
   const [managers, setManagers] = useState<DepartmentManager[]>([]);
+  const [managerStage, setManagerStage] = useState<
+    ApplicationStage | ApplicationStageHrOverview | null
+  >(null);
+  const [managerStageLoading, setManagerStageLoading] = useState(isReviews);
+  const [reviewStageOpen, setReviewStageOpen] = useState(false);
   const [note, setNote] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState("");
@@ -197,8 +234,11 @@ export function ApplicationDetail({ id }: { id: number }) {
       getComments(id),
       getTimeline(id),
       getAssessment(id),
+      isReviews
+        ? getAssignedStages({ page_size: 50 }).catch(() => null)
+        : Promise.resolve(null),
     ])
-      .then(async ([app, stagePage, commentPage, events, tests]) => {
+      .then(async ([app, stagePage, commentPage, events, tests, assigned]) => {
         if (ignore) {
           return;
         }
@@ -207,25 +247,51 @@ export function ApplicationDetail({ id }: { id: number }) {
         setComments(commentPage.results);
         setTimeline(events);
         setAssessment(tests);
-        const role = await getJobOpening(app.job_opening);
-        if (ignore) {
-          return;
+        if (isReviews) {
+          const assignedMatch =
+            assigned?.results.find((row) => {
+              if (row.job_application !== id) {
+                return false;
+              }
+              return reviewStageId == null || row.id === reviewStageId;
+            }) ??
+            assigned?.results.find((row) => row.job_application === id) ??
+            null;
+          const fromStages =
+            (reviewStageId != null
+              ? stagePage.results.find((row) => row.id === reviewStageId)
+              : null) ?? null;
+          setManagerStage(fromStages ?? assignedMatch ?? null);
+          setManagerStageLoading(false);
         }
-        setOpening(role);
-        const departmentManagers = await getDepartmentManagers(role.department);
-        if (!ignore) {
-          setManagers(departmentManagers);
+        try {
+          const role = await getJobOpening(app.job_opening);
+          if (ignore) {
+            return;
+          }
+          setOpening(role);
+          if (!isReviews) {
+            const departmentManagers = await getDepartmentManagers(
+              role.department,
+            );
+            if (!ignore) {
+              setManagers(departmentManagers);
+            }
+          }
+        } catch {
+          /* Reviewers can still use job_opening_name from the application. */
         }
       })
       .catch((error) => {
         if (!ignore) {
           onError(errorText(error));
+          setManagerStageLoading(false);
         }
       });
     return () => {
       ignore = true;
     };
-  }, [id, onError]);
+  }, [id, isReviews, onError, reviewStageId]);
 
   const managerNameById = useMemo(
     () => new Map(managers.map((row) => [row.id, row.full_name])),
@@ -313,23 +379,37 @@ export function ApplicationDetail({ id }: { id: number }) {
     }
   }
 
+  const reviewStageAction =
+    isReviews && managerStage ? (
+      <button
+        type="button"
+        onClick={() => setReviewStageOpen(true)}
+        className="inline-flex items-center gap-2 rounded-xl border border-amal-red/30 bg-amal-white px-4 py-2.5 text-sm font-semibold text-amal-red shadow-sm hover:bg-amal-red/10"
+      >
+        <ClipboardIcon className="h-4 w-4" />
+        {getReviewStageButtonLabel(managerStage.status)}
+      </button>
+    ) : null;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <CareersBackLink
-          href="/staff"
+          href={isReviews ? "/reviews" : "/staff"}
           className="text-sm font-semibold text-amal-red"
         >
-          ← Job Applications
+          {isReviews ? "← Manage Applications" : "← Job Applications"}
         </CareersBackLink>
-        <button
-          type="button"
-          onClick={() => setShareOpen(true)}
-          className="inline-flex items-center gap-2 rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-sm font-semibold text-zinc-700 hover:bg-amal-sheet"
-        >
-          <ShareIcon className="h-4 w-4" />
-          Share
-        </button>
+        {!isReviews ? (
+          <button
+            type="button"
+            onClick={() => setShareOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-sm font-semibold text-zinc-700 hover:bg-amal-sheet"
+          >
+            <ShareIcon className="h-4 w-4" />
+            Share
+          </button>
+        ) : null}
       </div>
 
       {notice ? (
@@ -340,6 +420,7 @@ export function ApplicationDetail({ id }: { id: number }) {
 
       <section className="overflow-hidden rounded-3xl border border-black/10 bg-amal-white shadow-sm">
         <div className="border-b border-black/5 bg-gradient-to-r from-amal-white via-amal-sheet to-amal-white px-6 py-6 lg:px-8">
+          <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
           <div className="flex min-w-0 items-start gap-5">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amal-staff-banner to-amal-red text-xl font-bold tracking-tight text-amal-white shadow-lg">
               {getInitials(application.applicant.name)}
@@ -384,8 +465,27 @@ export function ApplicationDetail({ id }: { id: number }) {
               </div>
             </div>
           </div>
+          {reviewStageAction && managerStage ? (
+            <div className="flex shrink-0 flex-col items-start gap-2 xl:items-end">
+              {reviewStageAction}
+              <p className="text-xs font-medium text-zinc-500">
+                {managerStageLabel(managerStage)} ·{" "}
+                {stageStatusBadge(managerStage.status).label}
+              </p>
+            </div>
+          ) : managerStageLoading && isReviews ? (
+            <span className="text-xs font-medium text-zinc-500">
+              Loading your stage…
+            </span>
+          ) : null}
+          </div>
         </div>
-        <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 xl:grid-cols-5">
+        <div
+          className={cn(
+            "grid grid-cols-1 gap-3 p-4 sm:grid-cols-2",
+            isReviews ? "xl:grid-cols-4" : "xl:grid-cols-5",
+          )}
+        >
           <MetricCard
             label="First Test"
             value={firstScore != null ? `${firstScore.toFixed(0)}%` : "—"}
@@ -441,6 +541,7 @@ export function ApplicationDetail({ id }: { id: number }) {
             disabled={!videoCompleted}
             onClick={videoCompleted ? () => setResultKind("video") : undefined}
           />
+          {isReviews ? null : (
           <MetricCard
             label="Questionnaire"
             value={formatAssessmentStatusLabel(
@@ -462,6 +563,7 @@ export function ApplicationDetail({ id }: { id: number }) {
                 : undefined
             }
           />
+          )}
         </div>
       </section>
 
@@ -509,12 +611,14 @@ export function ApplicationDetail({ id }: { id: number }) {
             analyzedAt={application.ai_relevance_analyzed_at ?? null}
             hasResume={Boolean(application.resume)}
             analyzing={busy === "score"}
+            showActions={!isReviews}
             onRunAnalysis={() => void runResumeScore()}
           />
           <ApplicationContextPanel
             application={application}
             opening={opening}
           />
+          {isReviews ? null : (
           <StagesPanel
             stages={orderedStages}
             currentStage={currentStage}
@@ -526,6 +630,7 @@ export function ApplicationDetail({ id }: { id: number }) {
               )
             }
           />
+          )}
           <VideoResponsesPanel responses={videoQuestions} />
           <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white p-5">
             <h2 className="text-lg font-bold">Comments</h2>
@@ -594,6 +699,21 @@ export function ApplicationDetail({ id }: { id: number }) {
           applicantName={application.applicant.name}
           onClose={() => setShareOpen(false)}
           onError={onError}
+        />
+      ) : null}
+      {reviewStageOpen && managerStage ? (
+        <ReviewStageModal
+          key={managerStage.id}
+          stage={managerStage}
+          applicantFallback={application.applicant.name}
+          jobFallback={opening?.title ?? application.job_opening_name}
+          onClose={() => setReviewStageOpen(false)}
+          onStageUpdated={(updated) => {
+            setManagerStage(updated);
+            setStages((current) =>
+              current.map((item) => (item.id === updated.id ? updated : item)),
+            );
+          }}
         />
       ) : null}
     </div>
@@ -702,6 +822,7 @@ function AiRelevancePanel({
   analyzedAt,
   hasResume,
   analyzing,
+  showActions = true,
   onRunAnalysis,
 }: {
   score: number | null;
@@ -710,6 +831,7 @@ function AiRelevancePanel({
   analyzedAt: string | null;
   hasResume: boolean;
   analyzing: boolean;
+  showActions?: boolean;
   onRunAnalysis: () => void;
 }) {
   return (
@@ -726,17 +848,19 @@ function AiRelevancePanel({
             </p>
           </div>
         </div>
-        <PrimaryButton
-          type="button"
-          disabled={!hasResume || analyzing}
-          onClick={onRunAnalysis}
-        >
-          {analyzing
-            ? "Analyzing..."
-            : score != null
-              ? "Re-run Analysis"
-              : "Run Analysis"}
-        </PrimaryButton>
+        {showActions ? (
+          <PrimaryButton
+            type="button"
+            disabled={!hasResume || analyzing}
+            onClick={onRunAnalysis}
+          >
+            {analyzing
+              ? "Analyzing..."
+              : score != null
+                ? "Re-run Analysis"
+                : "Run Analysis"}
+          </PrimaryButton>
+        ) : null}
       </div>
       <div className="grid gap-5 p-5 sm:grid-cols-[180px_minmax(0,1fr)]">
         <div
@@ -768,7 +892,9 @@ function AiRelevancePanel({
           <p className="mt-2 whitespace-pre-wrap rounded-2xl border border-black/5 bg-amal-sheet/80 p-4 text-sm leading-7 text-zinc-700">
             {rationale.trim()
               ? rationale
-              : "Run analysis to generate an AI resume evaluation score and rationale for this resume."}
+              : showActions
+                ? "Run analysis to generate an AI resume evaluation score and rationale for this resume."
+                : "No AI resume evaluation yet."}
           </p>
           {!hasResume ? (
             <p className="mt-3 text-xs font-medium text-amber-700">

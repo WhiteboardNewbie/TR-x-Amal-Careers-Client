@@ -590,7 +590,7 @@ function ReviewersTab({ onError }: { onError: (value: string) => void }) {
             checked={withLogin}
             onChange={(event) => setWithLogin(event.target.checked)}
           />
-          Create a login (Manager, lands on Reviews)
+          Create a login (Manager, lands on Careers)
         </label>
         {withLogin ? (
           <div className="grid gap-2 md:grid-cols-3">

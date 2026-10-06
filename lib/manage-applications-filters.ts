@@ -64,6 +64,21 @@ export type ManageApplicationsFilterPresetId =
   | "pre-screening-complete"
   | "high-ai-match";
 
+export type ManageApplicationsRestoreState = {
+  page?: number;
+  pageSize?: number;
+  filters?: ManageApplicationsFilterState;
+};
+
+export function restoreStateToManageApplicationsFilters(
+  restore: ManageApplicationsRestoreState,
+): Partial<ManageApplicationsFilterState> {
+  if (restore.filters) {
+    return restore.filters;
+  }
+  return {};
+}
+
 export function manageApplicationsFiltersToApiParams(
   debouncedSearch: string,
   filters: ManageApplicationsFilterState,

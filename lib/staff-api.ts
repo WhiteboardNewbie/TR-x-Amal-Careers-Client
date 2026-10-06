@@ -201,8 +201,8 @@ export function getAssignedStages(params?: {
   completed_video_test?: boolean;
   completed_general_questionnaire?: boolean;
   ordering?: "created_at" | "-created_at";
-}): Promise<Page<ApplicationStage>> {
-  return request<Page<ApplicationStage>>(
+}): Promise<Page<ApplicationStageHrOverview>> {
+  return request<Page<ApplicationStageHrOverview>>(
     `/careers/stages/assigned-to-me/${queryString(params ?? {})}`,
   );
 }
@@ -270,11 +270,31 @@ export function setManagerStageStatus(
 
 export function completeStage(
   stageId: number,
-  interview_feedback?: string,
+  body?: {
+    interview_feedback?: string;
+    manager_feedback?: string;
+    metric_scores?: Array<{ metric_id: number; raw_score: string | number }>;
+  },
 ): Promise<ApplicationStage> {
-  return sendJson<ApplicationStage>(`/careers/stages/${stageId}/complete/`, "POST", {
-    interview_feedback,
-  });
+  return sendJson<ApplicationStage>(
+    `/careers/stages/${stageId}/complete/`,
+    "POST",
+    body ?? {},
+  );
+}
+
+export function getScorecardMetrics(stageId: number): Promise<{
+  ideal_profile_id: number | null;
+  job_opening_slug: string;
+  metrics: Array<{
+    metric_id: number;
+    key: string;
+    label: string;
+    description: string;
+    client_weight: number;
+  }>;
+}> {
+  return request(`/careers/stages/${stageId}/scorecard-metrics/`);
 }
 
 export function reassignStage(

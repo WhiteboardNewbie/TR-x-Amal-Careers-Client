@@ -277,6 +277,14 @@ export function VideoIcon({ className }: { className?: string }) {
   );
 }
 
+export function PlayIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <polygon points="7 5 19 12 7 19" fill="currentColor" stroke="none" />
+    </Icon>
+  );
+}
+
 export function MessageSquareIcon({ className }: { className?: string }) {
   return (
     <Icon className={className}>

@@ -1,5 +1,5 @@
-import { ReviewsScreen } from "@/components/reviews/ReviewsScreen";
+import { StaffHub } from "@/components/staff/StaffHub";
 
 export default function ReviewsPage() {
-  return <ReviewsScreen />;
+  return <StaffHub />;
 }
