@@ -68,7 +68,7 @@ export function assessmentStatusToneClass(
     case "in_progress":
       return "border-amber-200 bg-amber-100 text-amber-800";
     case "pending":
-      return "border-black/10 bg-amal-sheet text-zinc-700";
+      return "border-amal-blue/30 bg-amal-blue/10 text-amal-blue";
     case "expired":
       return "border-amal-red/20 bg-amal-red/10 text-amal-red";
     default:
@@ -103,7 +103,7 @@ export function AssessmentStatusBadge({
       ) : null}
       {status === "pending" ? (
         <span
-          className="h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-400"
+          className="h-1.5 w-1.5 shrink-0 rounded-full bg-amal-blue"
           aria-hidden
         />
       ) : null}

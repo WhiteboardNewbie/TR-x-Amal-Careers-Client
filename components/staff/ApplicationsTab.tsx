@@ -740,11 +740,12 @@ export function ApplicationsTab({
                           <Link
                             href={`/staff/applications/${row.id}`}
                             className={iconButtonClass}
-                            title="Open application"
-                            aria-label={`Open application for ${row.applicant.name}`}
-                            onClick={(event) =>
-                              handleApplicationLinkClick(event, row.id)
-                            }
+                            title="Open unified application view"
+                            aria-label={`Open unified application view for ${row.applicant.name}`}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              persistReturn();
+                            }}
                           >
                             <EyeIcon className="h-4 w-4" />
                           </Link>
@@ -885,8 +886,15 @@ export function ApplicationsTab({
 
       {selectedId != null ? (
         <ApplicationDetailModal
+          key={selectedId}
           applicationId={selectedId}
+          statusUpdating={statusUpdatingId === selectedId}
+          refreshKey={tick}
           onClose={() => setSelectedId(null)}
+          onApplyStatus={(application, status) =>
+            void applyStatus(application, status)
+          }
+          onPersistReturn={persistReturn}
         />
       ) : null}
       {shareTarget ? (
