@@ -3,8 +3,10 @@ import type {
   ApplicantRow,
   ApplicationAssessment,
   ApplicationStage,
+  ApplicationStageHrOverview,
   AssessmentSetting,
   BankQuestion,
+  ClientApplicationReviewHr,
   Comment,
   Department,
   DepartmentManager,
@@ -128,15 +130,77 @@ export function updateApplicationStatus(
 export function getHrStages(params?: {
   page?: number;
   page_size?: number;
-}): Promise<Page<ApplicationStage>> {
-  return request<Page<ApplicationStage>>(
+  search?: string;
+  status?: string;
+  job_opening?: string;
+  application_status?: string;
+  assigned_to?: number;
+  created_from?: string;
+  created_to?: string;
+  scheduled_from?: string;
+  scheduled_to?: string;
+  applied_from?: string;
+  applied_to?: string;
+  first_test_score_min?: string;
+  first_test_score_max?: string;
+  ai_relevance_score_min?: string;
+  ai_relevance_score_max?: string;
+  completed_first_test?: boolean;
+  completed_video_test?: boolean;
+  completed_general_questionnaire?: boolean;
+  ordering?: "created_at" | "-created_at";
+}): Promise<Page<ApplicationStageHrOverview>> {
+  return request<Page<ApplicationStageHrOverview>>(
     `/careers/stages/hr-overview/${queryString(params ?? {})}`,
+  );
+}
+
+export function getClientApplicationReviews(params?: {
+  page?: number;
+  page_size?: number;
+  search?: string;
+  status?: string;
+  job_opening?: string;
+  application_status?: string;
+  client_user?: number;
+  created_from?: string;
+  created_to?: string;
+  applied_from?: string;
+  applied_to?: string;
+  first_test_score_min?: string;
+  first_test_score_max?: string;
+  ai_relevance_score_min?: string;
+  ai_relevance_score_max?: string;
+  completed_first_test?: boolean;
+  completed_video_test?: boolean;
+  completed_general_questionnaire?: boolean;
+}): Promise<Page<ClientApplicationReviewHr>> {
+  return request<Page<ClientApplicationReviewHr>>(
+    `/careers/client-application-reviews/${queryString(params ?? {})}`,
   );
 }
 
 export function getAssignedStages(params?: {
   page?: number;
   page_size?: number;
+  search?: string;
+  status?: string;
+  job_opening?: string;
+  application_status?: string;
+  created_from?: string;
+  created_to?: string;
+  scheduled_from?: string;
+  scheduled_to?: string;
+  applied_from?: string;
+  applied_to?: string;
+  first_test_score_min?: string;
+  first_test_score_max?: string;
+  ai_relevance_score_min?: string;
+  ai_relevance_score_max?: string;
+  completed_first_test?: boolean;
+  completed_video_test?: boolean;
+  completed_general_questionnaire?: boolean;
+  ordering?: "created_at" | "-created_at";
 }): Promise<Page<ApplicationStage>> {
   return request<Page<ApplicationStage>>(
     `/careers/stages/assigned-to-me/${queryString(params ?? {})}`,
@@ -211,6 +275,19 @@ export function completeStage(
   return sendJson<ApplicationStage>(`/careers/stages/${stageId}/complete/`, "POST", {
     interview_feedback,
   });
+}
+
+export function reassignStage(
+  stageId: number,
+  assigned_to: number,
+): Promise<ApplicationStage> {
+  return sendJson<ApplicationStage>(`/careers/stages/${stageId}/reassign/`, "PATCH", {
+    assigned_to,
+  });
+}
+
+export function rescindStage(stageId: number): Promise<void> {
+  return sendJson<void>(`/careers/stages/${stageId}/`, "DELETE");
 }
 
 export function getDepartmentManagers(

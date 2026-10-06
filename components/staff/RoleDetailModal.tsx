@@ -12,6 +12,7 @@ import {
   RoleDetailAnalyticsInsights,
   RoleDetailApplicationsCta,
 } from "./RoleDetailAnalytics";
+import { CenteredOverlay } from "./ui";
 
 const WORK_TYPE_LABEL: Record<string, string> = {
   remote: "Remote",
@@ -102,13 +103,12 @@ export function RoleDetailModal({
     .join(", ");
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-amal-black/60 px-4 backdrop-blur-sm"
-      onClick={onClose}
-      role="presentation"
+    <CenteredOverlay
+      onClose={onClose}
+      backdropClassName="bg-amal-black/60 backdrop-blur-sm"
     >
       <div
-        className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-amal-white shadow-2xl"
+        className="pointer-events-auto flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-amal-white shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="role-detail-title"
@@ -244,6 +244,6 @@ export function RoleDetailModal({
           </div>
         </div>
       </div>
-    </div>
+    </CenteredOverlay>
   );
 }

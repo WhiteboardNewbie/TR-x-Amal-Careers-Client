@@ -11,7 +11,7 @@ import {
 import { getApplicants, getStaffJobOpenings } from "@/lib/staff-api";
 import type { ApplicantRow, StaffJobOpening } from "@/lib/types";
 import { PhoneField } from "./PhoneField";
-import { GhostButton, PrimaryButton } from "./ui";
+import { CenteredOverlay, GhostButton, PrimaryButton } from "./ui";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
@@ -151,13 +151,9 @@ export function CreateApplicationModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-amal-ink/45 p-4"
-      onClick={onClose}
-      role="presentation"
-    >
+    <CenteredOverlay onClose={onClose} backdropClassName="bg-amal-ink/45">
       <div
-        className="flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-2xl"
+        className="pointer-events-auto flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="create-application-title"
@@ -398,6 +394,6 @@ export function CreateApplicationModal({
           </div>
         </form>
       </div>
-    </div>
+    </CenteredOverlay>
   );
 }

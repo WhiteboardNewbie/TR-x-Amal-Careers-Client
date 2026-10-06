@@ -22,7 +22,7 @@ import {
 } from "./icons";
 
 const SCORE_INPUT_CLASS =
-  "w-full rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-sm outline-none focus:border-amal-red focus:ring-2 focus:ring-amal-red/20";
+  "w-full rounded-lg border border-black/15 bg-amal-sheet px-3 py-2 text-sm outline-none focus:border-amal-red focus:ring-2 focus:ring-amal-red/20";
 
 const DATE_PRESET_OPTIONS: {
   value: JobApplicationsDatePreset;
@@ -43,27 +43,100 @@ const PRESET_VIEWS: { id: JobApplicationsFilterPresetId; label: string }[] = [
   { id: "shortlisted-plus", label: "Shortlisted+" },
 ];
 
-function SearchableFilterDropdown({
+export function DatePresetField({
+  label,
+  preset,
+  from,
+  to,
+  onPresetChange,
+  onFromChange,
+  onToChange,
+}: {
+  label: string;
+  preset: JobApplicationsDatePreset;
+  from: string;
+  to: string;
+  onPresetChange: (preset: JobApplicationsDatePreset) => void;
+  onFromChange: (from: string) => void;
+  onToChange: (to: string) => void;
+}) {
+  return (
+    <div className="grid grid-cols-1 gap-4">
+      <label className="flex flex-col gap-1">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+          {label}
+        </span>
+        <select
+          value={preset}
+          onChange={(event) =>
+            onPresetChange(event.target.value as JobApplicationsDatePreset)
+          }
+          className={SCORE_INPUT_CLASS}
+        >
+          {DATE_PRESET_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      {preset === "custom" ? (
+        <>
+          <label className="flex flex-col gap-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+              From
+            </span>
+            <input
+              type="date"
+              value={from}
+              onChange={(event) => onFromChange(event.target.value)}
+              className={SCORE_INPUT_CLASS}
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+              To
+            </span>
+            <input
+              type="date"
+              value={to}
+              onChange={(event) => onToChange(event.target.value)}
+              className={SCORE_INPUT_CLASS}
+            />
+          </label>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+export type FilterOption = { value: string; label: string };
+
+export function SearchableFilterDropdown({
   value,
   onChange,
   options,
   buttonId,
   placeholder,
   allLabel,
+  className = "relative min-w-[12rem]",
+  buttonClassName = "flex w-full items-center justify-between rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-sm",
 }: {
   value: string;
   onChange: (value: string) => void;
-  options: { value: string; label: string }[];
+  options: FilterOption[];
   buttonId: string;
   placeholder: string;
   allLabel: string;
+  className?: string;
+  buttonClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    function onDown(event: MouseEvent) {
+    function onDown(event: Event) {
       if (!wrapRef.current?.contains(event.target as Node)) {
         setOpen(false);
       }
@@ -87,12 +160,12 @@ function SearchableFilterDropdown({
     (value === "all" ? allLabel : placeholder);
 
   return (
-    <div ref={wrapRef} className="relative min-w-[12rem]">
+    <div ref={wrapRef} className={className}>
       <button
         id={buttonId}
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className="flex w-full items-center justify-between rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-sm"
+        className={buttonClassName}
       >
         <span className="truncate text-left">{selectedLabel}</span>
         <ChevronDownIcon className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
@@ -350,7 +423,7 @@ export function JobApplicationsFilterBar({
             <FilterIcon className="h-3.5 w-3.5" />
             More filters
             <ChevronDownIcon
-              className={`h-3.5 w-3.5 ${filters.advancedOpen ? "rotate-180" : ""}`}
+              className={`h-3.5 w-3.5 transition-transform duration-200 ${filters.advancedOpen ? "rotate-180" : ""}`}
             />
           </button>
           {showAdvancedSearch ? (
@@ -388,104 +461,91 @@ export function JobApplicationsFilterBar({
       {filters.advancedOpen ? (
         <div className="space-y-4 rounded-xl border border-black/5 bg-amal-sheet/60 p-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <label className="flex flex-col gap-1">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-                Applied date
-              </span>
-              <select
-                value={filters.datePreset}
-                onChange={(event) =>
-                  handleDatePresetChange(
-                    event.target.value as JobApplicationsDatePreset,
-                  )
-                }
-                className={SCORE_INPUT_CLASS}
-              >
-                {DATE_PRESET_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {filters.datePreset === "custom" ? (
-              <>
-                <label className="flex flex-col gap-1">
-                  <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-                    From
-                  </span>
-                  <input
-                    type="date"
-                    value={filters.appliedFrom}
-                    onChange={(event) =>
-                      onChange({
-                        appliedFrom: event.target.value,
-                        datePreset: "custom",
-                      })
-                    }
-                    className={SCORE_INPUT_CLASS}
-                  />
-                </label>
-                <label className="flex flex-col gap-1">
-                  <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-                    To
-                  </span>
-                  <input
-                    type="date"
-                    value={filters.appliedTo}
-                    onChange={(event) =>
-                      onChange({
-                        appliedTo: event.target.value,
-                        datePreset: "custom",
-                      })
-                    }
-                    className={SCORE_INPUT_CLASS}
-                  />
-                </label>
-              </>
-            ) : null}
+            <DatePresetField
+              label="Applied date"
+              preset={filters.datePreset}
+              from={filters.appliedFrom}
+              to={filters.appliedTo}
+              onPresetChange={handleDatePresetChange}
+              onFromChange={(appliedFrom) =>
+                onChange({ appliedFrom, datePreset: "custom" })
+              }
+              onToChange={(appliedTo) =>
+                onChange({ appliedTo, datePreset: "custom" })
+              }
+            />
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {(
-              [
-                [
-                  "First test min (0–100)",
-                  filters.firstTestScoreMin,
-                  "firstTestScoreMin",
-                ],
-                [
-                  "First test max (0–100)",
-                  filters.firstTestScoreMax,
-                  "firstTestScoreMax",
-                ],
-                [
-                  "AI score min (0–100)",
-                  filters.aiRelevanceScoreMin,
-                  "aiRelevanceScoreMin",
-                ],
-                [
-                  "AI score max (0–100)",
-                  filters.aiRelevanceScoreMax,
-                  "aiRelevanceScoreMax",
-                ],
-              ] as const
-            ).map(([label, value, key]) => (
-              <label key={key} className="flex flex-col gap-1">
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-                  {label}
-                </span>
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  step={1}
-                  value={value}
-                  onChange={(event) => onChange({ [key]: event.target.value })}
-                  placeholder={label.includes("min") ? "Min" : "Max"}
-                  className={SCORE_INPUT_CLASS}
-                />
-              </label>
-            ))}
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                First test min (0–100)
+              </span>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                step={1}
+                value={filters.firstTestScoreMin}
+                onChange={(event) =>
+                  onChange({ firstTestScoreMin: event.target.value })
+                }
+                placeholder="Min"
+                className={SCORE_INPUT_CLASS}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                First test max (0–100)
+              </span>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                step={1}
+                value={filters.firstTestScoreMax}
+                onChange={(event) =>
+                  onChange({ firstTestScoreMax: event.target.value })
+                }
+                placeholder="Max"
+                className={SCORE_INPUT_CLASS}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                AI score min (0–100)
+              </span>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                step={1}
+                value={filters.aiRelevanceScoreMin}
+                onChange={(event) =>
+                  onChange({ aiRelevanceScoreMin: event.target.value })
+                }
+                placeholder="Min"
+                className={SCORE_INPUT_CLASS}
+                title="Filters AI resume score; when video evaluation exists, both scores must be in range"
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                AI score max (0–100)
+              </span>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                step={1}
+                value={filters.aiRelevanceScoreMax}
+                onChange={(event) =>
+                  onChange({ aiRelevanceScoreMax: event.target.value })
+                }
+                placeholder="Max"
+                className={SCORE_INPUT_CLASS}
+                title="Filters AI resume score; when video evaluation exists, both scores must be in range"
+              />
+            </label>
           </div>
           <div>
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
@@ -517,7 +577,7 @@ export function JobApplicationsFilterBar({
                   onClick={() => onChange({ [item.key]: !item.active })}
                   className={`rounded-full border px-3 py-1 text-xs font-semibold ${
                     item.active
-                      ? "border-amal-ink bg-amal-ink text-amal-white"
+                      ? "border-amal-red bg-amal-red text-amal-white"
                       : "border-black/15 bg-amal-white text-zinc-600 hover:border-black/30"
                   }`}
                 >

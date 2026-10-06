@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { createSkill } from "@/lib/staff-api";
 import type { Skill } from "@/lib/types";
-import { GhostButton, PrimaryButton, inputClass } from "./ui";
+import { CenteredOverlay, GhostButton, PrimaryButton, inputClass } from "./ui";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
@@ -48,13 +48,13 @@ export function AddSkillDialog({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-amal-black/45 p-4"
-      onClick={onClose}
-      role="presentation"
+    <CenteredOverlay
+      onClose={onClose}
+      zClass="z-[90]"
+      backdropClassName="bg-amal-black/45"
     >
       <div
-        className="w-full max-w-md rounded-2xl border border-black/10 bg-amal-white shadow-2xl"
+        className="pointer-events-auto w-full max-w-md rounded-2xl border border-black/10 bg-amal-white shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-skill-title"
@@ -113,6 +113,6 @@ export function AddSkillDialog({
           </PrimaryButton>
         </div>
       </div>
-    </div>
+    </CenteredOverlay>
   );
 }

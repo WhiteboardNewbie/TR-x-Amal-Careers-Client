@@ -25,7 +25,7 @@ import type {
   StaffJobOpening,
 } from "@/lib/types";
 import { AddSkillDialog } from "./AddSkillDialog";
-import { GhostButton, PrimaryButton } from "./ui";
+import { GhostButton, PrimaryButton, CenteredOverlay } from "./ui";
 
 const fieldClass =
   "mt-1 w-full rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-sm outline-none focus:border-amal-red focus:ring-2 focus:ring-amal-red/20";
@@ -220,13 +220,13 @@ export function IdealProfileModal({
 
   return (
     <>
-      <div
-        className="fixed inset-0 z-[80] flex items-center justify-center bg-amal-black/45 p-4"
-        onClick={onClose}
-        role="presentation"
+      <CenteredOverlay
+        onClose={onClose}
+        zClass="z-[80]"
+        backdropClassName="bg-amal-black/45"
       >
         <div
-          className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-2xl"
+          className="pointer-events-auto flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-2xl"
           role="dialog"
           aria-modal="true"
           aria-labelledby="ideal-profile-title"
@@ -343,7 +343,7 @@ export function IdealProfileModal({
             </PrimaryButton>
           </div>
         </div>
-      </div>
+      </CenteredOverlay>
       {skillOpen ? (
         <AddSkillDialog
           onClose={() => setSkillOpen(false)}

@@ -65,7 +65,7 @@ import {
   SparklesIcon,
   VideoIcon,
 } from "./icons";
-import { GhostButton, PrimaryButton, TablePager } from "./ui";
+import { CenteredOverlay, GhostButton, PrimaryButton, TablePager } from "./ui";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
@@ -906,13 +906,12 @@ export function ApplicationsTab({
         />
       ) : null}
       {commentTarget ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-amal-ink/45 p-4"
-          onClick={() => setCommentTarget(null)}
-          role="presentation"
+        <CenteredOverlay
+          onClose={() => setCommentTarget(null)}
+          backdropClassName="bg-amal-ink/45"
         >
           <div
-            className="w-full max-w-md rounded-2xl bg-amal-white p-5 shadow-xl"
+            className="pointer-events-auto w-full max-w-md rounded-2xl bg-amal-white p-5 shadow-xl"
             onClick={(event) => event.stopPropagation()}
           >
             <h3 className="text-lg font-bold">Add comment</h3>
@@ -941,16 +940,15 @@ export function ApplicationsTab({
               </PrimaryButton>
             </div>
           </div>
-        </div>
+        </CenteredOverlay>
       ) : null}
       {resendTarget ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-amal-ink/45 p-4"
-          onClick={() => setResendTarget(null)}
-          role="presentation"
+        <CenteredOverlay
+          onClose={() => setResendTarget(null)}
+          backdropClassName="bg-amal-ink/45"
         >
           <div
-            className="w-full max-w-md rounded-2xl bg-amal-white p-5 shadow-xl"
+            className="pointer-events-auto w-full max-w-md rounded-2xl bg-amal-white p-5 shadow-xl"
             onClick={(event) => event.stopPropagation()}
           >
             <h3 className="text-lg font-bold">Resend New Test?</h3>
@@ -975,16 +973,15 @@ export function ApplicationsTab({
               </PrimaryButton>
             </div>
           </div>
-        </div>
+        </CenteredOverlay>
       ) : null}
       {extendTarget ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-amal-ink/45 p-4"
-          onClick={() => setExtendTarget(null)}
-          role="presentation"
+        <CenteredOverlay
+          onClose={() => setExtendTarget(null)}
+          backdropClassName="bg-amal-ink/45"
         >
           <div
-            className="w-full max-w-md rounded-2xl bg-amal-white p-5 shadow-xl"
+            className="pointer-events-auto w-full max-w-md rounded-2xl bg-amal-white p-5 shadow-xl"
             onClick={(event) => event.stopPropagation()}
           >
             <h3 className="text-lg font-bold">Extend Test Expiry</h3>
@@ -1033,16 +1030,16 @@ export function ApplicationsTab({
               ) : null}
             </div>
           </div>
-        </div>
+        </CenteredOverlay>
       ) : null}
       {rejection ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-          onClick={() => setRejection(null)}
-          role="presentation"
+        <CenteredOverlay
+          onClose={() => setRejection(null)}
+          zClass="z-[90]"
+          backdropClassName="bg-amal-black/50"
         >
           <div
-            className="w-full max-w-md rounded-2xl bg-amal-white p-6 shadow-xl"
+            className="pointer-events-auto w-full max-w-md rounded-2xl bg-amal-white p-6 shadow-xl"
             onClick={(event) => event.stopPropagation()}
           >
             <h3 className="text-lg font-bold">Reject application?</h3>
@@ -1064,7 +1061,7 @@ export function ApplicationsTab({
               </button>
             </div>
           </div>
-        </div>
+        </CenteredOverlay>
       ) : null}
       {managerReview ? (
         <ManagerReviewModal
@@ -1086,7 +1083,7 @@ export function ApplicationsTab({
   );
 }
 
-function ManagerReviewModal({
+export function ManagerReviewModal({
   application,
   busy,
   onClose,
@@ -1132,13 +1129,13 @@ function ManagerReviewModal({
   }, [application.job_opening]);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-      onClick={onClose}
-      role="presentation"
+    <CenteredOverlay
+      onClose={onClose}
+      zClass="z-[90]"
+      backdropClassName="bg-amal-black/50"
     >
       <div
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-amal-white p-6 shadow-xl"
+        className="pointer-events-auto max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-amal-white p-6 shadow-xl"
         onClick={(event) => event.stopPropagation()}
       >
         <h3 className="text-lg font-bold">Manager review — assign manager(s)</h3>
@@ -1205,7 +1202,7 @@ function ManagerReviewModal({
             </label>
           </div>
         )}
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-6 flex flex-wrap justify-end gap-3">
           <GhostButton type="button" onClick={onClose} disabled={busy}>
             Cancel
           </GhostButton>
@@ -1224,11 +1221,11 @@ function ManagerReviewModal({
           </PrimaryButton>
         </div>
       </div>
-    </div>
+    </CenteredOverlay>
   );
 }
 
-function ClientReviewModal({
+export function ClientReviewModal({
   application,
   busy,
   onClose,
@@ -1269,13 +1266,13 @@ function ClientReviewModal({
   }, [application.job_opening]);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-      onClick={onClose}
-      role="presentation"
+    <CenteredOverlay
+      onClose={onClose}
+      zClass="z-[90]"
+      backdropClassName="bg-amal-black/50"
     >
       <div
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-amal-white p-6 shadow-xl"
+        className="pointer-events-auto max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-amal-white p-6 shadow-xl"
         onClick={(event) => event.stopPropagation()}
       >
         <h3 className="text-lg font-bold">
@@ -1284,7 +1281,8 @@ function ClientReviewModal({
         <p className="mt-2 text-sm text-zinc-600">
           Choose which linked client users should review{" "}
           <strong>{application.applicant.name}</strong> on{" "}
-          <strong>{application.job_opening_name}</strong>.
+          <strong>{application.job_opening_name}</strong>, then set the
+          application to <strong>Client review</strong>.
         </p>
         {loading ? (
           <p className="mt-4 text-sm text-zinc-500">Loading client users…</p>
@@ -1294,37 +1292,44 @@ function ClientReviewModal({
             the job opening before Client Review.
           </p>
         ) : (
-          <div className="mt-4 max-h-48 space-y-1.5 overflow-y-auto rounded-lg border border-black/15 p-2">
-            {clientUsers.map((user) => {
-              const checked = clientIds.includes(user.id);
-              const name =
-                [user.first_name, user.last_name]
-                  .filter(Boolean)
-                  .join(" ")
-                  .trim() || user.email;
-              return (
-                <label
-                  key={user.id}
-                  className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-amal-sheet"
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() =>
-                      setClientIds((current) =>
-                        checked
-                          ? current.filter((id) => id !== user.id)
-                          : [...current, user.id],
-                      )
-                    }
-                  />
-                  {name}
-                </label>
-              );
-            })}
+          <div className="mt-4 space-y-3">
+            <fieldset>
+              <legend className="mb-2 block text-xs font-medium text-zinc-600">
+                Send to client user(s)
+              </legend>
+              <div className="max-h-48 space-y-1.5 overflow-y-auto rounded-lg border border-black/15 p-2">
+                {clientUsers.map((user) => {
+                  const checked = clientIds.includes(user.id);
+                  const name =
+                    [user.first_name, user.last_name]
+                      .filter(Boolean)
+                      .join(" ")
+                      .trim() || user.email;
+                  return (
+                    <label
+                      key={user.id}
+                      className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-amal-sheet"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() =>
+                          setClientIds((current) =>
+                            checked
+                              ? current.filter((id) => id !== user.id)
+                              : [...current, user.id],
+                          )
+                        }
+                      />
+                      {name}
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
           </div>
         )}
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-6 flex flex-wrap justify-end gap-3">
           <GhostButton type="button" onClick={onClose} disabled={busy}>
             Cancel
           </GhostButton>
@@ -1333,10 +1338,14 @@ function ClientReviewModal({
             disabled={busy || loading || clientIds.length === 0}
             onClick={() => onConfirm(clientIds)}
           >
-            {busy ? "Saving…" : "Assign & set status"}
+            {busy
+              ? "Saving…"
+              : clientIds.length > 1
+                ? `Assign ${clientIds.length} & set status`
+                : "Assign & set status"}
           </PrimaryButton>
         </div>
       </div>
-    </div>
+    </CenteredOverlay>
   );
 }

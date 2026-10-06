@@ -7,7 +7,7 @@ import { getApplicantJobs, updateApplicantNote } from "@/lib/staff-api";
 import { STATUS_BADGE, labelFor } from "@/lib/status";
 import type { ApplicantRow, StaffApplication } from "@/lib/types";
 import { MailIcon, MapPinIcon, PhoneIcon, UserIcon } from "./icons";
-import { inputClass } from "./ui";
+import { CenteredOverlay, inputClass } from "./ui";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
@@ -111,13 +111,12 @@ export function ApplicantDetailModal({
   const phoneHref = applicant.contact ? phoneTelHref(applicant.contact) : null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-amal-black/60 px-4 backdrop-blur-sm"
-      onClick={onClose}
-      role="presentation"
+    <CenteredOverlay
+      onClose={onClose}
+      backdropClassName="bg-amal-black/60 backdrop-blur-sm"
     >
       <div
-        className="flex max-h-[90vh] w-full max-w-3xl min-w-0 flex-col overflow-hidden rounded-2xl bg-amal-white shadow-2xl"
+        className="pointer-events-auto flex max-h-[90vh] w-full max-w-3xl min-w-0 flex-col overflow-hidden rounded-2xl bg-amal-white shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="applicant-detail-title"
@@ -299,6 +298,6 @@ export function ApplicantDetailModal({
           </div>
         </div>
       </div>
-    </div>
+    </CenteredOverlay>
   );
 }
