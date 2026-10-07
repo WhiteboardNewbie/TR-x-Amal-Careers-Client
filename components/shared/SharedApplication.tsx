@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ApiError } from "@/lib/api";
+import { ApiError, mediaUrl } from "@/lib/api";
 import {
   getSharedApplication,
   sharedResumeUrl,
@@ -135,16 +135,32 @@ function TestBlock({
           <ol className="mt-3 space-y-2">
             {kind === "video"
               ? ((section as SharedPayload["video_test"])?.questions ?? []).map(
-                  (item) => (
-                    <li key={item.order}>
-                      <p className="font-semibold">
-                        {item.order}. {item.prompt}
-                      </p>
-                      <p className="text-zinc-600">
-                        {item.transcript || "No transcript yet."}
-                      </p>
-                    </li>
-                  ),
+                  (item) => {
+                    const src = mediaUrl(item.video);
+                    return (
+                      <li key={item.order}>
+                        <p className="font-semibold">
+                          {item.order}. {item.prompt}
+                        </p>
+                        {src ? (
+                          <video
+                            key={src}
+                            src={src}
+                            controls
+                            preload="metadata"
+                            className="mt-2 aspect-video w-full rounded-xl bg-amal-black object-contain"
+                          >
+                            <track kind="captions" />
+                          </video>
+                        ) : (
+                          <p className="mt-1 text-zinc-500">No video file</p>
+                        )}
+                        <p className="mt-1 whitespace-pre-wrap text-zinc-600">
+                          {item.transcript || "No transcript yet."}
+                        </p>
+                      </li>
+                    );
+                  },
                 )
               : kind === "questionnaire"
                 ? (

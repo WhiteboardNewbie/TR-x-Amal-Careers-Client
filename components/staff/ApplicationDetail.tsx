@@ -1,11 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { ApiError, getJobOpening, mediaUrl } from "@/lib/api";
+import { peekCareersApplicationsReturn } from "@/lib/careers-return";
 import { formatPhoneDisplay, phoneTelHref } from "@/lib/phone-format";
 import { ReviewStageModal } from "@/components/reviews/ReviewStageModal";
 import {
   addComment,
+  downloadJobApplicationResume,
   getApplicationStages,
   getAssessment,
   getAssignedStages,
@@ -13,6 +22,7 @@ import {
   getDepartmentManagers,
   getStaffApplication,
   getTimeline,
+  runVideoEvaluation,
   scoreResume,
 } from "@/lib/staff-api";
 import { STATUS_TONE, labelFor, stageStatusBadge } from "@/lib/status";
@@ -24,6 +34,7 @@ import type {
   ApplicationStageHrOverview,
   JobOpening,
   StaffApplication,
+  VideoEvaluation,
 } from "@/lib/types";
 import { CareersBackLink } from "./CareersBackLink";
 import {
@@ -44,10 +55,12 @@ import {
   MapPinIcon,
   MessageSquareIcon,
   PhoneIcon,
+  PlayIcon,
   ShareIcon,
   VideoIcon,
 } from "./icons";
 import { ResultPage } from "./ResultPage";
+import { ResumePreviewPanel } from "./ResumePreviewPanel";
 import { ShareApplicationModal } from "./ShareApplicationModal";
 import { CenteredOverlay, PrimaryButton, inputClass } from "./ui";
 
@@ -192,6 +205,48 @@ function scoreNumber(
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+const VIDEO_EVAL_STATUS_BADGE: Record<
+  string,
+  { label: string; className: string }
+> = {
+  Pending: {
+    label: "Queued",
+    className: "bg-zinc-100 text-zinc-700",
+  },
+  Processing: {
+    label: "Processing",
+    className: "bg-amber-100 text-amber-800",
+  },
+  Completed: {
+    label: "Completed",
+    className: "bg-emerald-100 text-emerald-800",
+  },
+  Failed: {
+    label: "Failed",
+    className: "bg-amal-red/10 text-amal-red",
+  },
+};
+
+function careersBackLabel(
+  isReviews: boolean,
+  returnHint: ReturnType<typeof peekCareersApplicationsReturn>,
+): string {
+  if (isReviews) {
+    return "← Manage Applications";
+  }
+  if (returnHint?.tab === "manage") {
+    return "← Manage Applications";
+  }
+  if (returnHint?.tab === "stages") {
+    return "← Stage Assignments";
+  }
+  return "← Job Applications";
+}
+
+function scrollToElement(node: HTMLElement | null) {
+  node?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 export function ApplicationDetail({
   id,
   variant = "staff",
@@ -224,7 +279,14 @@ export function ApplicationDetail({
   const [shareOpen, setShareOpen] = useState(false);
   const [resultKind, setResultKind] = useState<ResultKind | null>(null);
   const [expandedStageId, setExpandedStageId] = useState<number | null>(null);
+  const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
+  const [resumeBlob, setResumeBlob] = useState<Blob | null>(null);
+  const [resumeDownloadUrl, setResumeDownloadUrl] = useState("");
+  const [resumeLoading, setResumeLoading] = useState(false);
+  const videoEvalRef = useRef<HTMLDivElement | null>(null);
+  const videoSectionRef = useRef<HTMLDivElement | null>(null);
   const onError = useCallback((value: string) => setNotice(value), []);
+  const returnHint = useMemo(() => peekCareersApplicationsReturn(), []);
 
   useEffect(() => {
     let ignore = false;
@@ -293,6 +355,50 @@ export function ApplicationDetail({
     };
   }, [id, isReviews, onError, reviewStageId]);
 
+  const resumeKey =
+    application?.resume && application.id ? application.id : null;
+  const [resumeFetchKey, setResumeFetchKey] = useState(resumeKey);
+  if (resumeFetchKey !== resumeKey) {
+    setResumeFetchKey(resumeKey);
+    setResumeBlob(null);
+    setResumeDownloadUrl("");
+    setResumeLoading(Boolean(resumeKey));
+  }
+
+  useEffect(() => {
+    if (resumeKey == null) {
+      return;
+    }
+    let objectUrl = "";
+    let ignore = false;
+    void downloadJobApplicationResume(resumeKey)
+      .then((blob) => {
+        if (ignore) {
+          return;
+        }
+        objectUrl = URL.createObjectURL(blob);
+        setResumeBlob(blob);
+        setResumeDownloadUrl(objectUrl);
+      })
+      .catch(() => {
+        if (!ignore) {
+          setResumeBlob(null);
+          setResumeDownloadUrl("");
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setResumeLoading(false);
+        }
+      });
+    return () => {
+      ignore = true;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [resumeKey]);
+
   const managerNameById = useMemo(
     () => new Map(managers.map((row) => [row.id, row.full_name])),
     [managers],
@@ -306,6 +412,25 @@ export function ApplicationDetail({
       ),
     [stages],
   );
+  const feedbackItems = useMemo(() => {
+    const items: Array<{ label: string; value: string }> = [];
+    for (const stage of orderedStages) {
+      const stageLabel = stage.name?.trim() || `Stage ${stage.order}`;
+      if (stage.hr_notes?.trim()) {
+        items.push({
+          label: `HR notes · ${stageLabel}`,
+          value: stage.hr_notes.trim(),
+        });
+      }
+      if (stage.interview_feedback?.trim()) {
+        items.push({
+          label: `Manager feedback · ${stageLabel}`,
+          value: stage.interview_feedback.trim(),
+        });
+      }
+    }
+    return items;
+  }, [orderedStages]);
   const currentStage =
     orderedStages.find(
       (stage) => stage.status !== "completed" && stage.status !== "rejected",
@@ -319,12 +444,15 @@ export function ApplicationDetail({
     );
   }
 
-  const resume = mediaUrl(application.resume);
   const firstScore = scoreNumber(
     assessment?.first_test?.score_percentage ??
       application.test_session?.score_percentage,
   );
   const aiScore = scoreNumber(application.ai_relevance_score);
+  const videoEvaluation = assessment?.video_evaluation ?? null;
+  const videoAiScore = scoreNumber(
+    videoEvaluation?.overall_score ?? assessment?.video_test?.score_percentage,
+  );
   const firstCompleted = sessionCompleted(
     application.test_session,
     assessment?.first_test?.status,
@@ -338,8 +466,18 @@ export function ApplicationDetail({
     assessment?.questionnaire?.status,
   );
   const videoQuestions = assessment?.video_test?.questions ?? [];
-  const firstAnswers = assessment?.first_test?.questions ?? [];
+  const firstTestSection = assessment?.first_test;
   const questionnaireAnswers = assessment?.questionnaire?.questions ?? [];
+  const preScreeningComplete =
+    firstCompleted && videoCompleted && questionnaireCompleted;
+  const firstTestSubtext =
+    firstCompleted && firstTestSection
+      ? `${firstTestSection.correct_count ?? "—"}/${firstTestSection.total_questions ?? firstTestSection.questions.length} correct`
+      : formatAssessmentStatusLabel(
+          getAssessmentEffectiveStatus(application.test_session) ??
+            firstTestSection?.status,
+        );
+  const backLabel = careersBackLabel(isReviews, returnHint);
 
   async function runResumeScore() {
     setBusy("score");
@@ -353,6 +491,27 @@ export function ApplicationDetail({
               ai_relevance_score: result.ai_relevance_score,
               ai_relevance_rationale: result.ai_relevance_rationale,
               ai_relevance_analyzed_at: result.ai_relevance_analyzed_at,
+            }
+          : current,
+      );
+    } catch (error) {
+      onError(errorText(error));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function runVideoScore() {
+    setBusy("video-ai");
+    setNotice("");
+    try {
+      const result = await runVideoEvaluation(id);
+      setAssessment((current) =>
+        current
+          ? {
+              ...current,
+              video_test: result.video_test,
+              video_evaluation: result.video_evaluation,
             }
           : current,
       );
@@ -398,7 +557,7 @@ export function ApplicationDetail({
           href={isReviews ? "/reviews" : "/staff"}
           className="text-sm font-semibold text-amal-red"
         >
-          {isReviews ? "← Manage Applications" : "← Job Applications"}
+          {backLabel}
         </CareersBackLink>
         {!isReviews ? (
           <button
@@ -489,14 +648,7 @@ export function ApplicationDetail({
           <MetricCard
             label="First Test"
             value={firstScore != null ? `${firstScore.toFixed(0)}%` : "—"}
-            subtext={
-              firstCompleted && firstAnswers.length
-                ? `${firstAnswers.filter((row) => row.selected_option).length}/${firstAnswers.length} answered`
-                : formatAssessmentStatusLabel(
-                    getAssessmentEffectiveStatus(application.test_session) ??
-                      assessment?.first_test?.status,
-                  )
-            }
+            subtext={firstTestSubtext}
             icon={AwardIcon}
             tone={getScoreTone(firstScore)}
             disabled={!firstCompleted}
@@ -515,10 +667,21 @@ export function ApplicationDetail({
           />
           <MetricCard
             label="AI Video Score"
-            value="—"
-            subtext="Not available"
+            value={videoAiScore != null ? `${videoAiScore.toFixed(0)}%` : "—"}
+            subtext={
+              busy === "video-ai" ||
+              videoEvaluation?.processing_status === "Processing" ||
+              videoEvaluation?.processing_status === "Pending"
+                ? "Evaluation in progress"
+                : videoAiScore != null
+                  ? "See AI Video Evaluation below"
+                  : preScreeningComplete
+                    ? "Not analyzed yet"
+                    : "Finish all three assessment parts first"
+            }
             icon={VideoIcon}
-            tone={getScoreTone(null)}
+            tone={getScoreTone(videoAiScore)}
+            onClick={() => scrollToElement(videoEvalRef.current)}
           />
           <MetricCard
             label="Video Test"
@@ -539,7 +702,11 @@ export function ApplicationDetail({
             icon={VideoIcon}
             tone={getScoreTone(videoCompleted ? 75 : null)}
             disabled={!videoCompleted}
-            onClick={videoCompleted ? () => setResultKind("video") : undefined}
+            onClick={
+              videoCompleted
+                ? () => scrollToElement(videoSectionRef.current)
+                : undefined
+            }
           />
           {isReviews ? null : (
           <MetricCard
@@ -569,37 +736,13 @@ export function ApplicationDetail({
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         <div className="space-y-6 xl:sticky xl:top-6 xl:self-start">
-          <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/5 px-5 py-4">
-              <div>
-                <h2 className="text-lg font-bold">Resume</h2>
-                <p className="text-sm text-zinc-500">Candidate document preview</p>
-              </div>
-              {resume ? (
-                <a
-                  href={resume}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-xs font-semibold text-zinc-700 hover:bg-amal-sheet"
-                >
-                  <ExternalLinkIcon className="h-3.5 w-3.5" />
-                  Open resume
-                </a>
-              ) : null}
-            </div>
-            {resume ? (
-              <iframe
-                src={resume}
-                title="Candidate resume"
-                className="h-[calc(100vh-15rem)] min-h-[560px] w-full bg-amal-sheet"
-              />
-            ) : (
-              <div className="flex min-h-[420px] flex-col items-center justify-center p-8 text-center text-zinc-500">
-                <FileTextIcon className="mb-3 h-12 w-12" />
-                <p>No resume uploaded.</p>
-              </div>
-            )}
-          </section>
+          <ResumePreviewPanel
+            resumePath={application.resume}
+            resumeBlob={resumeBlob}
+            downloadUrl={resumeDownloadUrl}
+            hasResume={Boolean(application.resume)}
+            loading={resumeLoading}
+          />
           <TimelinePanel events={timeline} application={application} />
         </div>
 
@@ -614,6 +757,16 @@ export function ApplicationDetail({
             showActions={!isReviews}
             onRunAnalysis={() => void runResumeScore()}
           />
+          <div ref={videoEvalRef}>
+            <AiVideoEvaluationPanel
+              evaluation={videoEvaluation}
+              score={videoAiScore}
+              ready={preScreeningComplete}
+              analyzing={busy === "video-ai"}
+              showActions={!isReviews}
+              onRunAnalysis={() => void runVideoScore()}
+            />
+          </div>
           <ApplicationContextPanel
             application={application}
             opening={opening}
@@ -631,26 +784,59 @@ export function ApplicationDetail({
             }
           />
           )}
-          <VideoResponsesPanel responses={videoQuestions} />
+          <div ref={videoSectionRef}>
+            <VideoResponsesPanel
+              responses={videoQuestions}
+              selectedIndex={selectedVideoIndex}
+              onSelect={setSelectedVideoIndex}
+            />
+          </div>
+          <FeedbackPanel
+            items={feedbackItems}
+            headerAction={reviewStageAction}
+            emptyStateAction={reviewStageAction}
+          />
           <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white p-5">
             <h2 className="text-lg font-bold">Comments</h2>
             <p className="text-sm text-zinc-500">Notes on this application</p>
             {comments.length === 0 ? (
-              <p className="mt-4 text-sm text-zinc-500">No comments yet.</p>
+              <div className="mt-4 rounded-2xl border border-dashed border-black/15 bg-amal-sheet/70 px-4 py-6 text-center">
+                <MessageSquareIcon className="mx-auto h-7 w-7 text-zinc-300" />
+                <p className="mt-2 text-sm font-medium text-zinc-600">
+                  No comments yet
+                </p>
+                <p className="mt-1 text-xs text-zinc-500">
+                  Be the first to add a note on this application.
+                </p>
+              </div>
             ) : (
-              <ul className="mt-4 space-y-2 text-sm">
+              <ul className="mt-4 space-y-3">
                 {comments.map((item) => (
                   <li
                     key={item.id}
-                    className="rounded-xl border border-black/10 px-3 py-2"
+                    className="rounded-xl border border-black/10 bg-amal-sheet/50 px-4 py-3"
                   >
-                    <p>{item.text}</p>
-                    <p className="mt-1 text-xs text-zinc-500">
-                      {item.source} · {formatDateTime(item.created_at)}
-                      {item.author != null ? ` · author ${item.author}` : ""}
-                      {item.application_stage != null
-                        ? ` · stage ${item.application_stage}`
-                        : ""}
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-zinc-500">
+                      <span className="font-semibold text-zinc-700">
+                        {item.author_display_name || "Unknown"}
+                      </span>
+                      <span aria-hidden>·</span>
+                      <time dateTime={item.created_at}>
+                        {formatDateTime(item.created_at)}
+                      </time>
+                      {item.source && item.source !== "general" ? (
+                        <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700">
+                          {item.source_label || item.source}
+                        </span>
+                      ) : null}
+                      {item.stage_name ? (
+                        <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700">
+                          {item.stage_name}
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-800">
+                      {item.text}
                     </p>
                   </li>
                 ))}
@@ -660,7 +846,7 @@ export function ApplicationDetail({
               className={`${inputClass} mt-4 h-20 py-2`}
               value={note}
               onChange={(event) => setNote(event.target.value)}
-              placeholder="Add a comment"
+              placeholder="Write a comment..."
             />
             <PrimaryButton
               type="button"
@@ -668,7 +854,7 @@ export function ApplicationDetail({
               disabled={busy === "comment" || !note.trim()}
               onClick={() => void saveComment()}
             >
-              {busy === "comment" ? "Saving…" : "Save comment"}
+              {busy === "comment" ? "Saving…" : "Add comment"}
             </PrimaryButton>
           </section>
         </div>
@@ -688,7 +874,15 @@ export function ApplicationDetail({
             <ResultPage
               id={id}
               kind={resultKind}
+              assessment={assessment}
               onClose={() => setResultKind(null)}
+              onSelectVideo={(index) => {
+                setSelectedVideoIndex(index);
+                setResultKind(null);
+                window.setTimeout(() => {
+                  scrollToElement(videoSectionRef.current);
+                }, 50);
+              }}
             />
           </div>
         </CenteredOverlay>
@@ -726,7 +920,7 @@ function ContactChip({
   href,
 }: {
   icon: typeof MailIcon;
-  children: React.ReactNode;
+  children: ReactNode;
   href?: string;
 }) {
   const className =
@@ -835,32 +1029,37 @@ function AiRelevancePanel({
   onRunAnalysis: () => void;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-black/5 bg-amal-sheet/60 px-5 py-5">
-        <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amal-ink text-amal-white">
-            <FileTextIcon className="h-5 w-5" />
+    <section className="overflow-hidden rounded-2xl border border-violet-200/70 bg-amal-white shadow-sm shadow-violet-100/50">
+      <div className="border-b border-violet-100 bg-gradient-to-r from-violet-50 via-amal-white to-violet-50/60 px-5 py-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-600 text-amal-white shadow-md shadow-violet-500/30">
+              <FileTextIcon className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-zinc-900">
+                AI Resume Evaluation
+              </h2>
+              <p className="mt-1 text-sm text-zinc-600">
+                Compare this resume against the job description and required
+                skills.
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-bold">AI Resume Evaluation</h2>
-            <p className="mt-1 text-sm text-zinc-600">
-              Compare this resume against the job description and required skills.
-            </p>
-          </div>
+          {showActions ? (
+            <PrimaryButton
+              type="button"
+              disabled={!hasResume || analyzing}
+              onClick={onRunAnalysis}
+            >
+              {analyzing
+                ? "Analyzing..."
+                : score != null
+                  ? "Re-run Analysis"
+                  : "Run Analysis"}
+            </PrimaryButton>
+          ) : null}
         </div>
-        {showActions ? (
-          <PrimaryButton
-            type="button"
-            disabled={!hasResume || analyzing}
-            onClick={onRunAnalysis}
-          >
-            {analyzing
-              ? "Analyzing..."
-              : score != null
-                ? "Re-run Analysis"
-                : "Run Analysis"}
-          </PrimaryButton>
-        ) : null}
       </div>
       <div className="grid gap-5 p-5 sm:grid-cols-[180px_minmax(0,1fr)]">
         <div
@@ -1139,6 +1338,31 @@ function StagesPanel({
                             value={stage.interview_feedback}
                           />
                         ) : null}
+                        {stage.manager_overall_score != null &&
+                        String(stage.manager_overall_score).trim() !== "" ? (
+                          <p className="rounded-xl bg-amal-white px-3 py-2 font-medium text-zinc-800">
+                            Manager score:{" "}
+                            {Number(stage.manager_overall_score).toFixed(2)} / 10
+                          </p>
+                        ) : null}
+                        {stage.manager_metric_scores &&
+                        stage.manager_metric_scores.length > 0 ? (
+                          <ul className="space-y-2">
+                            {stage.manager_metric_scores.map((score) => (
+                              <li
+                                key={score.metric_id}
+                                className="flex justify-between gap-3 rounded-xl border border-black/10 bg-amal-white px-3 py-2"
+                              >
+                                <span className="text-zinc-600">
+                                  {score.label ?? `Metric #${score.metric_id}`}
+                                </span>
+                                <span className="font-semibold text-zinc-900">
+                                  {Number(score.raw_score).toFixed(2)} / 10
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
                       </div>
                     ) : null}
                   </div>
@@ -1234,11 +1458,382 @@ function TimelinePanel({
   );
 }
 
+const VIDEO_COMPETENCIES: Array<{
+  key:
+    | "communication"
+    | "responsiveness"
+    | "problem_solving"
+    | "technical"
+    | "ownership";
+  label: string;
+}> = [
+  { key: "communication", label: "Communication" },
+  { key: "responsiveness", label: "Responsiveness" },
+  { key: "problem_solving", label: "Problem Solving" },
+  { key: "technical", label: "Technical Understanding" },
+  { key: "ownership", label: "Ownership / Initiative" },
+];
+
+function getCompetencyTone(score: number | null | undefined) {
+  if (score == null) {
+    return {
+      bg: "bg-amal-sheet/80",
+      border: "border-black/10",
+      text: "text-zinc-600",
+      bar: "bg-zinc-300",
+    };
+  }
+  if (score >= 8) {
+    return {
+      bg: "bg-emerald-50/80",
+      border: "border-emerald-200/80",
+      text: "text-emerald-700",
+      bar: "bg-emerald-500",
+    };
+  }
+  if (score >= 6) {
+    return {
+      bg: "bg-amber-50/80",
+      border: "border-amber-200/80",
+      text: "text-amber-700",
+      bar: "bg-amber-500",
+    };
+  }
+  return {
+    bg: "bg-amal-red/10",
+    border: "border-amal-red/20",
+    text: "text-amal-red",
+    bar: "bg-amal-red",
+  };
+}
+
+function AiVideoEvaluationPanel({
+  evaluation,
+  score,
+  ready,
+  analyzing,
+  showActions = true,
+  onRunAnalysis,
+}: {
+  evaluation: VideoEvaluation | null;
+  score: number | null;
+  ready: boolean;
+  analyzing: boolean;
+  showActions?: boolean;
+  onRunAnalysis: () => void;
+}) {
+  const overallTone = getScoreTone(score);
+  const status = evaluation?.processing_status;
+  const competencyRows = VIDEO_COMPETENCIES.map(({ key, label }) => {
+    const scoreKey = `${key}_score` as keyof VideoEvaluation;
+    const reasonKey = `${key}_reason` as keyof VideoEvaluation;
+    return {
+      key,
+      label,
+      score:
+        typeof evaluation?.[scoreKey] === "number"
+          ? (evaluation[scoreKey] as number)
+          : null,
+      reason: String(evaluation?.[reasonKey] ?? ""),
+    };
+  });
+  const hasResults = score != null && competencyRows.some((row) => row.score != null);
+  const transcripts = evaluation?.transcripts ?? [];
+
+  return (
+    <section className="overflow-hidden rounded-2xl border border-teal-200/70 bg-amal-white shadow-sm shadow-teal-100/50">
+      <div className="border-b border-teal-100 bg-gradient-to-r from-teal-50 via-amal-white to-teal-50/60 px-5 py-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-600 text-amal-white shadow-md shadow-teal-500/30">
+              <VideoIcon className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-lg font-bold text-zinc-900">
+                  AI Video Evaluation
+                </h2>
+                {status && VIDEO_EVAL_STATUS_BADGE[status] ? (
+                  <span
+                    className={cn(
+                      "rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
+                      VIDEO_EVAL_STATUS_BADGE[status].className,
+                    )}
+                  >
+                    {VIDEO_EVAL_STATUS_BADGE[status].label}
+                  </span>
+                ) : status ? (
+                  <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-700">
+                    {status}
+                  </span>
+                ) : null}
+              </div>
+              <p className="mt-1 text-sm text-zinc-600">
+                Scores are generated from video answer transcripts against the
+                role requirements.
+              </p>
+            </div>
+          </div>
+          {showActions ? (
+            <PrimaryButton
+              type="button"
+              disabled={!ready || analyzing}
+              onClick={onRunAnalysis}
+            >
+              {analyzing
+                ? "Evaluating..."
+                : hasResults
+                  ? "Re-run Evaluation"
+                  : "Run Evaluation"}
+            </PrimaryButton>
+          ) : null}
+        </div>
+      </div>
+      <div className="space-y-5 p-5">
+        {!showActions || ready ? null : (
+          <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            Complete the full pre-screening assessment (first test, video, and
+            questionnaire) before running AI video evaluation.
+          </p>
+        )}
+        {evaluation?.error_message ? (
+          <p className="rounded-xl border border-amal-red/30 bg-amal-red/10 px-3 py-2 text-sm text-amal-red">
+            {evaluation.error_message}
+          </p>
+        ) : null}
+        <div className="grid gap-5 lg:grid-cols-[200px_minmax(0,1fr)]">
+          <div
+            className={cn(
+              "flex flex-col justify-center rounded-2xl border p-5 text-center",
+              overallTone.border,
+              overallTone.bg,
+            )}
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              Overall Score
+            </p>
+            <p
+              className={cn(
+                "mt-2 text-5xl font-bold tracking-tight",
+                overallTone.text,
+              )}
+            >
+              {score != null ? Math.round(score) : "—"}
+            </p>
+            {score != null ? (
+              <p className={cn("mt-1 text-sm font-medium", overallTone.text)}>
+                out of 100
+              </p>
+            ) : (
+              <p className="mt-2 text-xs leading-5 text-zinc-500">
+                {showActions
+                  ? "Run evaluation after pre-screening is complete."
+                  : "No AI video evaluation yet."}
+              </p>
+            )}
+          </div>
+          <div className="space-y-3">
+            {hasResults ? (
+              competencyRows.map((row) => {
+                const tone = getCompetencyTone(row.score);
+                const pct =
+                  row.score != null
+                    ? Math.min(100, Math.max(0, (row.score / 10) * 100))
+                    : 0;
+                return (
+                  <article
+                    key={row.key}
+                    className={cn(
+                      "rounded-2xl border p-4",
+                      tone.border,
+                      tone.bg,
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-zinc-900">
+                          {row.label}
+                        </p>
+                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-amal-white/70">
+                          <div
+                            className={cn(
+                              "h-full rounded-full transition-all",
+                              tone.bar,
+                            )}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <p
+                          className={cn(
+                            "text-2xl font-bold tabular-nums",
+                            tone.text,
+                          )}
+                        >
+                          {row.score != null ? row.score : "—"}
+                        </p>
+                        <p className="text-[11px] font-medium text-zinc-500">
+                          / 10
+                        </p>
+                      </div>
+                    </div>
+                    {row.reason.trim() ? (
+                      <p className="mt-3 whitespace-pre-wrap rounded-xl border border-amal-white/60 bg-amal-white/60 px-3 py-2.5 text-sm leading-6 text-zinc-700">
+                        {row.reason}
+                      </p>
+                    ) : (
+                      <p className="mt-3 text-xs text-zinc-500">
+                        No rationale available yet.
+                      </p>
+                    )}
+                  </article>
+                );
+              })
+            ) : (
+              <p className="rounded-2xl border border-dashed border-black/10 bg-amal-sheet/60 px-4 py-8 text-center text-sm text-zinc-600">
+                Competency breakdown will appear here once evaluation completes.
+              </p>
+            )}
+          </div>
+        </div>
+        {transcripts.length > 0 ? (
+          <div className="border-t border-black/5 pt-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              Transcripts used for scoring
+            </p>
+            <div className="mt-3 space-y-3">
+              {transcripts.map((item) => (
+                <details
+                  key={item.question_number}
+                  className="group rounded-2xl border border-black/10 bg-amal-sheet/50 open:bg-amal-white"
+                >
+                  <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium text-zinc-800 marker:content-none [&::-webkit-details-marker]:hidden">
+                    <span className="font-semibold text-amal-red">
+                      Q{item.question_number}
+                    </span>
+                    <span className="mx-2 text-zinc-300">·</span>
+                    <span>{item.question_text || "Video question"}</span>
+                  </summary>
+                  <div className="border-t border-black/5 px-4 py-3">
+                    <p className="whitespace-pre-wrap text-sm leading-7 text-zinc-700">
+                      {item.transcript.trim()
+                        ? item.transcript
+                        : "Transcript not available."}
+                    </p>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function FeedbackPanel({
+  items,
+  headerAction,
+  emptyStateAction,
+}: {
+  items: Array<{ label: string; value: string }>;
+  headerAction?: ReactNode;
+  emptyStateAction?: ReactNode;
+}) {
+  return (
+    <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-black/5 px-5 py-4">
+        <div>
+          <h2 className="text-lg font-bold">Interview Feedback</h2>
+          <p className="text-sm text-zinc-500">
+            HR, manager, and reviewer comments
+          </p>
+        </div>
+        {headerAction}
+      </div>
+      <div className="space-y-3 p-5">
+        {items.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-black/15 bg-amal-sheet/70 px-4 py-8 text-center">
+            <MessageSquareIcon className="mx-auto h-8 w-8 text-zinc-300" />
+            <p className="mt-3 text-sm font-medium text-zinc-600">
+              No feedback submitted yet
+            </p>
+            {emptyStateAction ? (
+              <div className="mt-4 flex justify-center">{emptyStateAction}</div>
+            ) : null}
+          </div>
+        ) : (
+          items.map((item) => (
+            <TextBlock
+              key={`${item.label}-${item.value.slice(0, 40)}`}
+              label={item.label}
+              value={item.value}
+            />
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
+
+function formatFileSize(bytes: number | null | undefined): string {
+  if (bytes == null) {
+    return "—";
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+function formatDuration(seconds: number | null | undefined): string {
+  if (seconds == null || !Number.isFinite(seconds)) {
+    return "—";
+  }
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
+
+function VideoMetaChip({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-black/10 bg-amal-sheet/80 px-3 py-2">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">
+        {label}
+      </p>
+      <p className="mt-0.5 font-medium text-zinc-800">{value}</p>
+    </div>
+  );
+}
+
 function VideoResponsesPanel({
   responses,
+  selectedIndex,
+  onSelect,
 }: {
-  responses: { order: number; prompt: string; transcript: string }[];
+  responses: {
+    order: number;
+    prompt: string;
+    transcript: string;
+    video?: string | null;
+    duration_seconds?: number | null;
+    file_size_bytes?: number | null;
+    recorded_at?: string | null;
+    uploaded_at?: string | null;
+  }[];
+  selectedIndex: number;
+  onSelect: (index: number) => void;
 }) {
+  const selected = responses[selectedIndex] ?? responses[0] ?? null;
+  const videoUrl = mediaUrl(selected?.video);
+  const [playbackDuration, setPlaybackDuration] = useState<number | null>(null);
+  const [trackedVideoUrl, setTrackedVideoUrl] = useState(videoUrl);
+  if (trackedVideoUrl !== videoUrl) {
+    setTrackedVideoUrl(videoUrl);
+    setPlaybackDuration(null);
+  }
+
+  const durationSeconds =
+    selected?.duration_seconds ?? playbackDuration ?? null;
+
   return (
     <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white">
       <div className="border-b border-black/5 px-5 py-4">
@@ -1248,23 +1843,121 @@ function VideoResponsesPanel({
         </p>
       </div>
       {responses.length === 0 ? (
-        <p className="p-5 text-sm text-zinc-500">No video responses yet.</p>
+        <div className="flex flex-col items-center justify-center px-6 py-14 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amal-sheet">
+            <VideoIcon className="h-8 w-8 text-zinc-400" />
+          </div>
+          <p className="mt-4 text-sm font-medium text-zinc-700">
+            No video responses yet
+          </p>
+          <p className="mt-1 max-w-sm text-xs text-zinc-500">
+            Completed video test answers will appear here for playback and
+            review.
+          </p>
+        </div>
       ) : (
-        <ol className="space-y-3 p-5">
-          {responses.map((row) => (
-            <li
-              key={row.order}
-              className="rounded-2xl border border-black/5 bg-amal-sheet/60 p-4"
-            >
-              <p className="text-sm font-semibold">
-                {row.order}. {row.prompt}
-              </p>
-              <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-600">
-                {row.transcript || "No transcript yet."}
-              </p>
-            </li>
-          ))}
-        </ol>
+        <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)]">
+          <div className="space-y-2 border-b border-black/5 bg-amal-sheet/50 p-4 lg:border-b-0 lg:border-r">
+            {responses.map((response, index) => (
+              <button
+                key={response.order}
+                type="button"
+                onClick={() => onSelect(index)}
+                className={cn(
+                  "w-full rounded-xl p-3 text-left transition",
+                  selectedIndex === index
+                    ? "bg-violet-600 text-amal-white shadow-md shadow-violet-500/25"
+                    : "border border-transparent bg-amal-white text-zinc-700 hover:border-black/10",
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <PlayIcon className="h-4 w-4 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-semibold">Question {response.order}</p>
+                    <p
+                      className={cn(
+                        "text-xs",
+                        selectedIndex === index
+                          ? "text-amal-white/75"
+                          : "text-zinc-500",
+                      )}
+                    >
+                      {formatFileSize(response.file_size_bytes)}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+          <div>
+            <div className="aspect-video bg-amal-black">
+              {videoUrl ? (
+                <video
+                  key={videoUrl}
+                  src={videoUrl}
+                  controls
+                  preload="metadata"
+                  className="h-full w-full object-contain"
+                  onLoadedMetadata={(event) => {
+                    const duration = event.currentTarget.duration;
+                    setPlaybackDuration(
+                      Number.isFinite(duration) ? duration : null,
+                    );
+                  }}
+                >
+                  <track kind="captions" />
+                </video>
+              ) : (
+                <div className="flex h-full items-center justify-center text-amal-white/70">
+                  No video file available
+                </div>
+              )}
+            </div>
+            {selected ? (
+              <div className="space-y-4 p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-base font-bold text-zinc-900">
+                      Question {selected.order}
+                    </h3>
+                    <p className="mt-1 text-sm leading-6 text-zinc-600">
+                      {selected.prompt}
+                    </p>
+                  </div>
+                  {videoUrl ? (
+                    <a
+                      href={videoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-black/15 bg-amal-white px-3 py-2 text-xs font-semibold text-zinc-700 hover:bg-amal-sheet"
+                    >
+                      <ExternalLinkIcon className="h-3.5 w-3.5" />
+                      Open Video
+                    </a>
+                  ) : null}
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+                  <VideoMetaChip
+                    label="Size"
+                    value={formatFileSize(selected.file_size_bytes)}
+                  />
+                  <VideoMetaChip
+                    label="Duration"
+                    value={formatDuration(durationSeconds)}
+                  />
+                  <VideoMetaChip
+                    label="Recorded"
+                    value={formatDate(selected.recorded_at)}
+                  />
+                  <VideoMetaChip
+                    label="Uploaded"
+                    value={formatDate(selected.uploaded_at)}
+                  />
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
       )}
     </section>
   );

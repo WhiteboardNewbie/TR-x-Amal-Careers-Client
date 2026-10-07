@@ -8,16 +8,12 @@ import type {
 } from "@/lib/types";
 import {
   ASSESSMENT_BADGE_BASE,
+  ApplicationAiScoresInline,
   firstTestScoreBadgeClass,
   formatAssessmentStatusLabel,
   getAssessmentEffectiveStatus,
 } from "./assessment-status";
-import {
-  CheckIcon,
-  FileSearchIcon,
-  FileTextIcon,
-  VideoIcon,
-} from "./icons";
+import { CheckIcon, FileSearchIcon } from "./icons";
 
 export function formatDate(value: string | null | undefined): string {
   if (!value) {
@@ -234,39 +230,23 @@ export function AiCell({
   if (!application) {
     return <span className="text-zinc-400">—</span>;
   }
-  const resumePart =
-    application.ai_relevance_score == null ? (
-      <span className="inline-flex items-center gap-1 text-zinc-400">
-        <FileTextIcon className="h-3 w-3" />—
-      </span>
-    ) : (
-      <span
-        className={`${ASSESSMENT_BADGE_BASE} ${firstTestScoreBadgeClass(application.ai_relevance_score)}`}
-      >
-        <FileTextIcon className="h-3 w-3" />
-        {application.ai_relevance_score}%
-      </span>
-    );
-  if (compact) {
-    return resumePart;
-  }
   return (
-    <div className="inline-flex items-center justify-center gap-1.5">
-      {resumePart}
-      <span className="text-xs text-zinc-300">/</span>
-      <span className="inline-flex items-center gap-1 text-zinc-400">
-        <VideoIcon className="h-3 w-3" />—
-      </span>
-    </div>
+    <ApplicationAiScoresInline application={application} compact={compact} />
   );
 }
 
 export function ScoreCell({
   application,
+  stageOverallScore,
 }: {
   application: StaffApplication | null;
+  /** Prefer this stage's score when present (Manage / Stage Assignments). */
+  stageOverallScore?: string | number | null;
 }) {
-  const score = application?.manager_score_avg;
+  const score =
+    stageOverallScore != null && String(stageOverallScore).trim() !== ""
+      ? stageOverallScore
+      : application?.manager_score_avg;
   if (score == null || String(score).trim() === "") {
     return <span className="text-zinc-400">—</span>;
   }

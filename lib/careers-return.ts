@@ -110,6 +110,16 @@ function parseReturn(raw: string): CareersApplicationsReturn | null {
   };
 }
 
+export function peekCareersApplicationsReturn(): CareersApplicationsReturn | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  if (cachedReturn !== undefined && cachedReturn !== null) {
+    return cachedReturn;
+  }
+  return readStoredReturn();
+}
+
 export function consumeCareersApplicationsReturn(): CareersApplicationsReturn | null {
   try {
     const raw = sessionStorage.getItem(CAREERS_RETURN_STORAGE_KEY);

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { AssessmentSessionSummary, StaffApplication } from "@/lib/types";
-import { LockIcon } from "./icons";
+import { FileTextIcon, LockIcon, VideoIcon } from "./icons";
 
 export type AssessmentSessionLike = Partial<AssessmentSessionSummary> | null;
 
@@ -205,4 +205,103 @@ export function firstTestScoreBadgeClass(score: number): string {
     return "border-amber-200 bg-amber-100 text-amber-800";
   }
   return "border-amal-red/20 bg-amal-red/10 text-amal-red";
+}
+
+export function videoEvalScoreBadgeClass(score: number): string {
+  if (score >= 75) {
+    return "border-emerald-200 bg-emerald-100 text-emerald-800";
+  }
+  if (score >= 55) {
+    return "border-amber-200 bg-amber-100 text-amber-800";
+  }
+  return "border-amal-red/20 bg-amal-red/10 text-amal-red";
+}
+
+export function ApplicationAiScoresInline({
+  application,
+  compact = false,
+}: {
+  application: StaffApplication;
+  compact?: boolean;
+}) {
+  const resumePart =
+    application.ai_relevance_score == null ? (
+      <span className="inline-flex items-center gap-1 text-zinc-400">
+        <FileTextIcon className="h-3 w-3" />—
+      </span>
+    ) : (
+      <span
+        className={`${BADGE_BASE} ${firstTestScoreBadgeClass(application.ai_relevance_score)}`}
+      >
+        <FileTextIcon className="h-3 w-3" />
+        {application.ai_relevance_score}%
+      </span>
+    );
+
+  if (compact) {
+    return resumePart;
+  }
+
+  const evaluation = application.video_evaluation;
+  const status = evaluation?.processing_status;
+  const score =
+    evaluation?.overall_score != null &&
+    Number.isFinite(Number(evaluation.overall_score))
+      ? Number(evaluation.overall_score)
+      : null;
+  const isBusy = status === "Processing" || status === "Pending";
+
+  let videoPart: ReactNode;
+  if (!evaluation) {
+    videoPart = (
+      <span className="inline-flex items-center gap-1 text-zinc-400">
+        <VideoIcon className="h-3 w-3" />—
+      </span>
+    );
+  } else if (isBusy) {
+    videoPart = (
+      <span
+        className={`${BADGE_BASE} border-amber-200 bg-amber-100 text-amber-800`}
+        title="AI video evaluation in progress"
+      >
+        <VideoIcon className="h-3 w-3" />
+        {status === "Processing" ? "…" : "Q"}
+      </span>
+    );
+  } else if (status === "Failed") {
+    videoPart = (
+      <span
+        className={`${BADGE_BASE} border-amal-red/20 bg-amal-red/10 text-amal-red`}
+        title="AI video evaluation failed"
+      >
+        <VideoIcon className="h-3 w-3" />!
+      </span>
+    );
+  } else if (score == null) {
+    videoPart = (
+      <span className="inline-flex items-center gap-1 text-zinc-400">
+        <VideoIcon className="h-3 w-3" />—
+      </span>
+    );
+  } else {
+    videoPart = (
+      <span
+        className={`${BADGE_BASE} ${videoEvalScoreBadgeClass(score)}`}
+        title="AI video evaluation score"
+      >
+        <VideoIcon className="h-3 w-3" />
+        {score}
+      </span>
+    );
+  }
+
+  return (
+    <div className="inline-flex items-center justify-center gap-1.5">
+      {resumePart}
+      <span className="text-xs text-zinc-300" aria-hidden>
+        /
+      </span>
+      {videoPart}
+    </div>
+  );
 }
