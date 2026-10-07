@@ -66,9 +66,14 @@ Sign in also lands an assigned employee on Reviews and a client user on Hiring. 
 | Role closed | `/roles/[slug]` | A draft, inactive, or unknown slug | `visitor/role-closed.jpg` |
 | Apply | `/roles/[slug]/apply` | Apply on the role page | `visitor/apply.jpg` |
 | Thank you | `/roles/[slug]/applied` | A successful apply | `visitor/thank-you.jpg` |
-| Assessment invite | — | Sent by the apply call, and again on Resend New Test | `visitor/email-assessment-invite.jpg` |
-| Application rejected | — | Status changes to rejected | `visitor/email-application-rejected.jpg` |
-| Application on hold | — | Status changes to parking-lot | `visitor/email-application-parking-lot.jpg` |
+| Assessment invite | — | Sent by the apply call, and again on Resend New Test | `emails/01-assessment-invite.jpg` |
+| Assessment renewed | — | Replace after the first test was completed | `emails/02-assessment-renewed.jpg` |
+| Assessment extension | — | Staff extends the assessment window | `emails/03-assessment-extension.jpg` |
+| Application rejected | — | Status changes to rejected (incl. auto-reject) | `emails/04-application-rejected.jpg` |
+| Application on hold | — | Status changes to parking-lot | `emails/05-application-parking-lot.jpg` |
+| Client invitation | — | Client portal login is created | `emails/06-client-invitation.jpg` |
+
+HTML sources for those renders live next to the JPGs under `emails/`.
 
 ## Sign in
 
