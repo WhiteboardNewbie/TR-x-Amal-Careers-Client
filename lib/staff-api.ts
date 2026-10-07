@@ -19,6 +19,7 @@ import type {
   OrgLevel,
   OrgTitle,
   Page,
+  QuestionnairePrompt,
   ShareLink,
   Skill,
   StaffApplication,
@@ -509,6 +510,33 @@ export function patchVideoPrompt(
   body: Partial<VideoPrompt>,
 ): Promise<VideoPrompt> {
   return sendJson<VideoPrompt>(`/video-test/questions/${id}/`, "PATCH", body);
+}
+
+export function getQuestionnairePrompts(): Promise<QuestionnairePrompt[]> {
+  return request<QuestionnairePrompt[]>("/general-questionnaire/questions/");
+}
+
+export function createQuestionnairePrompt(body: {
+  question_text: string;
+  question_order: number;
+  is_active?: boolean;
+}): Promise<QuestionnairePrompt> {
+  return sendJson<QuestionnairePrompt>(
+    "/general-questionnaire/questions/",
+    "POST",
+    body,
+  );
+}
+
+export function patchQuestionnairePrompt(
+  id: number,
+  body: Partial<QuestionnairePrompt>,
+): Promise<QuestionnairePrompt> {
+  return sendJson<QuestionnairePrompt>(
+    `/general-questionnaire/questions/${id}/`,
+    "PATCH",
+    body,
+  );
 }
 
 export function getAssessmentSettings(): Promise<AssessmentSetting[]> {

@@ -301,6 +301,13 @@ export type VideoPrompt = {
   is_active: boolean;
 };
 
+export type QuestionnairePrompt = {
+  id: number;
+  question_text: string;
+  question_order: number;
+  is_active: boolean;
+};
+
 export type AssessmentSetting = {
   test_type: string;
   total_questions: number;
@@ -339,7 +346,8 @@ export type WrittenTestSection = {
   questions: {
     order: number;
     question_text: string;
-    selected_option: string | null;
+    selected_option?: string | null;
+    answer_text?: string | null;
   }[];
 };
 
