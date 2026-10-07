@@ -272,6 +272,7 @@ export function ClientApplication({ id }: { id: number }) {
     row?.client_review_status ?? row?.review.status ?? "pending";
   const canEdit = reviewStatus === "pending";
   const firstScore = scoreNumber(row?.first_test?.score_percentage);
+  const videoAiScore = scoreNumber(row?.video_test?.score_percentage);
   const firstTone = getScoreTone(firstScore);
   const aiScore = scoreNumber(row?.ai_relevance_score);
   const aiTone = getScoreTone(aiScore);
@@ -568,7 +569,26 @@ export function ClientApplication({ id }: { id: number }) {
                   </div>
                 </div>
               </div>
-              <p className="p-5 text-sm text-zinc-500 sm:p-6">Not available</p>
+              <div className="grid gap-5 p-5 sm:grid-cols-[140px_minmax(0,1fr)] sm:p-6">
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-black/10 bg-amal-sheet/80 px-4 py-5 text-center">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                    Score
+                  </p>
+                  <p className="mt-2 text-4xl font-bold tracking-tight">
+                    {videoAiScore != null ? videoAiScore.toFixed(0) : "—"}
+                  </p>
+                  {videoAiScore != null ? (
+                    <p className="mt-1 text-sm font-medium text-zinc-600">
+                      % match
+                    </p>
+                  ) : null}
+                </div>
+                <p className="text-sm leading-7 text-zinc-600">
+                  {videoAiScore != null
+                    ? "Score comes from transcripts of the recorded answers. Use Video Test Responses below to watch each clip."
+                    : "Not available yet. Hiring staff run video AI after pre-screening completes."}
+                </p>
+              </div>
             </section>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

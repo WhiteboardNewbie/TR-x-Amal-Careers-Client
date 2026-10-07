@@ -52,7 +52,12 @@ export type SharedApplication = {
   video_test: {
     status: string;
     score_percentage: string | number | null;
-    questions: { order: number; prompt: string; transcript: string }[];
+    questions: {
+      order: number;
+      prompt: string;
+      transcript: string;
+      video?: string | null;
+    }[];
   } | null;
   questionnaire: {
     status: string;

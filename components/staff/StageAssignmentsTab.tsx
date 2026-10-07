@@ -730,61 +730,61 @@ export function StageAssignmentsTab({
               </p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full table-fixed text-center text-sm">
+                <table className="w-full min-w-[1100px] text-center text-sm">
                   <thead>
                     <tr className="border-b border-black/10">
-                      <th className="w-[9%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Applicant
                       </th>
-                      <th className="w-[9%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Job
                       </th>
-                      <th className="w-[7%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Assigned to
                       </th>
-                      <th className="w-[5%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Stage
                       </th>
-                      <th className="w-[9%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Stage status
                       </th>
-                      <th className="w-[9%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         App status
                       </th>
-                      <th className="w-[3%] px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Resume
                       </th>
-                      <th className="w-[6%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Applied
                       </th>
-                      <th className="w-[7%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         First test
                       </th>
                       <th
-                        className="w-[3%] px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500"
+                        className="w-12 px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500"
                         title="Video test"
                       >
                         Video
                       </th>
                       <th
-                        className="w-[3%] px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500"
+                        className="w-12 px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500"
                         title="General questionnaire"
                       >
                         Quest.
                       </th>
-                      <th className="w-[5%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="whitespace-nowrap px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         AI
                       </th>
-                      <th className="w-[5%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="whitespace-nowrap px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Score
                       </th>
-                      <th className="w-[8%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="whitespace-nowrap px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Interview
                       </th>
-                      <th className="w-[5%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="whitespace-nowrap px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Completed
                       </th>
-                      <th className="w-[7%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="whitespace-nowrap px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Actions
                       </th>
                     </tr>
@@ -805,11 +805,14 @@ export function StageAssignmentsTab({
                           key={stage.id}
                           className="border-b border-black/5 hover:bg-amal-sheet/80"
                         >
-                          <td className="max-w-0 truncate px-1.5 py-2.5 font-medium text-amal-ink" title={applicantName}>
+                          <td
+                            className="max-w-[9rem] truncate px-1.5 py-2.5 font-medium text-amal-ink"
+                            title={applicantName}
+                          >
                             {applicantName}
                           </td>
                           <td
-                            className="max-w-0 truncate px-1.5 py-2.5 text-zinc-600"
+                            className="max-w-[9rem] truncate px-1.5 py-2.5 text-zinc-600"
                             title={
                               stage.job_title ??
                               application?.job_opening_name ??
@@ -821,12 +824,12 @@ export function StageAssignmentsTab({
                               "—"}
                           </td>
                           <td
-                            className="max-w-0 truncate px-1.5 py-2.5 text-zinc-600"
+                            className="max-w-[8rem] truncate px-1.5 py-2.5 text-zinc-600"
                             title={assignedName(stage.assigned_to)}
                           >
                             {assignedName(stage.assigned_to)}
                           </td>
-                          <td className="max-w-0 truncate px-1.5 py-2.5 text-zinc-600">
+                          <td className="max-w-[6rem] truncate px-1.5 py-2.5 text-zinc-600">
                             {stageName(stage)}
                           </td>
                           <td
@@ -948,10 +951,13 @@ export function StageAssignmentsTab({
                             className="px-1.5 py-2.5 text-center"
                             onClick={(event) => event.stopPropagation()}
                           >
-                            <AiCell application={application} compact />
+                            <AiCell application={application} />
                           </td>
                           <td className="px-1.5 py-2.5 tabular-nums text-zinc-700">
-                            <ScoreCell application={application} />
+                            <ScoreCell
+                              application={application}
+                              stageOverallScore={stage.manager_overall_score}
+                            />
                           </td>
                           <td
                             className="whitespace-nowrap px-1.5 py-2.5 text-xs text-zinc-600"
@@ -1022,55 +1028,55 @@ export function StageAssignmentsTab({
               </p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full table-fixed text-center text-sm">
+                <table className="w-full min-w-[1100px] text-center text-sm">
                   <thead>
                     <tr className="border-b border-black/10">
-                      <th className="w-[10%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Applicant
                       </th>
-                      <th className="w-[10%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Role
                       </th>
-                      <th className="w-[10%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Client user
                       </th>
-                      <th className="w-[9%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Review status
                       </th>
-                      <th className="w-[9%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         App status
                       </th>
-                      <th className="w-[5%] px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Resume
                       </th>
-                      <th className="w-[7%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Applied
                       </th>
-                      <th className="w-[8%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         First test
                       </th>
                       <th
-                        className="w-[4%] px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500"
+                        className="w-12 px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500"
                         title="Video test"
                       >
                         Video
                       </th>
                       <th
-                        className="w-[4%] px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500"
+                        className="w-12 px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500"
                         title="General questionnaire"
                       >
                         Quest.
                       </th>
-                      <th className="w-[6%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="whitespace-nowrap px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         AI
                       </th>
-                      <th className="w-[6%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="whitespace-nowrap px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Score
                       </th>
-                      <th className="w-[7%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="whitespace-nowrap px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Decided at
                       </th>
-                      <th className="w-[5%] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                      <th className="whitespace-nowrap px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Actions
                       </th>
                     </tr>
@@ -1092,11 +1098,14 @@ export function StageAssignmentsTab({
                           key={review.id}
                           className="border-b border-black/5 hover:bg-amal-sheet/80"
                         >
-                          <td className="max-w-0 truncate px-1.5 py-2.5 font-medium text-amal-ink" title={applicantName}>
+                          <td
+                            className="max-w-[9rem] truncate px-1.5 py-2.5 font-medium text-amal-ink"
+                            title={applicantName}
+                          >
                             {applicantName}
                           </td>
                           <td
-                            className="max-w-0 truncate px-1.5 py-2.5 text-zinc-700"
+                            className="max-w-[9rem] truncate px-1.5 py-2.5 text-zinc-700"
                             title={
                               review.job_title ??
                               application?.job_opening_name ??
@@ -1108,7 +1117,7 @@ export function StageAssignmentsTab({
                               "—"}
                           </td>
                           <td
-                            className="max-w-0 truncate px-1.5 py-2.5 text-zinc-700"
+                            className="max-w-[9rem] truncate px-1.5 py-2.5 text-zinc-700"
                             title={clientLabel}
                           >
                             {clientLabel}
@@ -1203,7 +1212,7 @@ export function StageAssignmentsTab({
                             className="px-1.5 py-2.5 text-center"
                             onClick={(event) => event.stopPropagation()}
                           >
-                            <AiCell application={application} compact />
+                            <AiCell application={application} />
                           </td>
                           <td className="px-1.5 py-2.5 tabular-nums text-zinc-700">
                             <ScoreCell application={application} />
@@ -1484,6 +1493,7 @@ function ScheduleInterviewModal({
   const [kind, setKind] = useState(interviewType);
   const [when, setWhen] = useState(toDateTimeLocalInput(stage.scheduled_at));
   const [busy, setBusy] = useState(false);
+  const [localError, setLocalError] = useState("");
   const applicantName =
     stage.applicant_name ??
     stage.application?.applicant.name ??
@@ -1491,12 +1501,19 @@ function ScheduleInterviewModal({
   const jobTitle =
     stage.job_title ?? stage.application?.job_opening_name ?? "Job";
   const stageLabel = stage.name || `Stage ${stage.order}`;
+  const scheduledIso = dateTimeLocalToIso(when);
+  const canSave = Boolean(scheduledIso) && !busy;
 
   async function onSave() {
+    if (!scheduledIso) {
+      setLocalError("Choose a date and time to schedule the interview.");
+      return;
+    }
+    setLocalError("");
     setBusy(true);
     try {
       await scheduleStage(stage.id, {
-        scheduled_at: dateTimeLocalToIso(when),
+        scheduled_at: scheduledIso,
         interview_type: kind,
       });
       onSaved();
@@ -1573,11 +1590,22 @@ function ScheduleInterviewModal({
                   id="hr-schedule-scheduled-at"
                   type="datetime-local"
                   value={when}
-                  onChange={(event) => setWhen(event.target.value)}
+                  onChange={(event) => {
+                    setWhen(event.target.value);
+                    if (localError) {
+                      setLocalError("");
+                    }
+                  }}
+                  required
                   className="w-full rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-sm outline-none focus:border-amal-red focus:ring-2 focus:ring-amal-red/20"
                 />
               </div>
             </div>
+            {localError ? (
+              <p className="text-sm text-amal-red" role="alert">
+                {localError}
+              </p>
+            ) : null}
           </div>
           <div className="flex shrink-0 items-center justify-end gap-3 border-t border-black/10 px-5 py-4">
             <GhostButton type="button" onClick={onClose}>
@@ -1586,7 +1614,7 @@ function ScheduleInterviewModal({
             <PrimaryButton
               type="button"
               className="px-4 py-2.5"
-              disabled={busy}
+              disabled={!canSave}
               onClick={() => void onSave()}
             >
               {busy ? "Saving…" : "Save"}

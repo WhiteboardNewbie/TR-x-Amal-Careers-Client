@@ -48,6 +48,18 @@ function firstString(value: unknown): string | null {
 function messageFor(status: number, body: unknown): string {
   const asText = firstString(body);
   if (asText) {
+    const trimmed = asText.trim();
+    if (
+      trimmed.startsWith("<!DOCTYPE") ||
+      trimmed.startsWith("<html") ||
+      trimmed.includes("<title>")
+    ) {
+      const title = trimmed.match(/<title>([^<]*)<\/title>/i)?.[1]?.trim();
+      if (title) {
+        return title;
+      }
+      return `Request failed with ${status}`;
+    }
     return asText;
   }
   if (body && typeof body === "object") {

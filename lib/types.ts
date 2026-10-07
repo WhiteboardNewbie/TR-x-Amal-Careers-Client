@@ -154,6 +154,10 @@ export type StaffApplication = {
   ai_relevance_score?: number | null;
   ai_relevance_rationale?: string | null;
   ai_relevance_analyzed_at?: string | null;
+  video_evaluation?: {
+    processing_status?: string | null;
+    overall_score?: number | null;
+  } | null;
   manager_score_avg?: string | number | null;
 };
 
@@ -324,6 +328,7 @@ export type Comment = {
   author: number | null;
   author_display_name?: string;
   application_stage: number | null;
+  stage_name?: string | null;
   source: string;
   source_label?: string;
   created_at: string;
@@ -343,11 +348,22 @@ export type ShareLink = {
 export type WrittenTestSection = {
   status: string;
   score_percentage: string | number | null;
+  correct_count?: number;
+  attempted_count?: number;
+  total_questions?: number;
   questions: {
     order: number;
     question_text: string;
     selected_option?: string | null;
     answer_text?: string | null;
+    option_a?: string;
+    option_b?: string;
+    option_c?: string;
+    option_d?: string;
+    correct_option?: string;
+    is_correct?: boolean;
+    attachment?: string | null;
+    answered_at?: string | null;
   }[];
 };
 
@@ -358,7 +374,33 @@ export type VideoTestSection = {
     order: number;
     prompt: string;
     transcript: string;
-    video?: string;
+    video?: string | null;
+    duration_seconds?: number | null;
+    file_size_bytes?: number | null;
+    recorded_at?: string | null;
+    uploaded_at?: string | null;
+  }[];
+};
+
+export type VideoEvaluation = {
+  processing_status?: string;
+  overall_score?: number | null;
+  communication_score?: number | null;
+  communication_reason?: string;
+  responsiveness_score?: number | null;
+  responsiveness_reason?: string;
+  problem_solving_score?: number | null;
+  problem_solving_reason?: string;
+  technical_score?: number | null;
+  technical_reason?: string;
+  ownership_score?: number | null;
+  ownership_reason?: string;
+  error_message?: string;
+  transcripts?: {
+    question_number: number;
+    question_text: string;
+    transcript: string;
+    transcript_status: string;
   }[];
 };
 
@@ -368,6 +410,7 @@ export type ApplicationAssessment = {
   invite_url: string | null;
   first_test: WrittenTestSection | null;
   video_test: VideoTestSection | null;
+  video_evaluation?: VideoEvaluation | null;
   questionnaire: WrittenTestSection | null;
 };
 

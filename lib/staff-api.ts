@@ -601,6 +601,45 @@ export function scoreResume(applicationId: number): Promise<{
   );
 }
 
+export async function downloadJobApplicationResume(
+  applicationId: number,
+): Promise<Blob> {
+  const { API_URL, ApiError } = await import("./api");
+  const { sessionToken } = await import("./session");
+  const headers = new Headers();
+  const token = sessionToken();
+  if (token) {
+    headers.set("Authorization", `Token ${token}`);
+  }
+  const response = await fetch(
+    `${API_URL}/careers/job-applications/${applicationId}/resume/`,
+    { headers },
+  );
+  if (!response.ok) {
+    throw new ApiError(response.status, await response.text());
+  }
+  return response.blob();
+}
+
+export function runVideoEvaluation(applicationId: number): Promise<{
+  video_test: {
+    status: string;
+    score_percentage: string | number | null;
+    questions: {
+      order: number;
+      prompt: string;
+      transcript: string;
+      video?: string | null;
+    }[];
+  };
+  video_evaluation: import("./types").VideoEvaluation | null;
+}> {
+  return sendJson(
+    `/careers/job-applications/${applicationId}/run-video-evaluation/`,
+    "POST",
+  );
+}
+
 export function handoffToClients(
   applicationId: number,
   client_users: number[],

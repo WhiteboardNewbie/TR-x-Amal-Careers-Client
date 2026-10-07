@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { StaffApplication } from "@/lib/types";
 import {
   ASSESSMENT_BADGE_BASE,
+  ApplicationAiScoresInline,
   AssessmentCell,
   AssessmentLockedBadge,
   AssessmentNotStartedBadge,
@@ -13,7 +14,6 @@ import {
 } from "./assessment-status";
 import {
   FileSearchIcon,
-  FileTextIcon,
   MessageSquareIcon,
   VideoIcon,
 } from "./icons";
@@ -122,24 +122,7 @@ export function ApplicationAssessmentCells({
       </td>
       <td className="px-3 py-3" onClick={(event) => event.stopPropagation()}>
         <AssessmentCell>
-          <div className="inline-flex items-center justify-center gap-1.5">
-            {row.ai_relevance_score == null ? (
-              <span className="inline-flex items-center gap-1 text-zinc-400">
-                <FileTextIcon className="h-3 w-3" />—
-              </span>
-            ) : (
-              <span
-                className={`${ASSESSMENT_BADGE_BASE} ${firstTestScoreBadgeClass(row.ai_relevance_score)}`}
-              >
-                <FileTextIcon className="h-3 w-3" />
-                {row.ai_relevance_score}%
-              </span>
-            )}
-            <span className="text-xs text-zinc-300">/</span>
-            <span className="inline-flex items-center gap-1 text-zinc-400">
-              <VideoIcon className="h-3 w-3" />—
-            </span>
-          </div>
+          <ApplicationAiScoresInline application={row} />
         </AssessmentCell>
       </td>
       <td className="px-3 py-3">

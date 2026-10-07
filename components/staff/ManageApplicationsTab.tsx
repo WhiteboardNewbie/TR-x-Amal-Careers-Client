@@ -328,58 +328,58 @@ export function ManageApplicationsTab({
           <p className="text-sm text-zinc-500">No rows match your filters.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full table-fixed text-center text-sm">
+            <table className="w-full min-w-[1100px] text-center text-sm">
               <thead>
                 <tr className="border-b border-black/10">
-                  <th className="w-[10%] px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  <th className="px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                     Applicant
                   </th>
-                  <th className="w-[10%] px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  <th className="px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                     Job
                   </th>
-                  <th className="w-[8%] px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  <th className="px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                     Stage
                   </th>
-                  <th className="w-[8%] px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  <th className="px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                     Stage status
                   </th>
-                  <th className="w-[8%] px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  <th className="px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                     App status
                   </th>
-                  <th className="w-[5%] px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  <th className="px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                     Resume
                   </th>
-                  <th className="w-[6%] px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  <th className="px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                     Applied
                   </th>
-                  <th className="w-[7%] px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  <th className="px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                     First test
                   </th>
                   <th
-                    className="w-[4%] px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500"
+                    className="w-12 px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500"
                     title="Video test"
                   >
                     Video
                   </th>
                   <th
-                    className="w-[4%] px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500"
+                    className="w-12 px-1 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500"
                     title="General questionnaire"
                   >
                     Quest.
                   </th>
-                  <th className="w-[6%] px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                    AI resume
+                  <th className="whitespace-nowrap px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                    AI
                   </th>
-                  <th className="w-[6%] px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  <th className="whitespace-nowrap px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                     Score
                   </th>
-                  <th className="w-[8%] px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  <th className="whitespace-nowrap px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                     Interview
                   </th>
-                  <th className="w-[6%] px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  <th className="whitespace-nowrap px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                     Completed
                   </th>
-                  <th className="w-[4%] px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  <th className="whitespace-nowrap px-2 py-2.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                     Actions
                   </th>
                 </tr>
@@ -404,11 +404,14 @@ export function ManageApplicationsTab({
                       key={stage.id}
                       className="border-b border-black/5 hover:bg-amal-sheet/80"
                     >
-                      <td className="max-w-0 truncate px-2 py-2.5 font-medium text-amal-ink" title={applicantName}>
+                      <td
+                        className="max-w-[9rem] truncate px-2 py-2.5 font-medium text-amal-ink"
+                        title={applicantName}
+                      >
                         {applicantName}
                       </td>
                       <td
-                        className="max-w-0 truncate px-2 py-2.5 text-zinc-600"
+                        className="max-w-[9rem] truncate px-2 py-2.5 text-zinc-600"
                         title={
                           stage.job_title ??
                           application?.job_opening_name ??
@@ -419,7 +422,7 @@ export function ManageApplicationsTab({
                           application?.job_opening_name ??
                           "—"}
                       </td>
-                      <td className="max-w-0 truncate px-2 py-2.5 text-zinc-600">
+                      <td className="max-w-[6rem] truncate px-2 py-2.5 text-zinc-600">
                         {stageName(stage)}
                       </td>
                       <td
@@ -523,10 +526,13 @@ export function ManageApplicationsTab({
                         className="px-2 py-2.5 text-center"
                         onClick={(event) => event.stopPropagation()}
                       >
-                        <AiCell application={application} compact />
+                        <AiCell application={application} />
                       </td>
                       <td className="px-2 py-2.5 tabular-nums text-zinc-700">
-                        <ScoreCell application={application} />
+                        <ScoreCell
+                          application={application}
+                          stageOverallScore={stage.manager_overall_score}
+                        />
                       </td>
                       <td
                         className="whitespace-nowrap px-2 py-2.5 text-xs text-zinc-600"
