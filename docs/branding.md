@@ -43,4 +43,4 @@ The logo is not a colour. Red and blue inside it still follow the table above.
 ## What branding covers
 
 - Public board: name, logo, colors, hero, and the Lahore contact line
-- Staff banners, when those screens are built
+- Staff banners (ERP-style card gradient on staff screens)

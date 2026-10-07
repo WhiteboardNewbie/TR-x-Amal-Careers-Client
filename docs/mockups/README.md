@@ -17,6 +17,8 @@ flowchart TD
   createIdeal[Create Ideal Profile]
   applicants[Applicants]
   applications[Job Applications]
+  stages[Stage Assignments]
+  manage[Manage Applications]
   unified[Unified view]
   cvSearch[CV search]
   shareLinks[Share links]
@@ -39,6 +41,8 @@ flowchart TD
   staff --> createIdeal
   staff --> applicants
   staff --> applications
+  staff --> stages
+  staff --> manage
   applications --> unified
   applications --> cvSearch
   applications --> shareLinks --> logs
@@ -72,11 +76,11 @@ Sign in also lands an assigned employee on Reviews and a client user on Hiring. 
 | --- | --- | --- | --- |
 | Sign in | `/sign-in` | Sign in on `/` | `visitor/sign-in.jpg` |
 
-Hiring staff land on `/staff`, an assigned employee on `/reviews`, a client user on `/client`.
+Hiring staff land on `/staff`, an assigned employee on `/reviews`, a client user on `/client`. Token `landing` drives that redirect; empty landing has no Careers access. Signed-in shell shows Notices for every landing.
 
 ## Hiring staff
 
-Banner Create Role, Create Job Application, and Create Ideal Profile each open a modal over `/staff`.
+Banner Create Role, Create Job Application, and Create Ideal Profile each open a modal over `/staff`. Careers tabs render by permission (Roles / Applicants / Job Applications / Stage Assignments / Manage Applications)—see [setup.md](../setup.md).
 
 | Screen | Path | Opened from | File |
 | --- | --- | --- | --- |
@@ -87,9 +91,9 @@ Banner Create Role, Create Job Application, and Create Ideal Profile each open a
 | Applicants | `/staff` | Applicants tab | `staff/staff-applicants.jpg` |
 | Applicant profile | `/staff` | A row on Applicants | `staff/staff-applicant.jpg` |
 | Job Applications | `/staff` | Job Applications tab | `staff/staff-applications.jpg` |
-| Application detail | `/staff` | A row on Job Applications | `staff/staff-application.jpg` |
+| Application detail | `/staff` | A row on Job Applications. Assignee can open scorecard complete here too | `staff/staff-application.jpg` |
 | Stage Assignments | `/staff` | Stage Assignments tab | `staff/staff-stage-assignments.jpg` |
-| Manage Applications | `/staff` | Manage Applications tab | `staff/staff-manage-applications.jpg` |
+| Manage Applications | `/staff` | Manage Applications tab (needs `view_applicationstage`) | `staff/staff-manage-applications.jpg` |
 
 ### From Job Applications
 
@@ -107,7 +111,7 @@ CV search and Shared links are not navbar items.
 
 ### Assessment database
 
-Navbar Assessment database. Not under Careers tabs.
+Navbar Assessment database. Not under Careers tabs. Four areas: **MCQ** bank, **Video** prompts, **Questionnaire** free-text prompts, and **Assessment Defaults** (counts/time/validity for `first_test`, `video_test`, `general_questionnaire`). Each bank supports add/edit and Active/Inactive.
 
 | Screen | Path | Opened from | File |
 | --- | --- | --- | --- |
@@ -120,7 +124,7 @@ Navbar Assessment database. Not under Careers tabs.
 
 Navbar Organizational Configuration. The records Careers reads: the role department, the ideal-profile title, the stage picker, and client review. Same tables as the ERP Organization Overview Departments, Levels, and Titles tabs, plus Clients and Reviewers. No org chart and no statistics.
 
-Reviewers are the Amal staff Stage Assignments can pick. Add reviewer creates the person with an org title and an optional login for `/reviews`. It is not the ERP People Directory.
+Reviewers are the Amal staff Stage Assignments can pick. Add reviewer: name + optional title; optional **Create a login (Manager, lands on Careers)** creates the auth user + employee. Clients tab also manages nested **Client users** (client, name, email). It is not the ERP People Directory.
 
 | Screen | Path | Opened from | File |
 | --- | --- | --- | --- |
@@ -132,22 +136,26 @@ Reviewers are the Amal staff Stage Assignments can pick. Add reviewer creates th
 
 ## Assigned employee
 
+Same `ReviewStageModal` as staff Manage Applications / application detail: Scorecard | Comments. Pending → Request interview / Reject; after HR schedules (`interview`) → rate metrics 0–10, overall fit, optional feedback → Submit scorecard (`metric_scores`). Needs ideal-profile metrics. Signed-in header includes Notices for all landings.
+
 | Screen | Path | Opened from | File |
 | --- | --- | --- | --- |
 | Reviews | `/reviews` | Sign in as an assigned employee | `reviews/reviews.jpg` |
-| One application | `/reviews/[id]` | A row on Reviews | `reviews/review.jpg` |
+| One application | `/reviews/[id]` | A row on Reviews. Complete uses scorecard metrics (`metric_scores`) | `reviews/review.jpg` |
 
 ## Client user
+
+`/client` shows open-role / awaiting-review style KPIs plus search and filters. Role page lists applications with Your review. Application: resume, assessment summaries, comments; **Approve / Reject once** (`clients.view_my_client_careers`). Not the staff detail screen.
 
 | Screen | Path | Opened from | File |
 | --- | --- | --- | --- |
 | Hiring | `/client` | Sign in as a client user | `client/client.jpg` |
 | Role | `/client/roles/[slug]` | A role on Hiring | `client/client-role.jpg` |
-| Application | `/client/applications/[id]` | A row on that role. Same unified application panel as staff, with Your review | `client/client-application.jpg` |
+| Application | `/client/applications/[id]` | A row on that role. Client application view with Your review (not the staff detail screen) | `client/client-application.jpg` |
 
 ## Candidate
 
-No navbar. The invite email opens the card.
+No navbar. The invite email opens the card. First test is MCQ; questionnaire is free text (not MCQ). Video upload stores the file; transcript/score appear later after pre-screening.
 
 ```mermaid
 flowchart TD
