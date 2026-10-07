@@ -5,24 +5,33 @@ import { ApiError } from "@/lib/api";
 import { preventFocusScroll } from "@/lib/prevent-focus-scroll";
 import {
   createBankQuestion,
+  createQuestionnairePrompt,
   createVideoPrompt,
   getAssessmentSettings,
   getBankQuestions,
+  getQuestionnairePrompts,
   getVideoPrompts,
   patchAssessmentSetting,
   patchBankQuestion,
+  patchQuestionnairePrompt,
   patchVideoPrompt,
 } from "@/lib/staff-api";
-import type { AssessmentSetting, BankQuestion, VideoPrompt } from "@/lib/types";
+import type {
+  AssessmentSetting,
+  BankQuestion,
+  QuestionnairePrompt,
+  VideoPrompt,
+} from "@/lib/types";
 import { CheckIcon, XIcon } from "./icons";
 import { StaffBanner } from "./StaffBanner";
 import { Field, GhostButton, Modal, PrimaryButton, inputClass } from "./ui";
 
-type Tab = "mcq" | "video" | "defaults";
+type Tab = "mcq" | "video" | "questionnaire" | "defaults";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "mcq", label: "MCQ" },
   { id: "video", label: "Video" },
+  { id: "questionnaire", label: "Questionnaire" },
   { id: "defaults", label: "Assessment Defaults" },
 ];
 
@@ -75,8 +84,8 @@ export function QuestionsScreen() {
           </button>
         }
       >
-        Multiple-choice questions, video prompts, and the three assessment
-        defaults.
+        Multiple-choice questions, video prompts, questionnaire text prompts,
+        and the three assessment defaults.
       </StaffBanner>
       {notice ? (
         <p className="mt-4 rounded-lg border border-amal-red/30 bg-amal-white px-3 py-2 text-sm text-amal-red">
@@ -103,6 +112,9 @@ export function QuestionsScreen() {
         </div>
         {tab === "mcq" ? <McqTab onError={onError} /> : null}
         {tab === "video" ? <VideoTab onError={onError} /> : null}
+        {tab === "questionnaire" ? (
+          <QuestionnaireTab onError={onError} />
+        ) : null}
         {tab === "defaults" ? <DefaultsTab onError={onError} /> : null}
       </div>
     </div>
@@ -414,6 +426,175 @@ function VideoModal({
             Active
           </label>
         ) : null}
+        <PrimaryButton type="submit" disabled={busy}>
+          {busy ? "Saving…" : "Save"}
+        </PrimaryButton>
+      </form>
+    </Modal>
+  );
+}
+
+function QuestionnaireTab({ onError }: { onError: (value: string) => void }) {
+  const [rows, setRows] = useState<QuestionnairePrompt[]>([]);
+  const [tick, setTick] = useState(0);
+  const [editing, setEditing] = useState<QuestionnairePrompt | "new" | null>(
+    null,
+  );
+
+  useEffect(() => {
+    let ignore = false;
+    getQuestionnairePrompts()
+      .then((data) => {
+        if (!ignore) {
+          setRows(
+            [...data].sort(
+              (a, b) => a.question_order - b.question_order || a.id - b.id,
+            ),
+          );
+        }
+      })
+      .catch((error) => {
+        if (!ignore) {
+          onError(errorText(error));
+        }
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [tick, onError]);
+
+  return (
+    <div>
+      <div className="mb-4">
+        <PrimaryButton type="button" onClick={() => setEditing("new")}>
+          Add question
+        </PrimaryButton>
+      </div>
+      {rows.length === 0 ? (
+        <p className="text-sm text-zinc-500">No questionnaire prompts yet.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px] text-left text-sm">
+            <thead>
+              <tr className="text-xs uppercase tracking-wide text-zinc-500">
+                <th className="py-2">Order</th>
+                <th>Question</th>
+                <th className="text-center">Status</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.id} className="border-t border-black/5">
+                  <td className="py-3">{row.question_order}</td>
+                  <td className="font-semibold">{row.question_text}</td>
+                  <td className="text-center">
+                    <QuestionStatusBadge active={row.is_active} />
+                  </td>
+                  <td className="text-right">
+                    <GhostButton type="button" onClick={() => setEditing(row)}>
+                      Edit
+                    </GhostButton>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {editing ? (
+        <QuestionnaireModal
+          question={editing === "new" ? null : editing}
+          nextOrder={
+            rows.reduce((max, row) => Math.max(max, row.question_order), 0) + 1
+          }
+          onClose={() => setEditing(null)}
+          onSaved={() => {
+            setEditing(null);
+            setTick((value) => value + 1);
+          }}
+          onError={onError}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function QuestionnaireModal({
+  question,
+  nextOrder,
+  onClose,
+  onSaved,
+  onError,
+}: {
+  question: QuestionnairePrompt | null;
+  nextOrder: number;
+  onClose: () => void;
+  onSaved: () => void;
+  onError: (value: string) => void;
+}) {
+  const [text, setText] = useState(question?.question_text ?? "");
+  const [order, setOrder] = useState(question?.question_order ?? nextOrder);
+  const [active, setActive] = useState(question?.is_active ?? true);
+  const [busy, setBusy] = useState(false);
+
+  async function onSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      if (question) {
+        await patchQuestionnairePrompt(question.id, {
+          question_text: text,
+          question_order: order,
+          is_active: active,
+        });
+      } else {
+        await createQuestionnairePrompt({
+          question_text: text,
+          question_order: order,
+          is_active: active,
+        });
+      }
+      onSaved();
+    } catch (error) {
+      onError(errorText(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Modal
+      title={question ? "Edit questionnaire question" : "Add questionnaire question"}
+      onClose={onClose}
+    >
+      <form onSubmit={onSubmit}>
+        <Field label="Question">
+          <textarea
+            className={`${inputClass} h-24 py-2`}
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            required
+          />
+        </Field>
+        <Field label="Order">
+          <input
+            className={inputClass}
+            type="number"
+            min={1}
+            value={order}
+            onChange={(event) => setOrder(Number(event.target.value) || 1)}
+            required
+          />
+        </Field>
+        <label className="mb-4 flex items-center gap-2 text-sm font-semibold">
+          <input
+            type="checkbox"
+            checked={active}
+            onChange={(event) => setActive(event.target.checked)}
+          />
+          Active
+        </label>
         <PrimaryButton type="submit" disabled={busy}>
           {busy ? "Saving…" : "Save"}
         </PrimaryButton>

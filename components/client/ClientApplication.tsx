@@ -954,7 +954,9 @@ export function ClientApplication({ id }: { id: number }) {
                               Answer
                             </p>
                             <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-zinc-800">
-                              {item.selected_option || "No answer provided"}
+                              {item.answer_text?.trim() ||
+                                item.selected_option ||
+                                "No answer provided"}
                             </p>
                           </div>
                         </div>

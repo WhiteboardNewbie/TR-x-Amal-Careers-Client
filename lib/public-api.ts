@@ -26,6 +26,12 @@ export type McqItem = {
   option_d: string;
 };
 
+export type QuestionnaireItem = {
+  id: number;
+  question_text: string;
+  question_order: number;
+};
+
 export type VideoItem = {
   id: number;
   order: number;
@@ -51,7 +57,12 @@ export type SharedApplication = {
   questionnaire: {
     status: string;
     score_percentage: string | number | null;
-    questions: { order: number; question_text: string; selected_option: string | null }[];
+    questions: {
+      order: number;
+      question_text: string;
+      answer_text?: string | null;
+      selected_option: string | null;
+    }[];
   } | null;
 };
 
@@ -105,7 +116,7 @@ export function completeVideoTest(
   return request(`/video-test/sessions/${token}/complete/`, { method: "POST" });
 }
 
-export function startQuestionnaire(token: string): Promise<McqItem[]> {
+export function startQuestionnaire(token: string): Promise<QuestionnaireItem[]> {
   return request(`/general-questionnaire/sessions/${token}/start/`, {
     method: "POST",
   });
@@ -114,18 +125,29 @@ export function startQuestionnaire(token: string): Promise<McqItem[]> {
 export function answerQuestionnaire(
   token: string,
   question_id: number,
-  selected_option: string,
+  answer_text: string,
+  attachment?: File | null,
 ): Promise<{ success: boolean }> {
+  if (attachment) {
+    const data = new FormData();
+    data.set("question_id", String(question_id));
+    data.set("answer_text", answer_text);
+    data.set("attachment", attachment);
+    return request(`/general-questionnaire/sessions/${token}/submit-answer/`, {
+      method: "POST",
+      body: data,
+    });
+  }
   return request(`/general-questionnaire/sessions/${token}/submit-answer/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question_id, selected_option }),
+    body: JSON.stringify({ question_id, answer_text }),
   });
 }
 
 export function completeQuestionnaire(
   token: string,
-): Promise<{ status: string; score_percentage: string }> {
+): Promise<{ status: string; score_percentage: string | null }> {
   return request(`/general-questionnaire/sessions/${token}/complete/`, {
     method: "POST",
   });

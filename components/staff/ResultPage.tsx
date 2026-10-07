@@ -100,20 +100,27 @@ export function ResultPage({
                     </p>
                   </li>
                 ))
-              : (
-                  (kind === "first-test"
-                    ? assessment?.first_test?.questions
-                    : assessment?.questionnaire?.questions) ?? []
-                ).map((row) => (
-                  <li key={row.order} className="text-sm">
-                    <p className="font-semibold">
-                      {row.order}. {row.question_text}
-                    </p>
-                    <p className="mt-1 text-zinc-600">
-                      Answer: {row.selected_option || "—"}
-                    </p>
-                  </li>
-                ))}
+              : kind === "questionnaire"
+                ? (assessment?.questionnaire?.questions ?? []).map((row) => (
+                    <li key={row.order} className="text-sm">
+                      <p className="font-semibold">
+                        {row.order}. {row.question_text}
+                      </p>
+                      <p className="mt-1 whitespace-pre-wrap text-zinc-600">
+                        {row.answer_text?.trim() || "—"}
+                      </p>
+                    </li>
+                  ))
+                : (assessment?.first_test?.questions ?? []).map((row) => (
+                    <li key={row.order} className="text-sm">
+                      <p className="font-semibold">
+                        {row.order}. {row.question_text}
+                      </p>
+                      <p className="mt-1 text-zinc-600">
+                        Answer: {row.selected_option || "—"}
+                      </p>
+                    </li>
+                  ))}
           </ol>
         </div>
       )}

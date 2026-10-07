@@ -1,349 +1,224 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
+import { getPublicInvite, type InvitePayload } from "@/lib/public-api";
 import {
-  answerFirstTest,
-  answerQuestionnaire,
-  completeFirstTest,
-  completeQuestionnaire,
-  completeVideoTest,
-  getPublicInvite,
-  startFirstTest,
-  startQuestionnaire,
-  startVideoTest,
-  uploadVideoAnswer,
-  type InvitePayload,
-  type McqItem,
-  type VideoItem,
-} from "@/lib/public-api";
-import { PrimaryButton, inputClass } from "@/components/staff/ui";
+  AssessmentExpiredCard,
+  isAssessmentLinkExpiredOrInvalid,
+} from "./AssessmentExpiredCard";
+import { FirstTestScreen } from "./FirstTestScreen";
+import { FirstTestThankYou } from "./FirstTestThankYou";
+import { FirstTestWelcome } from "./FirstTestWelcome";
+import { AlertCircleIcon } from "./icons";
+import { QuestionnaireScreen } from "./QuestionnaireScreen";
+import { QuestionnaireThankYou } from "./QuestionnaireThankYou";
+import { QuestionnaireWelcome } from "./QuestionnaireWelcome";
+import { TestBackdrop } from "./TestBackdrop";
+import { VideoTestScreen } from "./VideoTestScreen";
+import { VideoThankYou } from "./VideoThankYou";
+import { VideoWelcome } from "./VideoWelcome";
+import { cardShell, errorText, shellGradient } from "./shared";
 
-type Step =
-  | "load"
-  | "first"
-  | "video"
-  | "questionnaire"
-  | "done"
+type TestStage =
+  | "loading"
+  | "initial_welcome"
+  | "initial_test"
+  | "initial_test_thankyou"
+  | "video_welcome"
+  | "video_test"
+  | "video_test_result"
+  | "questionnaire_welcome"
+  | "questionnaire_test"
+  | "final_thankyou"
   | "missing"
   | "expired"
   | "error";
 
-function errorText(error: unknown): string {
-  return error instanceof ApiError ? error.message : "Request failed.";
+function stageFromInvite(invite: InvitePayload): TestStage {
+  if (invite.first_test.status !== "completed") {
+    if (invite.first_test.status === "pending") return "initial_welcome";
+    if (invite.first_test.status === "in_progress") return "initial_test";
+    return "error";
+  }
+  if (invite.video_test.status !== "completed") {
+    if (invite.video_test.status === "pending") return "video_welcome";
+    if (invite.video_test.status === "in_progress") return "video_test";
+    return "error";
+  }
+  if (invite.questionnaire.status !== "completed") {
+    if (invite.questionnaire.status === "pending") return "questionnaire_welcome";
+    if (invite.questionnaire.status === "in_progress") return "questionnaire_test";
+    return "error";
+  }
+  return "final_thankyou";
 }
 
 export function AssessmentFlow({ token }: { token: string }) {
-  const [step, setStep] = useState<Step>("load");
+  const [stage, setStage] = useState<TestStage>("loading");
   const [invite, setInvite] = useState<InvitePayload | null>(null);
-  const [notice, setNotice] = useState("");
+  const [error, setError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let ignore = false;
     getPublicInvite(token)
       .then((data) => {
-        if (ignore) {
-          return;
-        }
+        if (ignore) return;
         setInvite(data);
-        if (data.first_test.status !== "completed") {
-          setStep("first");
-        } else if (data.video_test.status !== "completed") {
-          setStep("video");
-        } else if (data.questionnaire.status !== "completed") {
-          setStep("questionnaire");
-        } else {
-          setStep("done");
-        }
+        setStage(stageFromInvite(data));
       })
-      .catch((error) => {
-        if (ignore) {
-          return;
-        }
-        if (error instanceof ApiError && error.status === 404) {
-          setStep("missing");
-        } else if (error instanceof ApiError && error.status === 410) {
-          setStep("expired");
+      .catch((err) => {
+        if (ignore) return;
+        if (err instanceof ApiError && err.status === 404) {
+          setStage("missing");
+        } else if (err instanceof ApiError && err.status === 410) {
+          setStage("expired");
         } else {
-          setNotice(errorText(error));
-          setStep("error");
+          setError(errorText(err));
+          setStage("error");
         }
       });
     return () => {
       ignore = true;
     };
-  }, [token]);
+  }, [token, reloadKey]);
 
-  if (step === "load") {
-    return <p className="text-sm text-zinc-500">Loading assessment…</p>;
+  const refresh = useCallback(() => {
+    setStage("loading");
+    setError("");
+    setReloadKey((k) => k + 1);
+  }, []);
+
+  if (stage === "loading") {
+    return <TestBackdrop message="Loading test..." />;
   }
-  if (step === "missing") {
-    return <StatusCard title="Not found" body="This assessment link is not valid." />;
-  }
-  if (step === "expired") {
+  if (stage === "missing") {
     return (
-      <StatusCard title="Expired" body="This assessment invite has expired." />
+      <AssessmentExpiredCard
+        title="Not found"
+        message="This assessment link is not valid."
+      />
     );
   }
-  if (step === "error") {
-    return <StatusCard title="Unavailable" body={notice || "Request failed."} />;
+  if (stage === "expired") {
+    return (
+      <AssessmentExpiredCard message="This assessment invite has expired." />
+    );
   }
-
-  return (
-    <div className="mx-auto max-w-2xl px-4 py-10">
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-        Assessment
-      </p>
-      <h1 className="mt-2 text-2xl font-semibold">
-        {invite?.role.title ?? "Assessment"}
-      </h1>
-      <p className="mt-1 text-sm text-zinc-600">{invite?.applicant.name}</p>
-      {step === "first" ? (
-        <McqSession
-          title="First test"
-          onStart={() => startFirstTest(token)}
-          onAnswer={(id, option) => answerFirstTest(token, id, option)}
-          onComplete={() => completeFirstTest(token)}
-          onDone={() => setStep("video")}
-        />
-      ) : null}
-      {step === "video" ? (
-        <VideoSession
-          onStart={() => startVideoTest(token)}
-          onUpload={(id, file) => uploadVideoAnswer(token, id, file)}
-          onComplete={() => completeVideoTest(token)}
-          onDone={() => setStep("questionnaire")}
-        />
-      ) : null}
-      {step === "questionnaire" ? (
-        <McqSession
-          title="Questionnaire"
-          onStart={() => startQuestionnaire(token)}
-          onAnswer={(id, option) => answerQuestionnaire(token, id, option)}
-          onComplete={() => completeQuestionnaire(token)}
-          onDone={() => setStep("done")}
-        />
-      ) : null}
-      {step === "done" ? (
-        <p className="mt-8 text-sm text-zinc-600">
-          Thank you. Your assessment is complete.
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-function StatusCard({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="mx-auto max-w-lg px-4 py-16 text-center">
-      <h1 className="text-2xl font-semibold">{title}</h1>
-      <p className="mt-3 text-sm text-zinc-600">{body}</p>
-    </div>
-  );
-}
-
-function McqSession({
-  title,
-  onStart,
-  onAnswer,
-  onComplete,
-  onDone,
-}: {
-  title: string;
-  onStart: () => Promise<McqItem[]>;
-  onAnswer: (id: number, option: string) => Promise<unknown>;
-  onComplete: () => Promise<unknown>;
-  onDone: () => void;
-}) {
-  const [items, setItems] = useState<McqItem[]>([]);
-  const [index, setIndex] = useState(0);
-  const [choice, setChoice] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState("");
-  const current = items[index];
-
-  async function begin() {
-    setBusy(true);
-    setNotice("");
-    try {
-      const rows = await onStart();
-      setItems(rows);
-    } catch (error) {
-      setNotice(errorText(error));
-    } finally {
-      setBusy(false);
+  if (stage === "error") {
+    if (isAssessmentLinkExpiredOrInvalid(error)) {
+      return <AssessmentExpiredCard message={error} />;
     }
-  }
-
-  async function save() {
-    if (!current || !choice) {
-      return;
-    }
-    setBusy(true);
-    setNotice("");
-    try {
-      await onAnswer(current.id, choice);
-      if (index + 1 < items.length) {
-        setIndex(index + 1);
-        setChoice("");
-      } else {
-        await onComplete();
-        onDone();
-      }
-    } catch (error) {
-      setNotice(errorText(error));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <section className="mt-8 rounded-2xl border border-black/10 bg-amal-white p-5">
-      <h2 className="text-lg font-bold">{title}</h2>
-      {notice ? <p className="mt-3 text-sm text-amal-red">{notice}</p> : null}
-      {items.length === 0 ? (
-        <div className="mt-4">
-          <PrimaryButton type="button" disabled={busy} onClick={() => void begin()}>
-            {busy ? "Starting…" : "Start"}
-          </PrimaryButton>
-        </div>
-      ) : (
-        <div className="mt-4">
-          <p className="text-xs uppercase tracking-wide text-zinc-500">
-            Question {index + 1} of {items.length}
-          </p>
-          <p className="mt-2 font-semibold">{current.question_text}</p>
-          <div className="mt-4 space-y-2">
-            {(["A", "B", "C", "D"] as const).map((letter) => {
-              const label = {
-                A: current.option_a,
-                B: current.option_b,
-                C: current.option_c,
-                D: current.option_d,
-              }[letter];
-              return (
-                <label key={letter} className="flex items-start gap-2 text-sm">
-                  <input
-                    type="radio"
-                    name={`q-${current.id}`}
-                    checked={choice === letter}
-                    onChange={() => setChoice(letter)}
-                  />
-                  <span>
-                    {letter}. {label}
-                  </span>
-                </label>
-              );
-            })}
+    return (
+      <div className={shellGradient}>
+        <div className={`${cardShell} max-w-md text-center`}>
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amal-red/15">
+            <AlertCircleIcon className="h-8 w-8 text-amal-red" />
           </div>
-          <div className="mt-4">
-            <PrimaryButton
-              type="button"
-              disabled={busy || !choice}
-              onClick={() => void save()}
-            >
-              {busy
-                ? "Saving…"
-                : index + 1 < items.length
-                  ? "Next"
-                  : "Finish"}
-            </PrimaryButton>
-          </div>
+          <h2 className="mb-2 text-2xl font-bold text-amal-ink">Error</h2>
+          <p className="mb-6 text-zinc-600">{error || "Request failed."}</p>
+          <button
+            type="button"
+            onClick={refresh}
+            className="w-full rounded-lg bg-amal-red px-6 py-3 font-semibold text-amal-white hover:bg-amal-red/90"
+          >
+            Try Again
+          </button>
         </div>
-      )}
-    </section>
-  );
-}
-
-function VideoSession({
-  onStart,
-  onUpload,
-  onComplete,
-  onDone,
-}: {
-  onStart: () => Promise<VideoItem[]>;
-  onUpload: (id: number, file: File) => Promise<unknown>;
-  onComplete: () => Promise<unknown>;
-  onDone: () => void;
-}) {
-  const [items, setItems] = useState<VideoItem[]>([]);
-  const [index, setIndex] = useState(0);
-  const [file, setFile] = useState<File | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState("");
-  const current = items[index];
-
-  async function begin() {
-    setBusy(true);
-    setNotice("");
-    try {
-      setItems(await onStart());
-    } catch (error) {
-      setNotice(errorText(error));
-    } finally {
-      setBusy(false);
-    }
+      </div>
+    );
   }
 
-  async function save() {
-    if (!current || !file) {
-      return;
-    }
-    setBusy(true);
-    setNotice("");
-    try {
-      await onUpload(current.id, file);
-      if (index + 1 < items.length) {
-        setIndex(index + 1);
-        setFile(null);
-      } else {
-        await onComplete();
-        onDone();
-      }
-    } catch (error) {
-      setNotice(errorText(error));
-    } finally {
-      setBusy(false);
-    }
+  if (!invite) {
+    return <TestBackdrop message="Loading..." />;
   }
 
-  return (
-    <section className="mt-8 rounded-2xl border border-black/10 bg-amal-white p-5">
-      <h2 className="text-lg font-bold">Video</h2>
-      {notice ? <p className="mt-3 text-sm text-amal-red">{notice}</p> : null}
-      {items.length === 0 ? (
-        <div className="mt-4">
-          <PrimaryButton type="button" disabled={busy} onClick={() => void begin()}>
-            {busy ? "Starting…" : "Start"}
-          </PrimaryButton>
-        </div>
-      ) : (
-        <div className="mt-4">
-          <p className="text-xs uppercase tracking-wide text-zinc-500">
-            Prompt {index + 1} of {items.length}
-          </p>
-          <p className="mt-2 font-semibold">{current.prompt}</p>
-          <input
-            className={`${inputClass} mt-4`}
-            type="file"
-            accept="video/*"
-            onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-          />
-          <div className="mt-4">
-            <PrimaryButton
-              type="button"
-              disabled={busy || !file}
-              onClick={() => void save()}
-            >
-              {busy
-                ? "Uploading…"
-                : index + 1 < items.length
-                  ? "Next"
-                  : "Finish"}
-            </PrimaryButton>
-          </div>
-        </div>
-      )}
-    </section>
-  );
+  const applicantName = invite.applicant.name;
+  const jobTitle = invite.role.title;
+
+  switch (stage) {
+    case "initial_welcome":
+      return (
+        <FirstTestWelcome
+          token={token}
+          applicantName={applicantName}
+          jobTitle={jobTitle}
+          totalQuestions={invite.first_test.total_questions}
+          timeLimitMinutes={invite.first_test.time_limit_minutes}
+          onTestStarted={refresh}
+        />
+      );
+    case "initial_test":
+      return (
+        <FirstTestScreen
+          token={token}
+          timeLimitMinutes={invite.first_test.time_limit_minutes}
+          onComplete={() => setStage("initial_test_thankyou")}
+        />
+      );
+    case "initial_test_thankyou":
+      return (
+        <FirstTestThankYou
+          videoQuestionCount={invite.video_test.total_questions}
+          onContinueToVideoTest={() => {
+            if (invite.video_test.status === "in_progress") {
+              setStage("video_test");
+            } else {
+              setStage("video_welcome");
+            }
+          }}
+        />
+      );
+    case "video_welcome":
+      return (
+        <VideoWelcome
+          token={token}
+          applicantName={applicantName}
+          jobTitle={jobTitle}
+          totalQuestions={invite.video_test.total_questions}
+          onTestStarted={refresh}
+        />
+      );
+    case "video_test":
+      return (
+        <VideoTestScreen
+          token={token}
+          onComplete={() => setStage("video_test_result")}
+        />
+      );
+    case "video_test_result":
+      return (
+        <VideoThankYou
+          onContinueToQuestionnaire={() => {
+            if (invite.questionnaire.status === "in_progress") {
+              setStage("questionnaire_test");
+            } else {
+              setStage("questionnaire_welcome");
+            }
+          }}
+        />
+      );
+    case "questionnaire_welcome":
+      return (
+        <QuestionnaireWelcome
+          token={token}
+          applicantName={applicantName}
+          jobTitle={jobTitle}
+          totalQuestions={invite.questionnaire.total_questions}
+          onTestStarted={refresh}
+        />
+      );
+    case "questionnaire_test":
+      return (
+        <QuestionnaireScreen
+          token={token}
+          onComplete={() => setStage("final_thankyou")}
+        />
+      );
+    case "final_thankyou":
+      return <QuestionnaireThankYou />;
+    default:
+      return <TestBackdrop message="Loading..." />;
+  }
 }

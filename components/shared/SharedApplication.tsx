@@ -99,12 +99,12 @@ export function SharedApplication({ id }: { id: string }) {
           <p className="mt-4 text-zinc-500">No resume on file.</p>
         )}
       </section>
-      <TestBlock title="First test" section={row.first_test} kind="written" />
+      <TestBlock title="First test" section={row.first_test} kind="mcq" />
       <TestBlock title="Video" section={row.video_test} kind="video" />
       <TestBlock
         title="Questionnaire"
         section={row.questionnaire}
-        kind="written"
+        kind="questionnaire"
       />
     </div>
   );
@@ -120,7 +120,7 @@ function TestBlock({
     | SharedPayload["first_test"]
     | SharedPayload["video_test"]
     | SharedPayload["questionnaire"];
-  kind: "written" | "video";
+  kind: "mcq" | "video" | "questionnaire";
 }) {
   return (
     <section className="rounded-2xl border border-black/10 bg-amal-white p-5">
@@ -146,8 +146,22 @@ function TestBlock({
                     </li>
                   ),
                 )
-              : ((section as SharedPayload["first_test"])?.questions ?? []).map(
-                  (item) => (
+              : kind === "questionnaire"
+                ? (
+                    (section as SharedPayload["questionnaire"])?.questions ?? []
+                  ).map((item) => (
+                    <li key={item.order}>
+                      <p className="font-semibold">
+                        {item.order}. {item.question_text}
+                      </p>
+                      <p className="whitespace-pre-wrap text-zinc-600">
+                        {item.answer_text?.trim() || "—"}
+                      </p>
+                    </li>
+                  ))
+                : (
+                    (section as SharedPayload["first_test"])?.questions ?? []
+                  ).map((item) => (
                     <li key={item.order}>
                       <p className="font-semibold">
                         {item.order}. {item.question_text}
@@ -156,8 +170,7 @@ function TestBlock({
                         Answer: {item.selected_option || "—"}
                       </p>
                     </li>
-                  ),
-                )}
+                  ))}
           </ol>
         </div>
       )}
