@@ -126,6 +126,24 @@ export function VideoTestScreen({
     onComplete();
   }, [token, onComplete]);
 
+  async function probeBlobDuration(blob: Blob): Promise<number | null> {
+    const objectUrl = URL.createObjectURL(blob);
+    try {
+      return await new Promise<number | null>((resolve) => {
+        const video = document.createElement("video");
+        video.preload = "metadata";
+        video.onloadedmetadata = () => {
+          const duration = video.duration;
+          resolve(Number.isFinite(duration) ? Math.round(duration) : null);
+        };
+        video.onerror = () => resolve(null);
+        video.src = objectUrl;
+      });
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
+  }
+
   async function handleRecordingComplete(blob: Blob) {
     if (!current) return;
     setIsUploading(true);
@@ -134,7 +152,8 @@ export function VideoTestScreen({
       const file = new File([blob], `question_${current.order}.mp4`, {
         type: blob.type || "video/mp4",
       });
-      await uploadVideoAnswer(token, current.id, file);
+      const durationSeconds = await probeBlobDuration(blob);
+      await uploadVideoAnswer(token, current.id, file, durationSeconds);
       setUploadedOrders((prev) =>
         prev.includes(current.order)
           ? prev

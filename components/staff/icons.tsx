@@ -248,6 +248,26 @@ export function ExternalLinkIcon({ className }: { className?: string }) {
   );
 }
 
+export function DownloadIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M12 3v12" />
+      <path d="m7 10 5 5 5-5" />
+      <path d="M5 19h14" />
+    </Icon>
+  );
+}
+
+export function ImageIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <rect x="4" y="5" width="16" height="14" rx="2" />
+      <circle cx="9" cy="10" r="1.5" />
+      <path d="m4 16 5-4 4 3 3-2 4 3" />
+    </Icon>
+  );
+}
+
 export function FileTextIcon({ className }: { className?: string }) {
   return (
     <Icon className={className}>

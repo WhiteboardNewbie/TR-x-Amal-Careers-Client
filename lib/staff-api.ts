@@ -563,11 +563,12 @@ export function getComments(applicationId: number): Promise<Page<Comment>> {
 export function addComment(
   applicationId: number,
   text: string,
+  source?: "general" | "video_test" | "general_questionnaire",
 ): Promise<Comment> {
   return sendJson<Comment>(
     `/careers/job-applications/${applicationId}/comments/`,
     "POST",
-    { text },
+    source ? { text, source } : { text },
   );
 }
 
