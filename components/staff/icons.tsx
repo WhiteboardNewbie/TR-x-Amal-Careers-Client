@@ -217,6 +217,26 @@ export function EyeIcon({ className }: { className?: string }) {
   );
 }
 
+export function PencilIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </Icon>
+  );
+}
+
+export function TrashIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M3 6h18" />
+      <path d="M8 6V4h8v2" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+      <path d="M10 11v6M14 11v6" />
+    </Icon>
+  );
+}
+
 export function ShareIcon({ className }: { className?: string }) {
   return (
     <Icon className={className}>
