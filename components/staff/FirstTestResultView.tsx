@@ -106,8 +106,12 @@ export function FirstTestResultView({ id }: { id: number }) {
   const tone = getScoreTone(
     Number.isFinite(scorePct) ? scorePct : 0,
   );
-  const correct = firstTest.correct_count ?? 0;
-  const attempted = firstTest.attempted_count ?? firstTest.questions.length;
+  const correct =
+    firstTest.correct_count ?? firstTest.correct_answers ?? 0;
+  const attempted =
+    firstTest.attempted_count ??
+    firstTest.questions_attempted ??
+    firstTest.questions.length;
   const total = firstTest.total_questions ?? firstTest.questions.length;
   const incorrect = Math.max(0, attempted - correct);
   const timeTaken =
@@ -315,6 +319,11 @@ function AccordionQuestion({
               );
             })}
           </div>
+          {question.answered_at ? (
+            <p className="mt-3 text-xs text-zinc-500">
+              Answered {formatDateTime(question.answered_at)}
+            </p>
+          ) : null}
         </div>
       ) : null}
     </div>
