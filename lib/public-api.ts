@@ -105,10 +105,14 @@ export function uploadVideoAnswer(
   token: string,
   question_id: number,
   file: File,
+  durationSeconds?: number | null,
 ): Promise<{ success: boolean }> {
   const data = new FormData();
   data.set("question_id", String(question_id));
   data.set("file", file);
+  if (durationSeconds != null && Number.isFinite(durationSeconds)) {
+    data.set("duration_seconds", String(Math.max(0, Math.round(durationSeconds))));
+  }
   return request(`/video-test/sessions/${token}/upload/`, {
     method: "POST",
     body: data,

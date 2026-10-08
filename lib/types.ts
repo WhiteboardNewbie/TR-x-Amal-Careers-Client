@@ -351,6 +351,8 @@ export type WrittenTestSection = {
   correct_count?: number;
   attempted_count?: number;
   total_questions?: number;
+  started_at?: string | null;
+  completed_at?: string | null;
   questions: {
     order: number;
     question_text: string;
@@ -370,6 +372,8 @@ export type WrittenTestSection = {
 export type VideoTestSection = {
   status: string;
   score_percentage: string | number | null;
+  started_at?: string | null;
+  completed_at?: string | null;
   questions: {
     order: number;
     prompt: string;
@@ -408,6 +412,9 @@ export type ApplicationAssessment = {
   invite_token: string | null;
   expires_at: string | null;
   invite_url: string | null;
+  applicant_name?: string | null;
+  applicant_email?: string | null;
+  job_title?: string | null;
   first_test: WrittenTestSection | null;
   video_test: VideoTestSection | null;
   video_evaluation?: VideoEvaluation | null;

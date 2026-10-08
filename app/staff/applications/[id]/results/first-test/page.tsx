@@ -1,9 +1,9 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { ResultPage } from "@/components/staff/ResultPage";
+import { FirstTestResultView } from "@/components/staff/FirstTestResultView";
 
 export default function FirstTestResultPage() {
   const params = useParams<{ id: string }>();
-  return <ResultPage id={Number(params.id)} kind="first-test" />;
+  return <FirstTestResultView id={Number(params.id)} />;
 }

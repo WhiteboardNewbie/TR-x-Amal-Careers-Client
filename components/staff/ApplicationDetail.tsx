@@ -13,12 +13,10 @@ import { peekCareersApplicationsReturn } from "@/lib/careers-return";
 import { formatPhoneDisplay, phoneTelHref } from "@/lib/phone-format";
 import { ReviewStageModal } from "@/components/reviews/ReviewStageModal";
 import {
-  addComment,
   downloadJobApplicationResume,
   getApplicationStages,
   getAssessment,
   getAssignedStages,
-  getComments,
   getDepartmentManagers,
   getStaffApplication,
   getTimeline,
@@ -29,13 +27,13 @@ import { STATUS_TONE, labelFor, stageStatusBadge } from "@/lib/status";
 import type {
   ApplicationAssessment,
   ApplicationStage,
-  Comment,
   DepartmentManager,
   ApplicationStageHrOverview,
   JobOpening,
   StaffApplication,
   VideoEvaluation,
 } from "@/lib/types";
+import { AssessmentCommentsPanel } from "./AssessmentCommentsPanel";
 import { CareersBackLink } from "./CareersBackLink";
 import {
   formatAssessmentStatusLabel,
@@ -62,7 +60,7 @@ import {
 import { ResultPage } from "./ResultPage";
 import { ResumePreviewPanel } from "./ResumePreviewPanel";
 import { ShareApplicationModal } from "./ShareApplicationModal";
-import { CenteredOverlay, PrimaryButton, inputClass } from "./ui";
+import { CenteredOverlay, PrimaryButton } from "./ui";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
@@ -260,7 +258,6 @@ export function ApplicationDetail({
   const [application, setApplication] = useState<StaffApplication | null>(null);
   const [opening, setOpening] = useState<JobOpening | null>(null);
   const [stages, setStages] = useState<ApplicationStage[]>([]);
-  const [comments, setComments] = useState<Comment[]>([]);
   const [timeline, setTimeline] = useState<
     { type: string; date: string | null; label: string }[]
   >([]);
@@ -273,7 +270,6 @@ export function ApplicationDetail({
   >(null);
   const [managerStageLoading, setManagerStageLoading] = useState(isReviews);
   const [reviewStageOpen, setReviewStageOpen] = useState(false);
-  const [note, setNote] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState("");
   const [shareOpen, setShareOpen] = useState(false);
@@ -293,20 +289,18 @@ export function ApplicationDetail({
     Promise.all([
       getStaffApplication(id),
       getApplicationStages(id),
-      getComments(id),
       getTimeline(id),
       getAssessment(id),
       isReviews
         ? getAssignedStages({ page_size: 50 }).catch(() => null)
         : Promise.resolve(null),
     ])
-      .then(async ([app, stagePage, commentPage, events, tests, assigned]) => {
+      .then(async ([app, stagePage, events, tests, assigned]) => {
         if (ignore) {
           return;
         }
         setApplication(app);
         setStages(stagePage.results);
-        setComments(commentPage.results);
         setTimeline(events);
         setAssessment(tests);
         if (isReviews) {
@@ -515,22 +509,6 @@ export function ApplicationDetail({
             }
           : current,
       );
-    } catch (error) {
-      onError(errorText(error));
-    } finally {
-      setBusy("");
-    }
-  }
-
-  async function saveComment() {
-    if (!note.trim()) {
-      return;
-    }
-    setBusy("comment");
-    try {
-      const created = await addComment(id, note.trim());
-      setComments((current) => [...current, created]);
-      setNote("");
     } catch (error) {
       onError(errorText(error));
     } finally {
@@ -796,67 +774,11 @@ export function ApplicationDetail({
             headerAction={reviewStageAction}
             emptyStateAction={reviewStageAction}
           />
-          <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white p-5">
-            <h2 className="text-lg font-bold">Comments</h2>
-            <p className="text-sm text-zinc-500">Notes on this application</p>
-            {comments.length === 0 ? (
-              <div className="mt-4 rounded-2xl border border-dashed border-black/15 bg-amal-sheet/70 px-4 py-6 text-center">
-                <MessageSquareIcon className="mx-auto h-7 w-7 text-zinc-300" />
-                <p className="mt-2 text-sm font-medium text-zinc-600">
-                  No comments yet
-                </p>
-                <p className="mt-1 text-xs text-zinc-500">
-                  Be the first to add a note on this application.
-                </p>
-              </div>
-            ) : (
-              <ul className="mt-4 space-y-3">
-                {comments.map((item) => (
-                  <li
-                    key={item.id}
-                    className="rounded-xl border border-black/10 bg-amal-sheet/50 px-4 py-3"
-                  >
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-zinc-500">
-                      <span className="font-semibold text-zinc-700">
-                        {item.author_display_name || "Unknown"}
-                      </span>
-                      <span aria-hidden>·</span>
-                      <time dateTime={item.created_at}>
-                        {formatDateTime(item.created_at)}
-                      </time>
-                      {item.source && item.source !== "general" ? (
-                        <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700">
-                          {item.source_label || item.source}
-                        </span>
-                      ) : null}
-                      {item.stage_name ? (
-                        <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700">
-                          {item.stage_name}
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-800">
-                      {item.text}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <textarea
-              className={`${inputClass} mt-4 h-20 py-2`}
-              value={note}
-              onChange={(event) => setNote(event.target.value)}
-              placeholder="Write a comment..."
-            />
-            <PrimaryButton
-              type="button"
-              className="mt-3"
-              disabled={busy === "comment" || !note.trim()}
-              onClick={() => void saveComment()}
-            >
-              {busy === "comment" ? "Saving…" : "Add comment"}
-            </PrimaryButton>
-          </section>
+          <AssessmentCommentsPanel
+            applicationId={id}
+            headerTitle="Comments"
+            headerSubtitle="Notes and feedback from reviewers"
+          />
         </div>
       </div>
 
@@ -1866,7 +1788,7 @@ function VideoResponsesPanel({
                 className={cn(
                   "w-full rounded-xl p-3 text-left transition",
                   selectedIndex === index
-                    ? "bg-violet-600 text-amal-white shadow-md shadow-violet-500/25"
+                    ? "bg-amal-red text-amal-white shadow-md shadow-amal-red/25"
                     : "border border-transparent bg-amal-white text-zinc-700 hover:border-black/10",
                 )}
               >
@@ -1947,7 +1869,9 @@ function VideoResponsesPanel({
                   />
                   <VideoMetaChip
                     label="Recorded"
-                    value={formatDate(selected.recorded_at)}
+                    value={formatDate(
+                      selected.recorded_at ?? selected.uploaded_at,
+                    )}
                   />
                   <VideoMetaChip
                     label="Uploaded"

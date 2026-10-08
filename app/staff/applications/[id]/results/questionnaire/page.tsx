@@ -1,9 +1,9 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { ResultPage } from "@/components/staff/ResultPage";
+import { QuestionnaireResultView } from "@/components/staff/QuestionnaireResultView";
 
 export default function QuestionnaireResultPage() {
   const params = useParams<{ id: string }>();
-  return <ResultPage id={Number(params.id)} kind="questionnaire" />;
+  return <QuestionnaireResultView id={Number(params.id)} />;
 }
