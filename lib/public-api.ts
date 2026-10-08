@@ -36,6 +36,7 @@ export type VideoItem = {
   id: number;
   order: number;
   prompt: string;
+  time_limit_seconds?: number;
 };
 
 export type SharedApplication = {

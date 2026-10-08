@@ -9,7 +9,9 @@ import {
   createVideoPrompt,
   getAssessmentSettings,
   getBankQuestions,
+  getOrgDepartments,
   getQuestionnairePrompts,
+  getSkillsPage,
   getVideoPrompts,
   patchAssessmentSetting,
   patchBankQuestion,
@@ -19,12 +21,162 @@ import {
 import type {
   AssessmentSetting,
   BankQuestion,
+  Department,
   QuestionnairePrompt,
+  Skill,
   VideoPrompt,
 } from "@/lib/types";
 import { CheckIcon, XIcon } from "./icons";
 import { StaffBanner } from "./StaffBanner";
 import { Field, GhostButton, Modal, PrimaryButton, inputClass } from "./ui";
+
+const DOMAIN_OPTIONS = [
+  { value: "", label: "Not set" },
+  { value: "technical", label: "Technical" },
+  { value: "behavioral", label: "Behavioral" },
+];
+
+const DIFFICULTY_OPTIONS = [
+  { value: "easy", label: "Easy" },
+  { value: "intermediate", label: "Intermediate" },
+  { value: "hard", label: "Hard" },
+];
+
+function TaxonomyFields({
+  departments,
+  skills,
+  departmentId,
+  domain,
+  difficulty,
+  skillIds,
+  onDepartment,
+  onDomain,
+  onDifficulty,
+  onSkillIds,
+}: {
+  departments: Department[];
+  skills: Skill[];
+  departmentId: number | "";
+  domain: string;
+  difficulty: string;
+  skillIds: number[];
+  onDepartment: (value: number | "") => void;
+  onDomain: (value: string) => void;
+  onDifficulty: (value: string) => void;
+  onSkillIds: (value: number[]) => void;
+}) {
+  function toggleSkill(id: number) {
+    onSkillIds(
+      skillIds.includes(id)
+        ? skillIds.filter((row) => row !== id)
+        : [...skillIds, id],
+    );
+  }
+
+  return (
+    <>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Field label="Department">
+          <select
+            className={inputClass}
+            value={departmentId === "" ? "" : String(departmentId)}
+            onChange={(event) =>
+              onDepartment(
+                event.target.value ? Number(event.target.value) : "",
+              )
+            }
+          >
+            <option value="">Not set</option>
+            {departments.map((row) => (
+              <option key={row.id} value={row.id}>
+                {row.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Domain">
+          <select
+            className={inputClass}
+            value={domain}
+            onChange={(event) => onDomain(event.target.value)}
+          >
+            {DOMAIN_OPTIONS.map((row) => (
+              <option key={row.value || "none"} value={row.value}>
+                {row.label}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Difficulty">
+          <select
+            className={inputClass}
+            value={difficulty}
+            onChange={(event) => onDifficulty(event.target.value)}
+          >
+            {DIFFICULTY_OPTIONS.map((row) => (
+              <option key={row.value} value={row.value}>
+                {row.label}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
+      <div className="mb-4 rounded-lg border border-black/10 bg-amal-sheet p-3">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+          Skills
+        </p>
+        <div className="flex max-h-28 flex-wrap gap-2 overflow-y-auto">
+          {skills.length === 0 ? (
+            <p className="text-xs text-zinc-500">No skills yet.</p>
+          ) : (
+            skills.map((row) => (
+              <label
+                key={row.id}
+                className="inline-flex items-center gap-2 rounded-md border border-black/10 bg-amal-white px-2 py-1 text-xs"
+              >
+                <input
+                  type="checkbox"
+                  checked={skillIds.includes(row.id)}
+                  onChange={() => toggleSkill(row.id)}
+                />
+                {row.name}
+              </label>
+            ))
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function useDepartmentsAndSkills(onError: (value: string) => void) {
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  useEffect(() => {
+    let ignore = false;
+    Promise.all([
+      getOrgDepartments().catch(() => [] as Department[]),
+      getSkillsPage()
+        .then((page) => page.results)
+        .catch(() => [] as Skill[]),
+    ])
+      .then(([nextDepartments, nextSkills]) => {
+        if (!ignore) {
+          setDepartments(nextDepartments);
+          setSkills(nextSkills);
+        }
+      })
+      .catch((error) => {
+        if (!ignore) {
+          onError(errorText(error));
+        }
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [onError]);
+  return { departments, skills };
+}
 
 type Tab = "mcq" | "video" | "questionnaire" | "defaults";
 
@@ -159,6 +311,8 @@ function McqTab({ onError }: { onError: (value: string) => void }) {
             <thead>
               <tr className="text-xs uppercase tracking-wide text-zinc-500">
                 <th className="py-2">Question</th>
+                <th>Domain</th>
+                <th>Difficulty</th>
                 <th>Answer</th>
                 <th className="text-center">Status</th>
                 <th />
@@ -168,6 +322,12 @@ function McqTab({ onError }: { onError: (value: string) => void }) {
               {rows.map((row) => (
                 <tr key={row.id} className="border-t border-black/5">
                   <td className="py-3 font-semibold">{row.question_text}</td>
+                  <td className="capitalize text-zinc-600">
+                    {row.domain || "—"}
+                  </td>
+                  <td className="capitalize text-zinc-600">
+                    {row.difficulty || "—"}
+                  </td>
                   <td>{row.correct_option}</td>
                   <td className="text-center">
                     <QuestionStatusBadge active={row.is_active} />
@@ -209,6 +369,7 @@ function McqModal({
   onSaved: () => void;
   onError: (value: string) => void;
 }) {
+  const { departments, skills } = useDepartmentsAndSkills(onError);
   const [text, setText] = useState(question?.question_text ?? "");
   const [a, setA] = useState(question?.option_a ?? "");
   const [b, setB] = useState(question?.option_b ?? "");
@@ -216,6 +377,14 @@ function McqModal({
   const [d, setD] = useState(question?.option_d ?? "");
   const [correct, setCorrect] = useState(question?.correct_option ?? "A");
   const [active, setActive] = useState(question?.is_active ?? true);
+  const [departmentId, setDepartmentId] = useState<number | "">(
+    question?.department_id ?? "",
+  );
+  const [domain, setDomain] = useState(question?.domain ?? "");
+  const [difficulty, setDifficulty] = useState(
+    question?.difficulty ?? "intermediate",
+  );
+  const [skillIds, setSkillIds] = useState<number[]>(question?.skill_ids ?? []);
   const [busy, setBusy] = useState(false);
 
   async function onSubmit(event: React.FormEvent) {
@@ -229,6 +398,10 @@ function McqModal({
       option_d: d,
       correct_option: correct,
       is_active: active,
+      department_id: departmentId === "" ? null : departmentId,
+      domain: domain || null,
+      difficulty,
+      skill_ids: skillIds,
     };
     try {
       if (question) {
@@ -282,6 +455,18 @@ function McqModal({
             ))}
           </select>
         </Field>
+        <TaxonomyFields
+          departments={departments}
+          skills={skills}
+          departmentId={departmentId}
+          domain={domain}
+          difficulty={difficulty}
+          skillIds={skillIds}
+          onDepartment={setDepartmentId}
+          onDomain={setDomain}
+          onDifficulty={setDifficulty}
+          onSkillIds={setSkillIds}
+        />
         <label className="mb-4 flex items-center gap-2 text-sm font-semibold">
           <input
             type="checkbox"
@@ -336,6 +521,9 @@ function VideoTab({ onError }: { onError: (value: string) => void }) {
             <thead>
               <tr className="text-xs uppercase tracking-wide text-zinc-500">
                 <th className="py-2">Prompt</th>
+                <th>Order</th>
+                <th>Domain</th>
+                <th>Limit</th>
                 <th className="text-center">Status</th>
                 <th />
               </tr>
@@ -344,6 +532,15 @@ function VideoTab({ onError }: { onError: (value: string) => void }) {
               {rows.map((row) => (
                 <tr key={row.id} className="border-t border-black/5">
                   <td className="py-3 font-semibold">{row.prompt}</td>
+                  <td>{row.question_order ?? "—"}</td>
+                  <td className="capitalize text-zinc-600">
+                    {row.domain || "—"}
+                  </td>
+                  <td>
+                    {row.time_limit_seconds
+                      ? `${row.time_limit_seconds}s`
+                      : "—"}
+                  </td>
                   <td className="text-center">
                     <QuestionStatusBadge active={row.is_active} />
                   </td>
@@ -384,18 +581,39 @@ function VideoModal({
   onSaved: () => void;
   onError: (value: string) => void;
 }) {
+  const { departments, skills } = useDepartmentsAndSkills(onError);
   const [text, setText] = useState(prompt?.prompt ?? "");
   const [active, setActive] = useState(prompt?.is_active ?? true);
+  const [order, setOrder] = useState(prompt?.question_order ?? 1);
+  const [timeLimit, setTimeLimit] = useState(prompt?.time_limit_seconds ?? 120);
+  const [departmentId, setDepartmentId] = useState<number | "">(
+    prompt?.department_id ?? "",
+  );
+  const [domain, setDomain] = useState(prompt?.domain ?? "");
+  const [difficulty, setDifficulty] = useState(
+    prompt?.difficulty ?? "intermediate",
+  );
+  const [skillIds, setSkillIds] = useState<number[]>(prompt?.skill_ids ?? []);
   const [busy, setBusy] = useState(false);
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     setBusy(true);
+    const body = {
+      prompt: text,
+      is_active: active,
+      question_order: order,
+      time_limit_seconds: timeLimit,
+      department_id: departmentId === "" ? null : departmentId,
+      domain: domain || null,
+      difficulty,
+      skill_ids: skillIds,
+    };
     try {
       if (prompt) {
-        await patchVideoPrompt(prompt.id, { prompt: text, is_active: active });
+        await patchVideoPrompt(prompt.id, body);
       } else {
-        await createVideoPrompt(text);
+        await createVideoPrompt(body);
       }
       onSaved();
     } catch (error) {
@@ -416,16 +634,50 @@ function VideoModal({
             required
           />
         </Field>
-        {prompt ? (
-          <label className="mb-4 flex items-center gap-2 text-sm font-semibold">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field label="Question order">
             <input
-              type="checkbox"
-              checked={active}
-              onChange={(event) => setActive(event.target.checked)}
+              type="number"
+              min={1}
+              className={inputClass}
+              value={order}
+              onChange={(event) => setOrder(Number(event.target.value) || 1)}
+              required
             />
-            Active
-          </label>
-        ) : null}
+          </Field>
+          <Field label="Time limit (seconds)">
+            <input
+              type="number"
+              min={30}
+              className={inputClass}
+              value={timeLimit}
+              onChange={(event) =>
+                setTimeLimit(Number(event.target.value) || 120)
+              }
+              required
+            />
+          </Field>
+        </div>
+        <TaxonomyFields
+          departments={departments}
+          skills={skills}
+          departmentId={departmentId}
+          domain={domain}
+          difficulty={difficulty}
+          skillIds={skillIds}
+          onDepartment={setDepartmentId}
+          onDomain={setDomain}
+          onDifficulty={setDifficulty}
+          onSkillIds={setSkillIds}
+        />
+        <label className="mb-4 flex items-center gap-2 text-sm font-semibold">
+          <input
+            type="checkbox"
+            checked={active}
+            onChange={(event) => setActive(event.target.checked)}
+          />
+          Active
+        </label>
         <PrimaryButton type="submit" disabled={busy}>
           {busy ? "Saving…" : "Save"}
         </PrimaryButton>

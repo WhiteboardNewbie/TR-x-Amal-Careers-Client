@@ -288,21 +288,43 @@ export type OrgClientUser = {
   user?: number | null;
 };
 
+export type QuestionDomain = "technical" | "behavioral" | null;
+export type QuestionDifficulty = "easy" | "intermediate" | "hard";
+
 export type BankQuestion = {
   id: number;
   question_text: string;
+  question_image?: string | null;
   option_a: string;
+  option_a_image?: string | null;
   option_b: string;
+  option_b_image?: string | null;
   option_c: string;
+  option_c_image?: string | null;
   option_d: string;
+  option_d_image?: string | null;
   correct_option: string;
   is_active: boolean;
+  department_id?: number | null;
+  domain?: QuestionDomain;
+  difficulty?: QuestionDifficulty;
+  skill_ids?: number[];
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type VideoPrompt = {
   id: number;
   prompt: string;
+  question_order?: number;
+  time_limit_seconds?: number;
   is_active: boolean;
+  department_id?: number | null;
+  domain?: QuestionDomain;
+  difficulty?: QuestionDifficulty;
+  skill_ids?: number[];
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type QuestionnairePrompt = {
@@ -350,6 +372,8 @@ export type WrittenTestSection = {
   score_percentage: string | number | null;
   correct_count?: number;
   attempted_count?: number;
+  questions_attempted?: number;
+  correct_answers?: number;
   total_questions?: number;
   started_at?: string | null;
   completed_at?: string | null;
@@ -450,6 +474,10 @@ export type IdealProfileTestConfig = {
   test_type: string;
   question_count: number;
   time_limit_minutes: number;
+  domain?: QuestionDomain;
+  easy_count?: number;
+  intermediate_count?: number;
+  hard_count?: number;
 };
 
 export type IdealProfile = {

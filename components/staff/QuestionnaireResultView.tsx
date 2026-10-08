@@ -128,9 +128,13 @@ export function QuestionnaireResultView({ id }: { id: number }) {
             <div className="flex items-center gap-2 rounded-xl bg-amal-sheet px-4 py-2">
               <CalendarIcon className="h-4 w-4 text-zinc-500" />
               <span className="text-sm text-zinc-700">
-                {responses[0]?.answered_at
-                  ? formatDateTime(responses[0].answered_at)
-                  : "—"}
+                {questionnaire.completed_at
+                  ? formatDateTime(questionnaire.completed_at)
+                  : questionnaire.started_at
+                    ? `Started ${formatDateTime(questionnaire.started_at)}`
+                    : responses[0]?.answered_at
+                      ? formatDateTime(responses[0].answered_at)
+                      : "—"}
               </span>
             </div>
             <span

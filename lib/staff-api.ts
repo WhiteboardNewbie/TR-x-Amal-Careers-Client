@@ -478,7 +478,7 @@ export function getBankQuestions(): Promise<BankQuestion[]> {
   return request<BankQuestion[]>("/questions/");
 }
 
-export function createBankQuestion(body: {
+export type BankQuestionWrite = {
   question_text: string;
   option_a: string;
   option_b: string;
@@ -486,13 +486,21 @@ export function createBankQuestion(body: {
   option_d: string;
   correct_option: string;
   is_active?: boolean;
-}): Promise<BankQuestion> {
+  department_id?: number | null;
+  domain?: string | null;
+  difficulty?: string;
+  skill_ids?: number[];
+};
+
+export function createBankQuestion(
+  body: BankQuestionWrite,
+): Promise<BankQuestion> {
   return sendJson<BankQuestion>("/questions/", "POST", body);
 }
 
 export function patchBankQuestion(
   id: number,
-  body: Partial<BankQuestion>,
+  body: Partial<BankQuestionWrite>,
 ): Promise<BankQuestion> {
   return sendJson<BankQuestion>(`/questions/${id}/`, "PATCH", body);
 }
@@ -501,13 +509,26 @@ export function getVideoPrompts(): Promise<VideoPrompt[]> {
   return request<VideoPrompt[]>("/video-test/questions/");
 }
 
-export function createVideoPrompt(prompt: string): Promise<VideoPrompt> {
-  return sendJson<VideoPrompt>("/video-test/questions/", "POST", { prompt });
+export type VideoPromptWrite = {
+  prompt: string;
+  is_active?: boolean;
+  question_order?: number;
+  time_limit_seconds?: number;
+  department_id?: number | null;
+  domain?: string | null;
+  difficulty?: string;
+  skill_ids?: number[];
+};
+
+export function createVideoPrompt(
+  body: VideoPromptWrite,
+): Promise<VideoPrompt> {
+  return sendJson<VideoPrompt>("/video-test/questions/", "POST", body);
 }
 
 export function patchVideoPrompt(
   id: number,
-  body: Partial<VideoPrompt>,
+  body: Partial<VideoPromptWrite>,
 ): Promise<VideoPrompt> {
   return sendJson<VideoPrompt>(`/video-test/questions/${id}/`, "PATCH", body);
 }
