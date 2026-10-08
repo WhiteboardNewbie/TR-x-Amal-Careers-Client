@@ -117,11 +117,13 @@ export function Modal({
   onClose,
   children,
   compact = false,
+  wide = false,
 }: {
   title: string;
   onClose: () => void;
   children: React.ReactNode;
   compact?: boolean;
+  wide?: boolean;
 }) {
   return (
     <CenteredOverlay
@@ -132,8 +134,8 @@ export function Modal({
       <div
         role="dialog"
         aria-modal="true"
-        className={`pointer-events-auto w-full rounded-2xl bg-amal-white p-6 shadow-xl ${
-          compact ? "max-w-md" : "max-w-lg"
+        className={`pointer-events-auto max-h-[90vh] w-full overflow-y-auto rounded-2xl bg-amal-white p-6 shadow-xl ${
+          compact ? "max-w-md" : wide ? "max-w-4xl" : "max-w-lg"
         }`}
         onClick={(event) => event.stopPropagation()}
       >
