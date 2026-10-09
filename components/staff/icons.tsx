@@ -278,6 +278,16 @@ export function DownloadIcon({ className }: { className?: string }) {
   );
 }
 
+export function UploadIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M12 21V9" />
+      <path d="m7 14 5-5 5 5" />
+      <path d="M5 5h14" />
+    </Icon>
+  );
+}
+
 export function ImageIcon({ className }: { className?: string }) {
   return (
     <Icon className={className}>
