@@ -505,6 +505,69 @@ export function patchBankQuestion(
   return sendJson<BankQuestion>(`/questions/${id}/`, "PATCH", body);
 }
 
+export type BankQuestionImageFiles = {
+  question_image?: File | null;
+  option_a_image?: File | null;
+  option_b_image?: File | null;
+  option_c_image?: File | null;
+  option_d_image?: File | null;
+};
+
+function appendBankQuestionForm(
+  fd: FormData,
+  body: BankQuestionWrite,
+  files?: BankQuestionImageFiles,
+) {
+  fd.append("question_text", body.question_text);
+  fd.append("option_a", body.option_a);
+  fd.append("option_b", body.option_b);
+  fd.append("option_c", body.option_c);
+  fd.append("option_d", body.option_d);
+  fd.append("correct_option", body.correct_option);
+  fd.append("is_active", String(body.is_active ?? true));
+  fd.append(
+    "department_id",
+    body.department_id == null ? "" : String(body.department_id),
+  );
+  fd.append("domain", body.domain ?? "");
+  fd.append("difficulty", body.difficulty || "intermediate");
+  const skillIds = body.skill_ids ?? [];
+  if (skillIds.length === 0) {
+    fd.append("skill_ids", "");
+  } else {
+    for (const id of skillIds) {
+      fd.append("skill_ids", String(id));
+    }
+  }
+  if (files?.question_image) fd.append("question_image", files.question_image);
+  if (files?.option_a_image) fd.append("option_a_image", files.option_a_image);
+  if (files?.option_b_image) fd.append("option_b_image", files.option_b_image);
+  if (files?.option_c_image) fd.append("option_c_image", files.option_c_image);
+  if (files?.option_d_image) fd.append("option_d_image", files.option_d_image);
+}
+
+export function createBankQuestionForm(
+  body: BankQuestionWrite,
+  files?: BankQuestionImageFiles,
+): Promise<BankQuestion> {
+  const fd = new FormData();
+  appendBankQuestionForm(fd, body, files);
+  return request<BankQuestion>("/questions/", { method: "POST", body: fd });
+}
+
+export function patchBankQuestionForm(
+  id: number,
+  body: BankQuestionWrite,
+  files?: BankQuestionImageFiles,
+): Promise<BankQuestion> {
+  const fd = new FormData();
+  appendBankQuestionForm(fd, body, files);
+  return request<BankQuestion>(`/questions/${id}/`, {
+    method: "PATCH",
+    body: fd,
+  });
+}
+
 export function getVideoPrompts(): Promise<VideoPrompt[]> {
   return request<VideoPrompt[]>("/video-test/questions/");
 }
@@ -626,7 +689,7 @@ export function scoreResume(applicationId: number): Promise<{
 export async function downloadJobApplicationResume(
   applicationId: number,
 ): Promise<Blob> {
-  const { API_URL, ApiError } = await import("./api");
+  const { absoluteApiUrl, ApiError } = await import("./api");
   const { sessionToken } = await import("./session");
   const headers = new Headers();
   const token = sessionToken();
@@ -634,7 +697,9 @@ export async function downloadJobApplicationResume(
     headers.set("Authorization", `Token ${token}`);
   }
   const response = await fetch(
-    `${API_URL}/careers/job-applications/${applicationId}/resume/`,
+    absoluteApiUrl(
+      `/careers/job-applications/${applicationId}/resume/`,
+    ),
     { headers },
   );
   if (!response.ok) {

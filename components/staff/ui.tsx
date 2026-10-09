@@ -118,13 +118,23 @@ export function Modal({
   children,
   compact = false,
   wide = false,
+  medium = false,
 }: {
-  title: string;
+  title: React.ReactNode;
   onClose: () => void;
   children: React.ReactNode;
   compact?: boolean;
   wide?: boolean;
+  /** max-w-2xl — ERP-style video / single-column forms */
+  medium?: boolean;
 }) {
+  const widthClass = compact
+    ? "max-w-md"
+    : wide
+      ? "max-w-4xl"
+      : medium
+        ? "max-w-2xl"
+        : "max-w-lg";
   return (
     <CenteredOverlay
       onClose={onClose}
@@ -134,16 +144,14 @@ export function Modal({
       <div
         role="dialog"
         aria-modal="true"
-        className={`pointer-events-auto max-h-[90vh] w-full overflow-y-auto rounded-2xl bg-amal-white p-6 shadow-xl ${
-          compact ? "max-w-md" : wide ? "max-w-4xl" : "max-w-lg"
-        }`}
+        className={`pointer-events-auto max-h-[90vh] w-full overflow-y-auto rounded-2xl bg-amal-white p-6 shadow-xl ${widthClass}`}
         onClick={(event) => event.stopPropagation()}
       >
         {compact ? (
           <h3 className="text-lg font-bold">{title}</h3>
         ) : (
           <div className="mb-4 flex items-start justify-between gap-4">
-            <h2 className="text-lg font-bold">{title}</h2>
+            <h2 className="text-lg font-bold text-zinc-900">{title}</h2>
             <button
               type="button"
               className="text-sm font-semibold text-zinc-500 hover:text-amal-ink"

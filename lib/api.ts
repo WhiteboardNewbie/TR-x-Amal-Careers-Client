@@ -13,6 +13,25 @@ export const API_URL = (
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8001"
 ).replace(/\/$/, "");
 
+/** Resolve API URL. In local dev, browser calls same-origin `/backend/*` (Route Handler → Django). */
+export function absoluteApiUrl(path: string): string {
+  const suffix = path.startsWith("/") ? path : `/${path}`;
+  const useProxy =
+    process.env.NODE_ENV === "development" ||
+    process.env.NEXT_PUBLIC_USE_API_PROXY === "1";
+  if (useProxy && typeof window !== "undefined") {
+    return `/backend${suffix}`;
+  }
+  if (useProxy && typeof window === "undefined") {
+    const target = (
+      process.env.API_PROXY_TARGET ??
+      (API_URL || "http://127.0.0.1:8001").replace("localhost", "127.0.0.1")
+    ).replace(/\/$/, "");
+    return `${target}${suffix}`;
+  }
+  return `${API_URL || "http://localhost:8001"}${suffix}`;
+}
+
 export function mediaUrl(path: string | null | undefined): string | null {
   if (!path) {
     return null;
@@ -20,7 +39,11 @@ export function mediaUrl(path: string | null | undefined): string | null {
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;
   }
-  return `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
+  const suffix = path.startsWith("/") ? path : `/${path}`;
+  if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+    return `/backend${suffix}`;
+  }
+  return `${API_URL}${suffix}`;
 }
 
 export class ApiError extends Error {
@@ -89,7 +112,7 @@ export async function request<T>(
   if (token && !anonymous && !headers.has("Authorization")) {
     headers.set("Authorization", `Token ${token}`);
   }
-  const response = await fetch(`${API_URL}${path}`, { ...rest, headers });
+  const response = await fetch(absoluteApiUrl(path), { ...rest, headers });
   const text = await response.text();
   let body: unknown = null;
   if (text) {
