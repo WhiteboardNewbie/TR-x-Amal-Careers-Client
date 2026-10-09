@@ -714,9 +714,23 @@ export function searchResumes(params: {
   );
 }
 
-export function getShareLinks(page = 1): Promise<Page<ShareLink>> {
+export function getShareLinks(
+  params: {
+    page?: number;
+    page_size?: number;
+    search?: string;
+    job_application?: number;
+    is_active?: boolean;
+  } = {},
+): Promise<Page<ShareLink>> {
   return request<Page<ShareLink>>(
-    `/careers/application-share-links/${queryString({ page, page_size: 10 })}`,
+    `/careers/application-share-links/${queryString({
+      page: params.page ?? 1,
+      page_size: params.page_size ?? 10,
+      search: params.search,
+      job_application: params.job_application,
+      is_active: params.is_active,
+    })}`,
   );
 }
 
