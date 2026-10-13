@@ -714,10 +714,29 @@ export function searchResumes(params: {
   );
 }
 
-export function getShareLinks(page = 1): Promise<Page<ShareLink>> {
+export function getShareLinks(params?: {
+  page?: number;
+  page_size?: number;
+  job_application?: number | string;
+  search?: string;
+  is_active?: boolean;
+}): Promise<Page<ShareLink>> {
+  const page = params?.page ?? 1;
+  const page_size = params?.page_size ?? 10;
   return request<Page<ShareLink>>(
-    `/careers/application-share-links/${queryString({ page, page_size: 10 })}`,
+    `/careers/application-share-links/${queryString({
+      page,
+      page_size,
+      job_application: params?.job_application,
+      search: params?.search,
+      is_active:
+        params?.is_active === undefined ? undefined : params.is_active ? "true" : "false",
+    })}`,
   );
+}
+
+export function getShareLink(id: string): Promise<ShareLink> {
+  return request<ShareLink>(`/careers/application-share-links/${id}/`);
 }
 
 export function createShareLink(body: {
@@ -742,6 +761,7 @@ export function patchShareLink(
 export function getShareLinkLogs(
   id: string,
   page = 1,
+  pageSize = 10,
 ): Promise<
   Page<{
     id: number;
@@ -749,11 +769,14 @@ export function getShareLinkLogs(
     host: string;
     user_agent: string;
     referer: string;
+    origin: string;
+    scheme: string;
+    path: string;
     accessed_at: string;
   }>
 > {
   return request(
-    `/careers/application-share-links/${id}/logs/${queryString({ page, page_size: 10 })}`,
+    `/careers/application-share-links/${id}/logs/${queryString({ page, page_size: pageSize })}`,
   );
 }
 

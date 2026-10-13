@@ -248,6 +248,41 @@ export function ShareIcon({ className }: { className?: string }) {
   );
 }
 
+export function CopyIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <rect x="9" y="9" width="13" height="13" rx="2" />
+      <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+    </Icon>
+  );
+}
+
+export function LinkIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M10 13a5 5 0 0 0 7.54.54l1.92-1.92a5 5 0 0 0-7.07-7.07L10.5 6.5" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54L4.54 12.38a5 5 0 0 0 7.07 7.07L13.5 17.5" />
+    </Icon>
+  );
+}
+
+export function ScrollTextIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M8 4h8a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 0 1 2-2z" />
+      <path d="M10 9h4M10 13h4" />
+    </Icon>
+  );
+}
+
+export function LoaderIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+    </Icon>
+  );
+}
+
 export function MoreVerticalIcon({ className }: { className?: string }) {
   return (
     <Icon className={className}>
