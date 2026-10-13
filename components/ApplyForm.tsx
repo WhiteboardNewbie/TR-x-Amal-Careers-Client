@@ -203,11 +203,17 @@ export function ApplyForm({ slug }: { slug: string }) {
             </button>
             <p className="pt-[1.875rem] text-sm text-zinc-500">
               All fields are required. By sending this form, you agree to the{" "}
-              <a className="text-zinc-950 underline" href={LEGAL}>
+              <a
+                className="text-zinc-950 underline hover:text-amal-red"
+                href={LEGAL}
+              >
                 Terms &amp; Conditions
               </a>{" "}
               and{" "}
-              <a className="text-zinc-950 underline" href={LEGAL}>
+              <a
+                className="text-zinc-950 underline hover:text-amal-red"
+                href={LEGAL}
+              >
                 Privacy Policy
               </a>
               .

@@ -120,7 +120,7 @@ export function SearchableFilterDropdown({
   placeholder,
   allLabel,
   className = "relative min-w-[12rem]",
-  buttonClassName = "flex w-full items-center justify-between rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-sm",
+  buttonClassName = "flex w-full items-center justify-between rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-sm hover:bg-amal-sheet",
 }: {
   value: string;
   onChange: (value: string) => void;

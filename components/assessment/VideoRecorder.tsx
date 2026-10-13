@@ -215,7 +215,7 @@ function VideoRecorderInner({
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="rounded-lg bg-amal-red px-6 py-3 text-amal-white"
+          className="rounded-lg bg-amal-red px-6 py-3 text-amal-white hover:bg-amal-red/90"
         >
           Try Again
         </button>
@@ -281,7 +281,7 @@ function VideoRecorderInner({
             <button
               type="button"
               onClick={stopRecording}
-              className="flex items-center rounded-lg bg-amal-red px-6 py-3 text-amal-white"
+              className="flex items-center rounded-lg bg-amal-red px-6 py-3 text-amal-white hover:bg-amal-red/90"
             >
               <SquareIcon className="mr-2 h-5 w-5" />
               Stop Recording
@@ -291,7 +291,7 @@ function VideoRecorderInner({
               type="button"
               onClick={handleStartRecording}
               disabled={isAcquiring}
-              className="flex items-center rounded-lg bg-amal-red px-6 py-3 text-amal-white disabled:opacity-50"
+              className="flex items-center rounded-lg bg-amal-red px-6 py-3 text-amal-white hover:bg-amal-red/90 disabled:opacity-50"
             >
               <CircleIcon className="mr-2 h-5 w-5" />
               Start Recording

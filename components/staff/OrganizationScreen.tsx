@@ -66,8 +66,8 @@ export function OrganizationScreen() {
               type="button"
               className={`rounded-lg border-0 px-3 py-2 text-sm font-bold outline-none ${
                 tab === item.id
-                  ? "bg-amal-red text-amal-white"
-                  : "bg-amal-sheet text-zinc-600"
+                  ? "bg-amal-red text-amal-white hover:bg-amal-red/90"
+                  : "bg-amal-sheet text-zinc-600 hover:bg-black/5"
               }`}
               onMouseDown={preventFocusScroll}
               onClick={() => setTab(item.id)}

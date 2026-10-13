@@ -37,6 +37,7 @@ import type {
 import { ApplicationDetailModal } from "./ApplicationDetailModal";
 import {
   ASSESSMENT_BADGE_BASE,
+  ASSESSMENT_BADGE_LINK_HOVER,
   AssessmentCell,
   AssessmentLockedBadge,
   AssessmentNotStartedBadge,
@@ -580,7 +581,7 @@ export function ApplicationsTab({
                                 event.target.value as JobApplicationStatus,
                               );
                             }}
-                            className={`h-7 cursor-pointer rounded-full border-0 px-2 text-xs font-semibold leading-none ${STATUS_TONE[row.status]}`}
+                            className={`h-7 cursor-pointer rounded-full border-0 px-2 text-xs font-semibold leading-none transition hover:brightness-95 ${STATUS_TONE[row.status]}`}
                           >
                             {statusDraftById[row.id] === "" ? (
                               <option value="" disabled>
@@ -605,7 +606,7 @@ export function ApplicationsTab({
                           ) : firstStatus === "completed" ? (
                             <Link
                               href={`/staff/applications/${row.id}/results/first-test`}
-                              className={`${ASSESSMENT_BADGE_BASE} ${
+                              className={`${ASSESSMENT_BADGE_BASE} ${ASSESSMENT_BADGE_LINK_HOVER} ${
                                 Number.isNaN(firstScore)
                                   ? "border-black/10 bg-amal-sheet text-zinc-700"
                                   : firstTestScoreBadgeClass(firstScore)
@@ -641,7 +642,7 @@ export function ApplicationsTab({
                           ) : videoStatus === "completed" ? (
                             <Link
                               href={`/staff/applications/${row.id}/results/video`}
-                              className={`${ASSESSMENT_BADGE_BASE} border-emerald-200 bg-emerald-100 text-emerald-800`}
+                              className={`${ASSESSMENT_BADGE_BASE} ${ASSESSMENT_BADGE_LINK_HOVER} border-emerald-200 bg-emerald-100 text-emerald-800`}
                             >
                               <VideoIcon className="h-3 w-3" />
                               Completed
@@ -673,7 +674,7 @@ export function ApplicationsTab({
                           ) : questionnaireStatus === "completed" ? (
                             <Link
                               href={`/staff/applications/${row.id}/results/questionnaire`}
-                              className={`${ASSESSMENT_BADGE_BASE} border-emerald-200 bg-emerald-100 text-emerald-800`}
+                              className={`${ASSESSMENT_BADGE_BASE} ${ASSESSMENT_BADGE_LINK_HOVER} border-emerald-200 bg-emerald-100 text-emerald-800`}
                             >
                               <MessageSquareIcon className="h-3 w-3" />
                               Completed
@@ -1038,7 +1039,7 @@ export function ApplicationsTab({
               <button
                 type="button"
                 onClick={() => void confirmRejection()}
-                className="rounded-lg bg-amal-red px-4 py-2 text-sm font-semibold text-amal-white"
+                className="rounded-lg bg-amal-red px-4 py-2 text-sm font-semibold text-amal-white hover:bg-amal-red/90"
               >
                 Reject application
               </button>

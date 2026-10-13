@@ -203,7 +203,7 @@ function AppStatusSelect({
         onDraftBlur(application.id);
         onChange(application, event.target.value as JobApplicationStatus);
       }}
-      className={`h-7 w-full max-w-full cursor-pointer rounded-full border-0 px-2 text-xs font-semibold leading-none ${tone} disabled:opacity-60`}
+      className={`h-7 w-full max-w-full cursor-pointer rounded-full border-0 px-2 text-xs font-semibold leading-none transition hover:brightness-95 ${tone} disabled:opacity-60`}
     >
       {draft === "" ? (
         <option value="" disabled>
@@ -853,7 +853,7 @@ export function StageAssignmentsTab({
                                   )
                                 }
                                 aria-label={`Stage status for ${applicantName}`}
-                                className={`h-7 w-full max-w-full cursor-pointer rounded-full border-0 px-2 text-xs font-semibold leading-none ${badge.className} disabled:opacity-60`}
+                                className={`h-7 w-full max-w-full cursor-pointer rounded-full border-0 px-2 text-xs font-semibold leading-none transition hover:brightness-95 ${badge.className} disabled:opacity-60`}
                               >
                                 {HR_STAGE_STATUS_OPTIONS.map((option) => (
                                   <option

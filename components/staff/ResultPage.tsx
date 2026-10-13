@@ -138,7 +138,7 @@ function QuestionnaireResponseBlock({
                 href={attachmentUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-amal-red"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-amal-red hover:underline"
               >
                 <ExternalLinkIcon className="h-3.5 w-3.5" />
                 View attachment
@@ -218,14 +218,14 @@ export function ResultPage({
         <button
           type="button"
           onClick={onClose}
-          className="text-sm font-semibold text-amal-red"
+          className="text-sm font-semibold text-amal-red hover:underline"
         >
           Close
         </button>
       ) : (
         <Link
           href={`/staff/applications/${id}`}
-          className="text-sm font-semibold text-amal-red"
+          className="text-sm font-semibold text-amal-red hover:underline"
         >
           ← Application
         </Link>

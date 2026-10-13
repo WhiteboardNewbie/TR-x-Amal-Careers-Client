@@ -72,10 +72,13 @@ export function NoticeBell() {
               {notices.map((notice) => (
                 <li
                   key={notice.id}
-                  className="border-b border-black/5 px-4 py-3 last:border-0"
+                  className="border-b border-black/5 last:border-0"
                 >
                   {notice.link ? (
-                    <a href={notice.link} className="block">
+                    <a
+                      href={notice.link}
+                      className="block px-4 py-3 hover:bg-amal-sheet"
+                    >
                       <p className="text-sm font-semibold text-amal-ink">
                         {notice.title}
                         {!notice.is_read ? (
@@ -85,7 +88,7 @@ export function NoticeBell() {
                       <p className="mt-1 text-sm text-zinc-600">{notice.message}</p>
                     </a>
                   ) : (
-                    <>
+                    <div className="px-4 py-3">
                       <p className="text-sm font-semibold text-amal-ink">
                         {notice.title}
                         {!notice.is_read ? (
@@ -93,7 +96,7 @@ export function NoticeBell() {
                         ) : null}
                       </p>
                       <p className="mt-1 text-sm text-zinc-600">{notice.message}</p>
-                    </>
+                    </div>
                   )}
                 </li>
               ))}
