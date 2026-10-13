@@ -21,7 +21,7 @@ import {
 } from "./icons";
 import { TestBackdrop } from "./TestBackdrop";
 import { VideoRecorder } from "./VideoRecorder";
-import { errorText } from "./shared";
+import { AssessmentHeaderMark, errorText } from "./shared";
 
 const PER_QUESTION_SECONDS = 120;
 
@@ -220,12 +220,17 @@ export function VideoTestScreen({
   return (
     <div className="min-h-screen bg-amal-sheet">
       <div className="sticky top-0 z-10 border-b border-black/10 bg-amal-white shadow-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-          <div>
-            <h1 className="text-xl font-semibold text-amal-ink">Video Assessment</h1>
-            <p className="text-sm text-zinc-600">
-              Question {currentStep} of {total}
-            </p>
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 pl-2 pr-4 sm:pl-3 sm:pr-6">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <AssessmentHeaderMark />
+            <div className="min-w-0">
+              <h1 className="truncate text-xl font-semibold text-amal-ink">
+                Video Assessment
+              </h1>
+              <p className="text-sm text-zinc-600">
+                Question {currentStep} of {total}
+              </p>
+            </div>
           </div>
           <div className="flex items-center rounded-lg bg-amal-red/10 px-4 py-2">
             <VideoIcon className="mr-2 h-5 w-5 text-amal-red" />

@@ -1,7 +1,12 @@
 "use client";
 
 import { CheckIcon, ClockIcon, MailIcon } from "@/components/staff/icons";
-import { CAREERS_CONTACT, CAREERS_PATH, cardShell, shellGradient } from "./shared";
+import {
+  CAREERS_CONTACT,
+  CAREERS_PATH,
+  cardShell,
+  shellGradient,
+} from "./shared";
 
 export function QuestionnaireThankYou() {
   return (

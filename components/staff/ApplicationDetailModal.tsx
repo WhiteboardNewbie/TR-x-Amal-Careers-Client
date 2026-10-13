@@ -649,7 +649,7 @@ export function ApplicationDetailModal({
                           <p className="text-xs text-zinc-500">Email</p>
                           <a
                             href={`mailto:${application.applicant.email}`}
-                            className="text-sm font-semibold text-amal-red hover:underline"
+                            className="text-sm font-semibold text-amal-ink underline-offset-2 hover:underline hover:text-amal-blue"
                           >
                             {application.applicant.email}
                           </a>
@@ -671,7 +671,7 @@ export function ApplicationDetailModal({
                           {phoneHref ? (
                             <a
                               href={phoneHref}
-                              className="text-sm font-semibold text-amal-red hover:underline"
+                              className="text-sm font-semibold text-amal-ink underline-offset-2 hover:underline hover:text-amal-blue"
                             >
                               {formatPhoneDisplay(
                                 application.applicant.contact,

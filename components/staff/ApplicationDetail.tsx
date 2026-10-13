@@ -161,18 +161,19 @@ function getScoreTone(score: number | null | undefined): {
   }
   if (score >= 70) {
     return {
-      icon: "text-emerald-600",
+      icon: "text-emerald-500",
       bg: "bg-emerald-50",
       border: "border-emerald-200",
-      text: "text-emerald-700",
+      // Brighter than emerald-700 so scores read clearly on white cards
+      text: "text-emerald-600",
     };
   }
   if (score >= 50) {
     return {
-      icon: "text-amber-600",
+      icon: "text-amber-500",
       bg: "bg-amber-50",
       border: "border-amber-200",
-      text: "text-amber-700",
+      text: "text-amber-600",
     };
   }
   return {
@@ -882,9 +883,7 @@ function MetricCard({
 }) {
   const interactive = Boolean(onClick);
   const className = cn(
-    "group relative overflow-hidden rounded-2xl border p-4 text-left transition duration-200 sm:p-5",
-    tone.border,
-    tone.bg,
+    "group relative overflow-hidden rounded-2xl border border-black/10 bg-amal-white p-4 text-left transition duration-200 sm:p-5",
     interactive &&
       "hover:-translate-y-0.5 hover:shadow-md disabled:cursor-default disabled:opacity-65 disabled:hover:translate-y-0 disabled:hover:shadow-none",
   );

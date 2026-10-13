@@ -1,3 +1,5 @@
+import { AmalMark } from "@/components/AmalMark";
+
 export const CAREERS_CONTACT = "hello@amalacademy.org";
 export const CAREERS_PATH = "/";
 
@@ -6,6 +8,13 @@ export const shellGradient =
 
 export const cardShell =
   "w-full max-w-2xl rounded-lg bg-amal-white p-8 shadow-xl";
+
+/** Compact mark for in-test sticky headers (matches AppNav). */
+export function AssessmentHeaderMark() {
+  return (
+    <AmalMark className="-ml-2 h-8 w-auto max-w-full shrink-0 bg-transparent sm:-ml-3" />
+  );
+}
 
 export function StepNumber({ n }: { n: number }) {
   return (
