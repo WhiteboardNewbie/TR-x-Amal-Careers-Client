@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { formatPhoneDisplay, phoneTelHref } from "@/lib/phone-format";
 import type { Comment } from "@/lib/types";
@@ -33,7 +33,7 @@ import {
   VideoIcon,
   XIcon,
 } from "@/components/staff/icons";
-import { CenteredOverlay } from "@/components/staff/ui";
+import { CenteredOverlay, ModalCloseButton } from "@/components/staff/ui";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
@@ -306,12 +306,12 @@ export function ClientApplication({ id }: { id: number }) {
       <div className="mx-auto max-w-[1800px] space-y-5 p-6">
         {notice ? (
           <>
-            <Link
-              href="/client"
-              className="inline-flex items-center gap-2 text-sm font-medium text-zinc-600 hover:text-amal-ink"
-            >
-              ← Back to hiring
-            </Link>
+            <Breadcrumbs
+              items={[
+                { label: "Hiring", href: "/client" },
+                { label: "Application" },
+              ]}
+            />
             <section className="rounded-2xl border border-black/10 bg-amal-white p-6 shadow-sm">
               <p className="text-sm text-zinc-600">{notice}</p>
             </section>
@@ -330,12 +330,27 @@ export function ClientApplication({ id }: { id: number }) {
   return (
     <div className="min-h-full bg-amal-sheet">
       <div className="mx-auto max-w-[1800px] space-y-5 p-6">
-        <Link
-          href={backHref}
-          className="inline-flex items-center gap-2 text-sm font-medium text-zinc-600 transition-colors hover:text-amal-ink"
-        >
-          ← Back to {backSlug ? "role applicants" : "hiring"}
-        </Link>
+        <Breadcrumbs
+          items={
+            backSlug
+              ? [
+                  { label: "Hiring", href: "/client" },
+                  {
+                    label: row.role.title?.trim() || "Role",
+                    href: backHref,
+                  },
+                  {
+                    label: applicantName.trim() || "Application",
+                  },
+                ]
+              : [
+                  { label: "Hiring", href: "/client" },
+                  {
+                    label: applicantName.trim() || "Application",
+                  },
+                ]
+          }
+        />
 
         {notice ? (
           <p className="rounded-2xl border border-amal-red/30 bg-amal-white px-4 py-3 text-sm text-amal-red">
@@ -1086,14 +1101,7 @@ function ModalHeader({
   return (
     <div className="flex items-center justify-between gap-4 border-b border-black/5 px-6 py-4">
       <h2 className="text-lg font-bold">{title}</h2>
-      <button
-        type="button"
-        onClick={onClose}
-        className="rounded-lg p-1 text-zinc-500 hover:bg-amal-sheet hover:text-amal-ink"
-        aria-label="Close"
-      >
-        <XIcon className="h-5 w-5" />
-      </button>
+      <ModalCloseButton onClick={onClose} />
     </div>
   );
 }

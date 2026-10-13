@@ -61,9 +61,14 @@ import {
   SparklesIcon,
   UserIcon,
   UsersIcon,
-  XIcon,
 } from "./icons";
-import { CenteredOverlay, GhostButton, PrimaryButton, inputClass } from "./ui";
+import {
+  CenteredOverlay,
+  GhostButton,
+  ModalCloseButton,
+  PrimaryButton,
+  inputClass,
+} from "./ui";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
@@ -459,14 +464,7 @@ export function ApplicationDetailModal({
                 >
                   {labelFor(application.status)}
                 </span>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-2xl leading-none text-amal-white/80 hover:text-amal-white"
-                  aria-label="Close"
-                >
-                  ×
-                </button>
+                <ModalCloseButton tone="onDark" onClick={onClose} />
               </div>
             </div>
             <div className="shrink-0 border-b border-black/10 px-6">
@@ -996,14 +994,10 @@ export function ApplicationDetailModal({
                     <div className="space-y-3 rounded-xl border border-black/10 bg-amal-sheet p-4">
                       <div className="flex items-center justify-between">
                         <h4 className="font-semibold">Stage details</h4>
-                        <button
-                          type="button"
+                        <ModalCloseButton
                           onClick={() => setSelectedStage(null)}
-                          className="text-zinc-500 hover:text-amal-ink"
                           aria-label="Close stage details"
-                        >
-                          <XIcon className="h-4 w-4" />
-                        </button>
+                        />
                       </div>
                       <p>
                         <span className="text-zinc-500">Manager:</span>{" "}

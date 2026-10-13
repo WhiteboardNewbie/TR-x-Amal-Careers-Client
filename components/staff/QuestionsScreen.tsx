@@ -34,6 +34,7 @@ import {
   PencilIcon,
   PlusIcon,
   SearchIcon,
+  SparklesIcon,
   TrashIcon,
   VideoIcon,
   XIcon,
@@ -240,11 +241,7 @@ export function QuestionsScreen() {
           valueClassName="text-amber-700"
           hint="Across all three pools; not shown in new candidate sessions"
         />
-        <StatCard
-          label="Coverage"
-          value="First Test, Video, and General Questionnaire"
-          valueClassName="text-base font-semibold text-zinc-900"
-        />
+        <CoverageCard />
       </div>
 
       <div className="rounded-2xl border border-black/10 bg-amal-white p-4 shadow-sm md:p-6">
@@ -337,6 +334,24 @@ function StatCard({
       </p>
       <p className={`mt-1 text-3xl font-bold ${valueClassName}`}>{value}</p>
       {hint ? <p className="mt-1 text-xs text-zinc-500">{hint}</p> : null}
+    </div>
+  );
+}
+
+function CoverageCard() {
+  return (
+    <div className="rounded-xl border border-amal-red/20 bg-gradient-to-r from-amal-red/5 to-amal-sheet p-4 shadow-sm">
+      <div className="flex items-start gap-2">
+        <SparklesIcon className="mt-0.5 h-4 w-4 shrink-0 text-amal-red" />
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-amal-red">
+            Coverage
+          </p>
+          <p className="mt-1 text-sm font-semibold text-zinc-900">
+            First Test, Video, and General Questionnaire
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

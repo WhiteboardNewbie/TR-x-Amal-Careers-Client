@@ -21,7 +21,7 @@ import type {
   StaffJobOpening,
 } from "@/lib/types";
 import { ApplicationAssessmentCells } from "./ApplicationAssessmentCells";
-import { CareersBackLink } from "./CareersBackLink";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JobApplicationsFilterBar } from "./JobApplicationsFilterBar";
 import { AssessmentCell } from "./assessment-status";
 import { ExternalLinkIcon, EyeIcon, FilterIcon, SearchIcon } from "./icons";
@@ -227,12 +227,13 @@ export function CvSearchScreen() {
 
   return (
     <div>
-      <CareersBackLink
-        href="/staff"
-        className="text-sm font-semibold text-amal-red"
-      >
-        ← Careers
-      </CareersBackLink>
+      <Breadcrumbs
+        linkAs="careers"
+        items={[
+          { label: "Careers", href: "/staff" },
+          { label: "CV search" },
+        ]}
+      />
       <h1 className="mt-3 text-2xl font-semibold tracking-tight">
         Advanced CV search
       </h1>

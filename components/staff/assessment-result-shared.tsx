@@ -1,9 +1,38 @@
 "use client";
 
 import { useMemo } from "react";
-import { CareersBackLink } from "@/components/staff/CareersBackLink";
-import { peekCareersApplicationsReturn } from "@/lib/careers-return";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import {
+  peekCareersApplicationsReturn,
+  type CareersApplicationsReturn,
+} from "@/lib/careers-return";
 import { readSession } from "@/lib/session";
+
+export function staffHubBreadcrumbLabel(
+  returnHint: CareersApplicationsReturn | null,
+  options?: { isReviews?: boolean },
+): string {
+  if (options?.isReviews || returnHint?.tab === "manage") {
+    return "Manage Applications";
+  }
+  if (returnHint?.tab === "stages") {
+    return "Stage Assignments";
+  }
+  return "Job Applications";
+}
+
+export function staffHubBreadcrumbHref(landing?: string | null): string {
+  return landing === "reviews" ? "/reviews" : "/staff";
+}
+
+export function staffApplicationHref(
+  applicationId: number,
+  landing?: string | null,
+): string {
+  return landing === "reviews"
+    ? `/reviews/${applicationId}`
+    : `/staff/applications/${applicationId}`;
+}
 
 export function getScoreTone(percentage: number): {
   text: string;
@@ -67,32 +96,30 @@ export function formatDuration(seconds: number | null | undefined): string {
 
 export function AssessmentResultBackNav({
   applicationId,
+  currentLabel,
 }: {
   applicationId: number;
+  currentLabel: string;
 }) {
   const returnHint = useMemo(() => peekCareersApplicationsReturn(), []);
   const landing = useMemo(() => readSession()?.landing, []);
-  const label =
-    returnHint?.tab === "manage"
-      ? "← Manage Applications"
-      : returnHint?.tab === "stages"
-        ? "← Stage Assignments"
-        : "← Application";
-  const hubHref = landing === "reviews" ? "/reviews" : "/staff";
-  const href =
-    returnHint?.tab === "manage" || returnHint?.tab === "stages"
-      ? hubHref
-      : landing === "reviews"
-        ? `/reviews/${applicationId}`
-        : `/staff/applications/${applicationId}`;
+  const hubHref = staffHubBreadcrumbHref(landing);
+  const applicationHref = staffApplicationHref(applicationId, landing);
 
   return (
-    <CareersBackLink
-      href={href}
-      className="text-sm font-semibold text-amal-red"
-    >
-      {label}
-    </CareersBackLink>
+    <Breadcrumbs
+      linkAs="careers"
+      items={[
+        {
+          label: staffHubBreadcrumbLabel(returnHint, {
+            isReviews: landing === "reviews",
+          }),
+          href: hubHref,
+        },
+        { label: "Application", href: applicationHref },
+        { label: currentLabel },
+      ]}
+    />
   );
 }
 

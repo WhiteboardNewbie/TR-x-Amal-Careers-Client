@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ApiError } from "@/lib/api";
 import { getShareLink, getShareLinkLogs } from "@/lib/staff-api";
 import type { ShareLink } from "@/lib/types";
@@ -98,12 +98,14 @@ export function ShareLinkLogsScreen({ id }: { id: string }) {
 
   return (
     <div>
-      <Link
-        href={backHref}
-        className="text-sm font-semibold text-amal-red hover:underline"
-      >
-        ← Shared links
-      </Link>
+      <Breadcrumbs
+        linkAs="careers"
+        items={[
+          { label: "Careers", href: "/staff" },
+          { label: "Shared links", href: backHref },
+          { label: "Access logs" },
+        ]}
+      />
       <h1 className="mt-3 text-2xl font-semibold tracking-tight">Access logs</h1>
       {link ? (
         <div className="mt-3 space-y-1 text-sm text-zinc-600">

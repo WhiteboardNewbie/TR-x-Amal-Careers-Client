@@ -2,6 +2,7 @@
 
 import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { XIcon } from "@/components/staff/icons";
 
 let bodyScrollLockCount = 0;
 let previousBodyOverflow = "";
@@ -248,6 +249,30 @@ export function GhostButton({
       className={`inline-flex items-center justify-center rounded-lg border border-black/15 bg-amal-white px-4 py-2 text-sm font-semibold text-amal-ink hover:bg-amal-sheet disabled:opacity-60 ${props.className ?? ""}`}
     >
       {children}
+    </button>
+  );
+}
+
+const modalCloseToneClass = {
+  onLight: "text-zinc-500 hover:bg-amal-sheet hover:text-amal-ink",
+  onDark: "text-amal-white/80 hover:bg-amal-white/10 hover:text-amal-white",
+} as const;
+
+export function ModalCloseButton({
+  tone = "onLight",
+  className = "",
+  ...props
+}: Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
+  tone?: keyof typeof modalCloseToneClass;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label="Close"
+      {...props}
+      className={`inline-flex h-9 w-9 items-center justify-center rounded-lg ${modalCloseToneClass[tone]} ${className}`}
+    >
+      <XIcon className="h-5 w-5" />
     </button>
   );
 }

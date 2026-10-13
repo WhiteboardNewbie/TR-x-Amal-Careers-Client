@@ -7,7 +7,7 @@ import { getApplicantJobs, updateApplicantNote } from "@/lib/staff-api";
 import { STATUS_BADGE, labelFor } from "@/lib/status";
 import type { ApplicantRow, StaffApplication } from "@/lib/types";
 import { MailIcon, MapPinIcon, PhoneIcon, UserIcon } from "./icons";
-import { CenteredOverlay, inputClass } from "./ui";
+import { CenteredOverlay, ModalCloseButton, inputClass } from "./ui";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
@@ -145,14 +145,7 @@ export function ApplicantDetailModal({
               ) : null}
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="shrink-0 rounded-lg px-2 text-2xl text-amal-white/80 hover:bg-amal-white/10 hover:text-amal-white"
-            aria-label="Close"
-          >
-            ×
-          </button>
+          <ModalCloseButton tone="onDark" className="shrink-0" onClick={onClose} />
         </div>
 
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-6">

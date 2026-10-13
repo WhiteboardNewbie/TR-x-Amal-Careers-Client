@@ -25,7 +25,12 @@ import type {
   StaffJobOpening,
 } from "@/lib/types";
 import { AddSkillDialog } from "./AddSkillDialog";
-import { GhostButton, PrimaryButton, CenteredOverlay } from "./ui";
+import {
+  CenteredOverlay,
+  GhostButton,
+  ModalCloseButton,
+  PrimaryButton,
+} from "./ui";
 
 const fieldClass =
   "mt-1 w-full rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-sm outline-none focus:border-amal-red focus:ring-2 focus:ring-amal-red/20";
@@ -245,14 +250,7 @@ export function IdealProfileModal({
                   : "Keep profile optional and attach when ready."}
               </p>
             </div>
-            <button
-              type="button"
-              className="rounded-full px-2 py-1 text-sm font-semibold text-zinc-500 hover:bg-amal-sheet hover:text-amal-ink"
-              onClick={onClose}
-              aria-label="Close"
-            >
-              ×
-            </button>
+            <ModalCloseButton onClick={onClose} />
           </div>
           <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-6">
             {!standalone ? (

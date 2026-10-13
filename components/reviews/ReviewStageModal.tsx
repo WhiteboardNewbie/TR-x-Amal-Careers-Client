@@ -20,12 +20,12 @@ import {
   ClipboardIcon,
   ExternalLinkIcon,
   MessageSquareIcon,
-  XIcon,
 } from "@/components/staff/icons";
 import {
   CenteredOverlay,
   GhostButton,
   Modal,
+  ModalCloseButton,
   PrimaryButton,
   inputClass,
 } from "@/components/staff/ui";
@@ -276,14 +276,7 @@ export function ReviewStageModal({
                   ) : null}
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="shrink-0 rounded-lg p-1.5 text-zinc-400 hover:bg-amal-sheet hover:text-amal-ink"
-                aria-label="Close"
-              >
-                <XIcon className="h-5 w-5" />
-              </button>
+              <ModalCloseButton className="shrink-0" onClick={onClose} />
             </div>
           </div>
 

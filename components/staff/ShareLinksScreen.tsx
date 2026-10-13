@@ -7,7 +7,7 @@ import { ApiError } from "@/lib/api";
 import { deactivateShareLink, getShareLinks } from "@/lib/staff-api";
 import type { ShareLink } from "@/lib/types";
 import { EditShareLinkModal } from "./ShareApplicationModal";
-import { CareersBackLink } from "./CareersBackLink";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import {
   CopyIcon,
   ExternalLinkIcon,
@@ -178,12 +178,13 @@ export function ShareLinksScreen() {
     <div>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <CareersBackLink
-            href="/staff"
-            className="text-sm font-semibold text-amal-red"
-          >
-            ← Careers
-          </CareersBackLink>
+          <Breadcrumbs
+            linkAs="careers"
+            items={[
+              { label: "Careers", href: "/staff" },
+              { label: "Shared links" },
+            ]}
+          />
           <h1 className="mt-3 text-2xl font-semibold tracking-tight">
             Shared links
           </h1>

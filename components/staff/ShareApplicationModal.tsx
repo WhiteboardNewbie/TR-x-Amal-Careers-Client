@@ -17,9 +17,8 @@ import {
   LoaderIcon,
   ScrollTextIcon,
   ShareIcon,
-  XIcon,
 } from "./icons";
-import { CenteredOverlay, GhostButton, inputClass } from "./ui";
+import { CenteredOverlay, GhostButton, ModalCloseButton, inputClass } from "./ui";
 
 const EXPIRY_PRESETS = [
   { label: "1 day", days: 1 },
@@ -230,14 +229,7 @@ export function ShareApplicationModal({
               Share application
             </h3>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded p-1 text-zinc-500 hover:bg-amal-sheet hover:text-zinc-700"
-            aria-label="Close"
-          >
-            <XIcon className="h-[18px] w-[18px]" />
-          </button>
+          <ModalCloseButton onClick={onClose} />
         </div>
 
         <div className="space-y-5 overflow-y-auto px-5 py-4">
@@ -535,14 +527,7 @@ export function EditShareLinkModal({
               Edit share link
             </h3>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded p-1 text-zinc-500 hover:bg-amal-sheet hover:text-zinc-700"
-            aria-label="Close"
-          >
-            <XIcon className="h-[18px] w-[18px]" />
-          </button>
+          <ModalCloseButton onClick={onClose} />
         </div>
 
         <div className="space-y-5 overflow-y-auto px-5 py-4">

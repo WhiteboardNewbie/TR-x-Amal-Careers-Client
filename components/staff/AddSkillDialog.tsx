@@ -4,7 +4,13 @@ import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { createSkill } from "@/lib/staff-api";
 import type { Skill } from "@/lib/types";
-import { CenteredOverlay, GhostButton, PrimaryButton, inputClass } from "./ui";
+import {
+  CenteredOverlay,
+  GhostButton,
+  ModalCloseButton,
+  PrimaryButton,
+  inputClass,
+} from "./ui";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
@@ -69,14 +75,7 @@ export function AddSkillDialog({
               Create a new skill for job requirements.
             </p>
           </div>
-          <button
-            type="button"
-            className="rounded-full px-2 py-1 text-sm font-semibold text-zinc-500 hover:bg-amal-sheet hover:text-amal-ink"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            ×
-          </button>
+          <ModalCloseButton onClick={onClose} />
         </div>
         <div className="p-5">
           <label

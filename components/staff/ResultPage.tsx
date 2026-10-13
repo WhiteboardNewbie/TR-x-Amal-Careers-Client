@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { getAssessment } from "@/lib/staff-api";
 import type { ApplicationAssessment, WrittenTestSection } from "@/lib/types";
@@ -201,6 +201,12 @@ export function ResultPage({
       : kind === "video"
         ? "Video result"
         : "Questionnaire Answers";
+  const crumbLabel =
+    kind === "first-test"
+      ? "First test"
+      : kind === "video"
+        ? "Video test"
+        : "Questionnaire";
   const firstTest = assessment?.first_test ?? null;
   const questionnaire = assessment?.questionnaire ?? null;
   const videoTest = assessment?.video_test ?? null;
@@ -223,12 +229,17 @@ export function ResultPage({
           Close
         </button>
       ) : (
-        <Link
-          href={`/staff/applications/${id}`}
-          className="text-sm font-semibold text-amal-red hover:underline"
-        >
-          ← Application
-        </Link>
+        <Breadcrumbs
+          linkAs="careers"
+          items={[
+            { label: "Job Applications", href: "/staff" },
+            {
+              label: "Application",
+              href: `/staff/applications/${id}`,
+            },
+            { label: crumbLabel },
+          ]}
+        />
       )}
       <h1 className="mt-3 text-2xl font-semibold tracking-tight">{title}</h1>
       {notice ? (
