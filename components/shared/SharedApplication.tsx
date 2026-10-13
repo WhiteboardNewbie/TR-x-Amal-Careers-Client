@@ -720,7 +720,7 @@ function AiVideoEvaluationPanel({
                       key={item.question_number}
                       className="rounded-2xl border border-black/10 bg-amal-sheet/50 open:bg-amal-white"
                     >
-                      <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium text-zinc-800 marker:content-none [&::-webkit-details-marker]:hidden">
+                      <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium text-zinc-800 hover:bg-amal-sheet marker:content-none [&::-webkit-details-marker]:hidden">
                         <span className="font-semibold text-amal-red">
                           Q{item.question_number}
                         </span>

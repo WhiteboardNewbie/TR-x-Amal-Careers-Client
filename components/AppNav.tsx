@@ -50,7 +50,7 @@ export function AppNav({ session }: { session: AuthSession }) {
       <div className="mx-auto flex h-16 max-w-[1600px] min-w-0 items-center justify-between gap-2 px-3 md:gap-3 md:px-4">
         <Link
           href={home.href}
-          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 overflow-hidden md:min-w-[220px] md:flex-none md:gap-4 md:overflow-visible"
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 overflow-hidden hover:opacity-90 md:min-w-[220px] md:flex-none md:gap-4 md:overflow-visible"
         >
           <AmalMark className="h-8 w-auto max-w-full shrink-0 bg-transparent" />
           <span className="hidden h-6 w-px shrink-0 bg-black/15 md:block" />
@@ -78,7 +78,7 @@ export function AppNav({ session }: { session: AuthSession }) {
           <NoticeBell />
           <details className="relative">
             <summary
-              className="flex h-9 w-9 cursor-pointer list-none items-center justify-center overflow-hidden rounded-full border border-black/15 bg-amal-sheet text-sm font-semibold text-zinc-600 md:h-8 md:w-8"
+              className="flex h-9 w-9 cursor-pointer list-none items-center justify-center overflow-hidden rounded-full border border-black/15 bg-amal-sheet text-sm font-semibold text-zinc-600 hover:bg-zinc-200 md:h-8 md:w-8"
               aria-label="Account menu"
             >
               {session.username.slice(0, 1).toUpperCase()}
@@ -105,7 +105,7 @@ export function AppNav({ session }: { session: AuthSession }) {
           className={`rounded-md px-3 py-2 text-sm font-bold ${
             pathname === home.href
               ? "bg-amal-sheet text-amal-red"
-              : "text-zinc-500"
+              : "text-zinc-500 hover:bg-amal-sheet hover:text-amal-ink"
           }`}
         >
           {home.label}
@@ -118,7 +118,7 @@ export function AppNav({ session }: { session: AuthSession }) {
             className={`whitespace-nowrap rounded-md px-3 py-2 text-sm font-bold ${
               isActive(pathname, link.href)
                 ? "bg-amal-sheet text-amal-red"
-                : "text-zinc-500"
+                : "text-zinc-500 hover:bg-amal-sheet hover:text-amal-ink"
             }`}
           >
             {link.label}

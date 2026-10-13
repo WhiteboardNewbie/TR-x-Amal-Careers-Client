@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { CareersBackLink } from "@/components/staff/CareersBackLink";
 import { peekCareersApplicationsReturn } from "@/lib/careers-return";
+import { readSession } from "@/lib/session";
 
 export function getScoreTone(percentage: number): {
   text: string;
@@ -70,16 +71,20 @@ export function AssessmentResultBackNav({
   applicationId: number;
 }) {
   const returnHint = useMemo(() => peekCareersApplicationsReturn(), []);
+  const landing = useMemo(() => readSession()?.landing, []);
   const label =
     returnHint?.tab === "manage"
       ? "← Manage Applications"
       : returnHint?.tab === "stages"
         ? "← Stage Assignments"
         : "← Application";
+  const hubHref = landing === "reviews" ? "/reviews" : "/staff";
   const href =
     returnHint?.tab === "manage" || returnHint?.tab === "stages"
-      ? "/staff"
-      : `/staff/applications/${applicationId}`;
+      ? hubHref
+      : landing === "reviews"
+        ? `/reviews/${applicationId}`
+        : `/staff/applications/${applicationId}`;
 
   return (
     <CareersBackLink

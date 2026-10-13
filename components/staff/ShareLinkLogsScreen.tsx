@@ -98,7 +98,10 @@ export function ShareLinkLogsScreen({ id }: { id: string }) {
 
   return (
     <div>
-      <Link href={backHref} className="text-sm font-semibold text-amal-red">
+      <Link
+        href={backHref}
+        className="text-sm font-semibold text-amal-red hover:underline"
+      >
         ← Shared links
       </Link>
       <h1 className="mt-3 text-2xl font-semibold tracking-tight">Access logs</h1>

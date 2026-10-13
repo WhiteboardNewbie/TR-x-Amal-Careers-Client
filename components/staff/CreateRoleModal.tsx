@@ -454,7 +454,7 @@ export function CreateRoleModal({
               </legend>
               <button
                 type="button"
-                className="text-xs font-semibold text-amal-red"
+                className="text-xs font-semibold text-amal-red hover:underline"
                 onClick={() => setSkillOpen(true)}
               >
                 + Add New Skill
@@ -467,7 +467,7 @@ export function CreateRoleModal({
                   className={`cursor-pointer rounded-lg border px-3 py-2 text-xs font-medium ${
                     skillIds.includes(row.id)
                       ? "border-amal-red bg-amal-red/10 text-amal-red"
-                      : "border-black/15 bg-amal-white text-zinc-600"
+                      : "border-black/15 bg-amal-white text-zinc-600 hover:bg-amal-sheet"
                   }`}
                 >
                   <input

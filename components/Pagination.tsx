@@ -27,7 +27,7 @@ export function Pagination({
     >
       <button
         type="button"
-        className={`${box} border-zinc-300 text-zinc-500 disabled:opacity-30`}
+        className={`${box} border-zinc-300 text-zinc-500 hover:border-zinc-950 hover:text-zinc-950 disabled:opacity-30 disabled:hover:border-zinc-300 disabled:hover:text-zinc-500`}
         disabled={activePage === 1}
         onClick={() => onPageChange(activePage - 1)}
         aria-label="Previous page"
@@ -51,7 +51,7 @@ export function Pagination({
       ))}
       <button
         type="button"
-        className={`${box} border-zinc-300 text-zinc-500 disabled:opacity-30`}
+        className={`${box} border-zinc-300 text-zinc-500 hover:border-zinc-950 hover:text-zinc-950 disabled:opacity-30 disabled:hover:border-zinc-300 disabled:hover:text-zinc-500`}
         disabled={activePage === totalPages}
         onClick={() => onPageChange(activePage + 1)}
         aria-label="Next page"

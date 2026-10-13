@@ -74,7 +74,7 @@ function WordDocPreview({
             href={downloadUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-amal-ink px-4 py-2 text-sm font-semibold text-amal-white"
+            className="inline-flex items-center gap-2 rounded-lg bg-amal-ink px-4 py-2 text-sm font-semibold text-amal-white hover:bg-amal-ink/90"
           >
             <ExternalLinkIcon className="h-4 w-4" />
             Open Resume
@@ -82,7 +82,7 @@ function WordDocPreview({
           <a
             href={downloadUrl}
             download
-            className="inline-flex items-center gap-2 rounded-lg border border-black/15 bg-amal-white px-4 py-2 text-sm font-semibold text-zinc-700"
+            className="inline-flex items-center gap-2 rounded-lg border border-black/15 bg-amal-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-amal-sheet"
           >
             Download
           </a>
@@ -176,7 +176,7 @@ export function ResumePreviewPanel({
               href={downloadUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-amal-ink px-4 py-2 text-sm font-semibold text-amal-white"
+              className="inline-flex items-center gap-2 rounded-lg bg-amal-ink px-4 py-2 text-sm font-semibold text-amal-white hover:bg-amal-ink/90"
             >
               <ExternalLinkIcon className="h-4 w-4" />
               Open Resume
@@ -184,7 +184,7 @@ export function ResumePreviewPanel({
             <a
               href={downloadUrl}
               download
-              className="inline-flex items-center gap-2 rounded-lg border border-black/15 bg-amal-white px-4 py-2 text-sm font-semibold text-zinc-700"
+              className="inline-flex items-center gap-2 rounded-lg border border-black/15 bg-amal-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-amal-sheet"
             >
               Download
             </a>

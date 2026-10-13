@@ -744,7 +744,7 @@ function RolesTab({
               className={`rounded-full border px-3 py-1 text-xs font-semibold ${
                 status === item.key
                   ? "border-amal-ink bg-amal-ink text-amal-white"
-                  : "border-black/15 bg-amal-white text-zinc-600"
+                  : "border-black/15 bg-amal-white text-zinc-600 hover:bg-amal-sheet"
               }`}
             >
               {item.label}
@@ -903,7 +903,9 @@ function RolesTab({
                       type="button"
                       onClick={() => void toggle(row)}
                       className={`rounded-lg px-3 py-1.5 text-xs font-semibold text-amal-white ${
-                        row.is_active ? "bg-amal-red" : "bg-amal-ink"
+                        row.is_active
+                          ? "bg-amal-red hover:bg-amal-red/90"
+                          : "bg-amal-ink hover:bg-amal-ink/90"
                       }`}
                     >
                       {row.is_active ? "Close role" : "Open role"}

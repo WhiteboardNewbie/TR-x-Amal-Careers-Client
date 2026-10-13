@@ -137,7 +137,7 @@ export function SiteFooter() {
         <div className="mt-4 flex justify-end md:col-span-7 md:col-start-6 md:mt-0 lg:col-span-7 lg:col-start-6">
           <a
             href="#top"
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-amal-red text-amal-white"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-amal-red text-amal-white hover:bg-amal-red/90"
             aria-label="Back to top"
           >
             <svg

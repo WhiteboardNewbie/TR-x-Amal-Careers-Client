@@ -319,7 +319,7 @@ export function ClientRoleApplications({ slug }: { slug: string }) {
                                 });
                               }
                             }}
-                            className={`h-7 cursor-pointer rounded-full border-0 px-2 text-xs font-semibold ${REVIEW_BADGE[reviewStatus]}`}
+                            className={`h-7 cursor-pointer rounded-full border-0 px-2 text-xs font-semibold transition hover:brightness-95 ${REVIEW_BADGE[reviewStatus]}`}
                           >
                             <option value="pending">Pending</option>
                             <option value="approved">Approved</option>

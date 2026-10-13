@@ -8,6 +8,7 @@ import type {
 } from "@/lib/types";
 import {
   ASSESSMENT_BADGE_BASE,
+  ASSESSMENT_BADGE_LINK_HOVER,
   ApplicationAiScoresInline,
   firstTestScoreBadgeClass,
   formatAssessmentStatusLabel,
@@ -123,7 +124,7 @@ export function CompactAssessmentIndicator({
       <Link
         href={completedHref}
         onClick={onPersistReturn}
-        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-emerald-200 bg-emerald-50 text-emerald-700 transition hover:bg-emerald-100 hover:ring-1 hover:ring-emerald-300"
         title={`${label} completed`}
       >
         <CheckIcon className="h-3.5 w-3.5" />
@@ -206,7 +207,7 @@ export function FirstTestCell({
       <Link
         href={`/staff/applications/${appId}/results/first-test`}
         onClick={onPersistReturn}
-        className={badgeClass}
+        className={`${badgeClass} ${ASSESSMENT_BADGE_LINK_HOVER}`}
       >
         <FileSearchIcon className="h-3.5 w-3.5" />
         {label}

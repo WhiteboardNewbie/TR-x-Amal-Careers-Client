@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { StaffApplication } from "@/lib/types";
 import {
   ASSESSMENT_BADGE_BASE,
+  ASSESSMENT_BADGE_LINK_HOVER,
   ApplicationAiScoresInline,
   AssessmentCell,
   AssessmentLockedBadge,
@@ -43,7 +44,7 @@ export function ApplicationAssessmentCells({
           ) : firstStatus === "completed" ? (
             <Link
               href={`/staff/applications/${row.id}/results/first-test`}
-              className={`${ASSESSMENT_BADGE_BASE} ${
+              className={`${ASSESSMENT_BADGE_BASE} ${ASSESSMENT_BADGE_LINK_HOVER} ${
                 Number.isNaN(firstScore)
                   ? "border-black/10 bg-amal-sheet text-zinc-700"
                   : firstTestScoreBadgeClass(firstScore)
@@ -74,7 +75,7 @@ export function ApplicationAssessmentCells({
           ) : videoStatus === "completed" ? (
             <Link
               href={`/staff/applications/${row.id}/results/video`}
-              className={`${ASSESSMENT_BADGE_BASE} border-emerald-200 bg-emerald-100 text-emerald-800`}
+              className={`${ASSESSMENT_BADGE_BASE} ${ASSESSMENT_BADGE_LINK_HOVER} border-emerald-200 bg-emerald-100 text-emerald-800`}
             >
               <VideoIcon className="h-3 w-3" />
               Completed
@@ -102,7 +103,7 @@ export function ApplicationAssessmentCells({
           ) : questionnaireStatus === "completed" ? (
             <Link
               href={`/staff/applications/${row.id}/results/questionnaire`}
-              className={`${ASSESSMENT_BADGE_BASE} border-emerald-200 bg-emerald-100 text-emerald-800`}
+              className={`${ASSESSMENT_BADGE_BASE} ${ASSESSMENT_BADGE_LINK_HOVER} border-emerald-200 bg-emerald-100 text-emerald-800`}
             >
               <MessageSquareIcon className="h-3 w-3" />
               Completed

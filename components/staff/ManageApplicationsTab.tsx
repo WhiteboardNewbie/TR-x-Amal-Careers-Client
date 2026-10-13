@@ -270,7 +270,7 @@ export function ManageApplicationsTab({
   const menuAppId = menuStage
     ? (applicationFromStage(menuStage)?.id ?? menuStage.job_application)
     : 0;
-  const linkResults = mode === "staff";
+  const linkResults = true;
   const applicationHref = (appId: number, stageId?: number) =>
     mode === "reviews"
       ? `/reviews/${appId}${stageId != null ? `?stage=${stageId}` : ""}`
@@ -443,7 +443,7 @@ export function ManageApplicationsTab({
                               void changeStageStatus(stage, event.target.value)
                             }
                             aria-label={`Stage status for ${applicantName}`}
-                            className={`h-7 max-w-[7.5rem] cursor-pointer rounded-full border-0 px-2 text-xs font-semibold leading-none ${badge.className} disabled:opacity-60`}
+                            className={`h-7 max-w-[7.5rem] cursor-pointer rounded-full border-0 px-2 text-xs font-semibold leading-none transition hover:brightness-95 ${badge.className} disabled:opacity-60`}
                           >
                             {MANAGER_STAGE_STATUS_OPTIONS.map((option) => (
                               <option key={option.value} value={option.value}>

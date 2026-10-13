@@ -24,7 +24,11 @@ export function CareersBackLink({
   }
 
   return (
-    <a href={href} onClick={handleClick} className={className}>
+    <a
+      href={href}
+      onClick={handleClick}
+      className={["hover:underline", className].filter(Boolean).join(" ")}
+    >
       {children}
     </a>
   );

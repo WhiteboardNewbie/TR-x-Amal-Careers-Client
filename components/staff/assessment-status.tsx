@@ -59,6 +59,10 @@ export function formatAssessmentDateTime(
 const BADGE_BASE =
   "inline-flex h-7 max-w-full items-center justify-center gap-1 whitespace-nowrap rounded-full border px-2 py-1 text-xs font-semibold leading-none";
 
+/** Append on assessment result `<Link>` badges (not plain spans). */
+export const ASSESSMENT_BADGE_LINK_HOVER =
+  "transition hover:brightness-95 hover:ring-1 hover:ring-black/15";
+
 export function assessmentStatusToneClass(
   status: string | undefined | null,
 ): string {
