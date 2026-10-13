@@ -1,5 +1,10 @@
 import { AlertCircleIcon } from "./icons";
-import { CAREERS_CONTACT, CAREERS_PATH, cardShell, shellGradient } from "./shared";
+import {
+  CAREERS_CONTACT,
+  CAREERS_PATH,
+  cardShell,
+  shellGradient,
+} from "./shared";
 
 export function isAssessmentLinkExpiredOrInvalid(message: string): boolean {
   const lower = message.toLowerCase();

@@ -19,7 +19,7 @@ import {
   LoaderIcon,
 } from "./icons";
 import { TestBackdrop } from "./TestBackdrop";
-import { errorText } from "./shared";
+import { AssessmentHeaderMark, errorText } from "./shared";
 
 export function QuestionnaireScreen({
   token,
@@ -132,12 +132,15 @@ export function QuestionnaireScreen({
   return (
     <div className="min-h-screen bg-amal-sheet">
       <div className="sticky top-0 z-10 border-b border-black/10 bg-amal-white shadow-sm">
-        <div className="mx-auto max-w-4xl px-4 py-4 sm:px-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-amal-ink">
-              General Questionnaire
-            </h1>
-            <div className="flex items-center rounded-lg bg-amal-red/10 px-4 py-2">
+        <div className="mx-auto max-w-4xl py-4 pl-2 pr-4 sm:pl-3 sm:pr-6">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+              <AssessmentHeaderMark />
+              <h1 className="truncate text-xl font-semibold text-amal-ink">
+                General Questionnaire
+              </h1>
+            </div>
+            <div className="flex shrink-0 items-center rounded-lg bg-amal-red/10 px-4 py-2">
               <MessageSquareIcon className="mr-2 h-5 w-5 text-amal-red" />
               <span className="font-semibold text-amal-red">
                 {index + 1}/{total}

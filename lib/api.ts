@@ -23,6 +23,12 @@ export function mediaUrl(path: string | null | undefined): string | null {
   return `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
+/** Absolute careers API URL for a path (always hits NEXT_PUBLIC_API_URL). */
+export function absoluteApiUrl(path: string): string {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `${API_URL}${normalized}`;
+}
+
 export class ApiError extends Error {
   readonly status: number;
   readonly body: unknown;

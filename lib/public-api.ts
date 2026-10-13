@@ -1,4 +1,4 @@
-import { API_URL, ApiError, absoluteApiUrl, request } from "./api";
+import { ApiError, absoluteApiUrl, request } from "./api";
 import type { VideoEvaluation } from "./types";
 
 export type SessionStatus = {
@@ -236,7 +236,7 @@ export async function getSharedApplicationResumeBlob(id: string): Promise<Blob> 
   return response.blob();
 }
 
-/** Direct API URL (non-proxy) for download attributes when needed. */
+/** Alias for sharedResumeUrl (same absolute API URL). */
 export function sharedResumeDirectUrl(id: string): string {
-  return `${API_URL}/careers/public/application-shares/${id}/resume/`;
+  return sharedResumeUrl(id);
 }

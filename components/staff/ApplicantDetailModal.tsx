@@ -165,7 +165,7 @@ export function ApplicantDetailModal({
               <ContactRow icon={MailIcon} label="Email">
                 {applicant.email?.trim() ? (
                   <a
-                    className="break-all text-amal-red hover:underline"
+                    className="break-all text-amal-ink underline-offset-2 hover:underline hover:text-amal-blue"
                     href={`mailto:${applicant.email.trim()}`}
                   >
                     {applicant.email.trim()}
@@ -181,7 +181,7 @@ export function ApplicantDetailModal({
                 {applicant.contact?.trim() ? (
                   phoneHref ? (
                     <a
-                      className="wrap-break-word text-amal-red hover:underline"
+                      className="wrap-break-word text-amal-ink underline-offset-2 hover:underline hover:text-amal-blue"
                       href={phoneHref}
                     >
                       {applicant.contact.trim()}
