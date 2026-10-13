@@ -1,4 +1,5 @@
-import { API_URL, request } from "./api";
+import { API_URL, ApiError, absoluteApiUrl, request } from "./api";
+import type { VideoEvaluation } from "./types";
 
 export type SessionStatus = {
   status: string;
@@ -39,27 +40,77 @@ export type VideoItem = {
   time_limit_seconds?: number;
 };
 
+export type SharedMcqQuestion = {
+  order: number;
+  question_text: string;
+  selected_option: string | null;
+  answered_at?: string | null;
+  option_a?: string;
+  option_b?: string;
+  option_c?: string;
+  option_d?: string;
+  correct_option?: string;
+  is_correct?: boolean;
+};
+
+export type SharedVideoQuestion = {
+  order: number;
+  prompt: string;
+  transcript: string;
+  video?: string | null;
+  duration_seconds?: number | null;
+  file_size_bytes?: number | null;
+  recorded_at?: string | null;
+  uploaded_at?: string | null;
+};
+
 export type SharedApplication = {
   id: number;
-  applicant: { name: string; email: string; city: string; contact: string };
-  role: { title: string; slug: string; department_name: string; location: string };
+  applicant: {
+    id?: number;
+    name: string;
+    email: string;
+    city: string;
+    contact: string;
+    notes?: string;
+  };
+  role: {
+    title: string;
+    slug: string;
+    department_name: string;
+    location: string;
+  };
   has_resume: boolean;
   status: string;
+  applied_at?: string;
+  ai_relevance_score?: number | null;
+  ai_relevance_rationale?: string | null;
+  ai_relevance_analyzed_at?: string | null;
+  share?: {
+    id: string;
+    expires_at: string | null;
+    comment: string;
+  } | null;
   first_test: {
     status: string;
     score_percentage: string | number | null;
-    questions: { order: number; question_text: string; selected_option: string | null }[];
+    questions: SharedMcqQuestion[];
+    started_at?: string | null;
+    completed_at?: string | null;
+    questions_attempted?: number;
+    correct_answers?: number;
+    correct_count?: number;
+    attempted_count?: number;
+    total_questions?: number;
   } | null;
   video_test: {
     status: string;
     score_percentage: string | number | null;
-    questions: {
-      order: number;
-      prompt: string;
-      transcript: string;
-      video?: string | null;
-    }[];
+    questions: SharedVideoQuestion[];
+    started_at?: string | null;
+    completed_at?: string | null;
   } | null;
+  video_evaluation?: VideoEvaluation | null;
   questionnaire: {
     status: string;
     score_percentage: string | number | null;
@@ -68,7 +119,11 @@ export type SharedApplication = {
       question_text: string;
       answer_text?: string | null;
       selected_option: string | null;
+      attachment?: string | null;
+      answered_at?: string | null;
     }[];
+    started_at?: string | null;
+    completed_at?: string | null;
   } | null;
 };
 
@@ -168,5 +223,20 @@ export function getSharedApplication(id: string): Promise<SharedApplication> {
 }
 
 export function sharedResumeUrl(id: string): string {
+  return absoluteApiUrl(`/careers/public/application-shares/${id}/resume/`);
+}
+
+export async function getSharedApplicationResumeBlob(id: string): Promise<Blob> {
+  const response = await fetch(
+    absoluteApiUrl(`/careers/public/application-shares/${id}/resume/`),
+  );
+  if (!response.ok) {
+    throw new ApiError(response.status, await response.text());
+  }
+  return response.blob();
+}
+
+/** Direct API URL (non-proxy) for download attributes when needed. */
+export function sharedResumeDirectUrl(id: string): string {
   return `${API_URL}/careers/public/application-shares/${id}/resume/`;
 }

@@ -360,11 +360,21 @@ export type ShareLink = {
   id: string;
   job_application_id?: number;
   job_application?: number;
+  applicant_name?: string;
+  applicant_email?: string;
+  job_opening_title?: string;
+  created_by?: number | null;
+  created_by_username?: string | null;
   comment: string;
   expires_at: string | null;
   is_active: boolean;
+  is_expired?: boolean;
+  status?: "active" | "expired" | "deactivated" | string;
   share_url: string;
+  access_count?: number;
+  last_accessed_at?: string | null;
   created_at: string;
+  updated_at?: string;
 };
 
 export type WrittenTestSection = {
