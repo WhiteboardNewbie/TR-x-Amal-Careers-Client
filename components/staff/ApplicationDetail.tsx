@@ -33,8 +33,12 @@ import type {
   StaffApplication,
   VideoEvaluation,
 } from "@/lib/types";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { AssessmentCommentsPanel } from "./AssessmentCommentsPanel";
-import { CareersBackLink } from "./CareersBackLink";
+import {
+  staffHubBreadcrumbHref,
+  staffHubBreadcrumbLabel,
+} from "./assessment-result-shared";
 import {
   formatAssessmentStatusLabel,
   getAssessmentEffectiveStatus,
@@ -225,22 +229,6 @@ const VIDEO_EVAL_STATUS_BADGE: Record<
     className: "bg-amal-red/10 text-amal-red",
   },
 };
-
-function careersBackLabel(
-  isReviews: boolean,
-  returnHint: ReturnType<typeof peekCareersApplicationsReturn>,
-): string {
-  if (isReviews) {
-    return "← Manage Applications";
-  }
-  if (returnHint?.tab === "manage") {
-    return "← Manage Applications";
-  }
-  if (returnHint?.tab === "stages") {
-    return "← Stage Assignments";
-  }
-  return "← Job Applications";
-}
 
 function scrollToElement(node: HTMLElement | null) {
   node?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -472,7 +460,8 @@ export function ApplicationDetail({
           getAssessmentEffectiveStatus(application.test_session) ??
             firstTestSection?.status,
         );
-  const backLabel = careersBackLabel(isReviews, returnHint);
+  const hubLabel = staffHubBreadcrumbLabel(returnHint, { isReviews });
+  const hubHref = staffHubBreadcrumbHref(isReviews ? "reviews" : undefined);
 
   async function runResumeScore() {
     setBusy("score");
@@ -532,12 +521,16 @@ export function ApplicationDetail({
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <CareersBackLink
-          href={isReviews ? "/reviews" : "/staff"}
-          className="text-sm font-semibold text-amal-red"
-        >
-          {backLabel}
-        </CareersBackLink>
+        <Breadcrumbs
+          linkAs="careers"
+          items={[
+            { label: hubLabel, href: hubHref },
+            {
+              label:
+                application.applicant.name?.trim() || "Application",
+            },
+          ]}
+        />
         {!isReviews ? (
           <button
             type="button"

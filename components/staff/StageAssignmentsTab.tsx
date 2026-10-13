@@ -74,6 +74,7 @@ import {
   CenteredOverlay,
   GhostButton,
   Modal,
+  ModalCloseButton,
   PrimaryButton,
   TablePager,
 } from "./ui";
@@ -1549,14 +1550,7 @@ function ScheduleInterviewModal({
               Assigned to {stage.assigned_to?.full_name ?? "—"}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-1 text-amal-white/80 hover:bg-amal-white/10 hover:text-amal-white"
-            aria-label="Close"
-          >
-            <XIcon className="h-5 w-5" />
-          </button>
+          <ModalCloseButton tone="onDark" onClick={onClose} />
         </div>
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex-1 space-y-4 overflow-y-auto p-5">

@@ -12,7 +12,7 @@ import {
   RoleDetailAnalyticsInsights,
   RoleDetailApplicationsCta,
 } from "./RoleDetailAnalytics";
-import { CenteredOverlay } from "./ui";
+import { CenteredOverlay, ModalCloseButton } from "./ui";
 
 const WORK_TYPE_LABEL: Record<string, string> = {
   remote: "Remote",
@@ -154,14 +154,7 @@ export function RoleDetailModal({
                 {role.is_active ? "Close role" : "Open role"}
               </button>
             ) : null}
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-2xl text-amal-white/60 hover:text-amal-white"
-              aria-label="Close"
-            >
-              ×
-            </button>
+            <ModalCloseButton tone="onDark" onClick={onClose} />
           </div>
         </div>
 

@@ -13,7 +13,7 @@ import {
 import { STATUS_BADGE, labelFor } from "@/lib/status";
 import type { VideoEvaluation } from "@/lib/types";
 import { ResumePreviewPanel } from "@/components/staff/ResumePreviewPanel";
-import { CenteredOverlay } from "@/components/staff/ui";
+import { CenteredOverlay, ModalCloseButton } from "@/components/staff/ui";
 import {
   AwardIcon,
   CalendarIcon,
@@ -25,7 +25,6 @@ import {
   PhoneIcon,
   PlayIcon,
   VideoIcon,
-  XIcon,
 } from "@/components/staff/icons";
 
 function cn(...values: Array<string | false | null | undefined>) {
@@ -970,14 +969,7 @@ function FirstTestModal({
               {correct != null ? ` · ${correct}/${total} correct` : ""}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded p-1 text-zinc-500 hover:bg-amal-sheet"
-            aria-label="Close"
-          >
-            <XIcon className="h-5 w-5" />
-          </button>
+          <ModalCloseButton onClick={onClose} />
         </div>
         <div className="space-y-4 overflow-y-auto px-5 py-4">
           {questions.length === 0 ? (

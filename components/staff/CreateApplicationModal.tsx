@@ -11,7 +11,12 @@ import {
 import { getApplicants, getStaffJobOpenings } from "@/lib/staff-api";
 import type { ApplicantRow, StaffJobOpening } from "@/lib/types";
 import { PhoneField } from "./PhoneField";
-import { CenteredOverlay, GhostButton, PrimaryButton } from "./ui";
+import {
+  CenteredOverlay,
+  GhostButton,
+  ModalCloseButton,
+  PrimaryButton,
+} from "./ui";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : "Request failed.";
@@ -168,14 +173,7 @@ export function CreateApplicationModal({
               Add candidate details and submit to the hiring pipeline.
             </p>
           </div>
-          <button
-            type="button"
-            className="rounded-full px-2 py-1 text-sm font-semibold text-zinc-500 hover:bg-amal-sheet hover:text-amal-ink"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            ×
-          </button>
+          <ModalCloseButton onClick={onClose} />
         </div>
         <form
           className="flex min-h-0 flex-1 flex-col"

@@ -76,7 +76,10 @@ export function QuestionnaireResultView({ id }: { id: number }) {
   if (notice || !questionnaire) {
     return (
       <div className="space-y-4 p-6">
-        <AssessmentResultBackNav applicationId={id} />
+        <AssessmentResultBackNav
+          applicationId={id}
+          currentLabel="Questionnaire"
+        />
         <SectionCard>
           <div className="p-6">
             <p className="text-zinc-600">
@@ -101,7 +104,10 @@ export function QuestionnaireResultView({ id }: { id: number }) {
 
   return (
     <div className="space-y-6 p-6">
-      <AssessmentResultBackNav applicationId={id} />
+      <AssessmentResultBackNav
+        applicationId={id}
+        currentLabel="Questionnaire"
+      />
 
       <SectionCard>
         <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">

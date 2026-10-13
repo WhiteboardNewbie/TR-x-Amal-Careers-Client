@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ApiError } from "@/lib/api";
 import {
   decideClientApplication,
@@ -138,12 +139,12 @@ export function ClientRoleApplications({ slug }: { slug: string }) {
 
   return (
     <div className="staff-container space-y-4 py-8">
-      <Link
-        href="/client"
-        className="inline-flex items-center gap-2 text-sm text-zinc-600 hover:text-amal-ink"
-      >
-        ← All roles
-      </Link>
+      <Breadcrumbs
+        items={[
+          { label: "Hiring", href: "/client" },
+          { label: role?.title?.trim() || "Applications" },
+        ]}
+      />
       <StaffBanner
         eyebrow="Role detail"
         title={role?.title ?? "Applications"}
