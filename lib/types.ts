@@ -340,8 +340,11 @@ export type AssessmentSetting = {
   technical_question_count: number;
   behavioral_question_count: number;
   time_limit_minutes: number;
-  validity_days: number;
   estimated_minutes: number;
+};
+
+export type AssessmentInviteSettings = {
+  default_validity_days: number;
 };
 
 export type Comment = {

@@ -4,6 +4,7 @@ import type {
   ApplicationAssessment,
   ApplicationStage,
   ApplicationStageHrOverview,
+  AssessmentInviteSettings,
   AssessmentSetting,
   BankQuestion,
   ClientApplicationReviewHr,
@@ -570,6 +571,20 @@ export function patchAssessmentSetting(
 ): Promise<AssessmentSetting> {
   return sendJson<AssessmentSetting>(
     `/assessment-settings/${encodeURIComponent(testType)}/`,
+    "PATCH",
+    body,
+  );
+}
+
+export function getAssessmentInviteSettings(): Promise<AssessmentInviteSettings> {
+  return request<AssessmentInviteSettings>("/assessment-invite-settings/");
+}
+
+export function patchAssessmentInviteSettings(
+  body: Partial<AssessmentInviteSettings>,
+): Promise<AssessmentInviteSettings> {
+  return sendJson<AssessmentInviteSettings>(
+    "/assessment-invite-settings/",
     "PATCH",
     body,
   );

@@ -7,18 +7,21 @@ import {
   createBankQuestion,
   createQuestionnairePrompt,
   createVideoPrompt,
+  getAssessmentInviteSettings,
   getAssessmentSettings,
   getBankQuestions,
   getOrgDepartments,
   getQuestionnairePrompts,
   getSkillsPage,
   getVideoPrompts,
+  patchAssessmentInviteSettings,
   patchAssessmentSetting,
   patchBankQuestion,
   patchQuestionnairePrompt,
   patchVideoPrompt,
 } from "@/lib/staff-api";
 import type {
+  AssessmentInviteSettings,
   AssessmentSetting,
   BankQuestion,
   Department,
@@ -1466,15 +1469,17 @@ function DefaultsModal({
 }) {
   const [rows, setRows] = useState<AssessmentSetting[]>([]);
   const [drafts, setDrafts] = useState<Record<string, AssessmentSetting>>({});
+  const [inviteDays, setInviteDays] = useState(3);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     let ignore = false;
-    getAssessmentSettings()
-      .then((data) => {
+    Promise.all([getAssessmentSettings(), getAssessmentInviteSettings()])
+      .then(([data, invite]) => {
         if (!ignore) {
           setRows(data);
           setDrafts(Object.fromEntries(data.map((row) => [row.test_type, row])));
+          setInviteDays(invite.default_validity_days);
         }
       })
       .catch((error) => {
@@ -1495,11 +1500,16 @@ function DefaultsModal({
   async function save() {
     setBusy(true);
     try {
-      const updated = await Promise.all(
-        rows.map((row) =>
-          patchAssessmentSetting(row.test_type, drafts[row.test_type]),
+      const [updated] = await Promise.all([
+        Promise.all(
+          rows.map((row) =>
+            patchAssessmentSetting(row.test_type, drafts[row.test_type]),
+          ),
         ),
-      );
+        patchAssessmentInviteSettings({
+          default_validity_days: inviteDays,
+        } satisfies Partial<AssessmentInviteSettings>),
+      ]);
       setRows(updated);
       onClose();
     } catch (error) {
@@ -1512,6 +1522,24 @@ function DefaultsModal({
   return (
     <Modal title="Assessment Defaults" onClose={onClose} wide>
       <div className="space-y-4">
+        <section className="rounded-xl border border-black/10 p-4">
+          <h2 className="mb-3 text-sm font-bold">Invite link</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Default validity (days)">
+              <input
+                className={inputClass}
+                type="number"
+                min={1}
+                value={inviteDays}
+                onChange={(event) => setInviteDays(Number(event.target.value))}
+              />
+            </Field>
+          </div>
+          <p className="mt-2 text-xs text-black/55">
+            Used when a new assessment invite is created. Extending an invite still
+            uses 3, 5, or 7 days from the application screen.
+          </p>
+        </section>
         {rows.map((row) => {
           const draft = drafts[row.test_type] ?? row;
           return (
@@ -1523,23 +1551,21 @@ function DefaultsModal({
                 {SETTING_LABEL[row.test_type] ?? row.test_type}
               </h2>
               <div className="grid gap-3 sm:grid-cols-2">
-                {row.test_type !== "general_questionnaire" ? (
-                  <Field label="Total questions">
-                    <input
-                      className={inputClass}
-                      type="number"
-                      min={0}
-                      value={draft.total_questions}
-                      onChange={(event) =>
-                        update(
-                          row.test_type,
-                          "total_questions",
-                          Number(event.target.value),
-                        )
-                      }
-                    />
-                  </Field>
-                ) : null}
+                <Field label="Total questions">
+                  <input
+                    className={inputClass}
+                    type="number"
+                    min={0}
+                    value={draft.total_questions}
+                    onChange={(event) =>
+                      update(
+                        row.test_type,
+                        "total_questions",
+                        Number(event.target.value),
+                      )
+                    }
+                  />
+                </Field>
                 {row.test_type === "first_test" ? (
                   <>
                     <Field label="Technical">
@@ -1574,33 +1600,16 @@ function DefaultsModal({
                     </Field>
                   </>
                 ) : null}
-                {row.test_type !== "general_questionnaire" ? (
-                  <Field label="Time limit (minutes)">
-                    <input
-                      className={inputClass}
-                      type="number"
-                      min={0}
-                      value={draft.time_limit_minutes}
-                      onChange={(event) =>
-                        update(
-                          row.test_type,
-                          "time_limit_minutes",
-                          Number(event.target.value),
-                        )
-                      }
-                    />
-                  </Field>
-                ) : null}
-                <Field label="Validity (days)">
+                <Field label="Time limit (minutes)">
                   <input
                     className={inputClass}
                     type="number"
-                    min={1}
-                    value={draft.validity_days}
+                    min={0}
+                    value={draft.time_limit_minutes}
                     onChange={(event) =>
                       update(
                         row.test_type,
-                        "validity_days",
+                        "time_limit_minutes",
                         Number(event.target.value),
                       )
                     }
