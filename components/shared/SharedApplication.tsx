@@ -12,12 +12,14 @@ import {
 } from "@/lib/public-api";
 import { STATUS_BADGE, labelFor } from "@/lib/status";
 import type { VideoEvaluation } from "@/lib/types";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { ResumePreviewPanel } from "@/components/staff/ResumePreviewPanel";
 import { CenteredOverlay, ModalCloseButton } from "@/components/staff/ui";
 import {
   AwardIcon,
   CalendarIcon,
   CheckIcon,
+  ExternalLinkIcon,
   FileTextIcon,
   MailIcon,
   MapPinIcon,
@@ -390,13 +392,33 @@ export function SharedApplication({ id }: { id: string }) {
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
           <div className="space-y-6 xl:sticky xl:top-6 xl:self-start">
-            <ResumePreviewPanel
-              resumePath="resume.pdf"
-              resumeBlob={resumeBlob}
-              downloadUrl={resumeObjectUrl || sharedResumeUrl(id)}
-              hasResume={data.has_resume}
-              loading={resumeLoading}
-            />
+            <CollapsibleSection
+              className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-black/10 bg-amal-white"
+              title="Resume"
+              subtitle="Candidate document preview"
+              headerAction={
+                resumeObjectUrl || data.has_resume ? (
+                  <a
+                    href={resumeObjectUrl || sharedResumeUrl(id)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-xs font-semibold text-zinc-700 hover:bg-amal-sheet"
+                  >
+                    <ExternalLinkIcon className="h-3.5 w-3.5" />
+                    Open
+                  </a>
+                ) : null
+              }
+            >
+              <ResumePreviewPanel
+                resumePath="resume.pdf"
+                resumeBlob={resumeBlob}
+                downloadUrl={resumeObjectUrl || sharedResumeUrl(id)}
+                hasResume={data.has_resume}
+                loading={resumeLoading}
+                showHeader={false}
+              />
+            </CollapsibleSection>
           </div>
 
           <div className="space-y-6">
@@ -558,23 +580,18 @@ function AiRelevancePanel({
   hasResume: boolean;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-violet-200/70 bg-amal-white shadow-sm">
-      <div className="border-b border-violet-100 bg-gradient-to-r from-violet-50 via-amal-white to-violet-50/60 px-5 py-5">
-        <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-600 text-amal-white shadow-md">
-            <FileTextIcon className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-zinc-900">
-              AI Resume Evaluation
-            </h2>
-            <p className="mt-1 text-sm text-zinc-600">
-              Compare this resume against the job description and required
-              skills.
-            </p>
-          </div>
+    <CollapsibleSection
+      className="overflow-hidden rounded-2xl border border-violet-200/70 bg-amal-white shadow-sm"
+      headerClassName="border-b border-violet-100 bg-gradient-to-r from-violet-50 via-amal-white to-violet-50/60 px-5 py-5"
+      subtitleClassName="mt-1 text-sm text-zinc-600"
+      title="AI Resume Evaluation"
+      subtitle="Compare this resume against the job description and required skills."
+      icon={
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-violet-600 text-amal-white shadow-md">
+          <FileTextIcon className="h-5 w-5" />
         </div>
-      </div>
+      }
+    >
       <div className="grid gap-5 p-5 sm:grid-cols-[180px_minmax(0,1fr)]">
         <div
           className={cn(
@@ -614,7 +631,7 @@ function AiRelevancePanel({
           ) : null}
         </div>
       </div>
-    </section>
+    </CollapsibleSection>
   );
 }
 
@@ -641,23 +658,18 @@ function AiVideoEvaluationPanel({
   const transcripts = evaluation?.transcripts ?? [];
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-teal-200/70 bg-amal-white shadow-sm">
-      <div className="border-b border-teal-100 bg-gradient-to-r from-teal-50 via-amal-white to-teal-50/60 px-5 py-5">
-        <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-600 text-amal-white shadow-md">
-            <VideoIcon className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-zinc-900">
-              AI Video Evaluation
-            </h2>
-            <p className="mt-1 text-sm text-zinc-600">
-              Scores are generated from video answer transcripts against the
-              role requirements.
-            </p>
-          </div>
+    <CollapsibleSection
+      className="overflow-hidden rounded-2xl border border-teal-200/70 bg-amal-white shadow-sm"
+      headerClassName="border-b border-teal-100 bg-gradient-to-r from-teal-50 via-amal-white to-teal-50/60 px-5 py-5"
+      subtitleClassName="mt-1 text-sm text-zinc-600"
+      title="AI Video Evaluation"
+      subtitle="Scores are generated from video answer transcripts against the role requirements."
+      icon={
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-teal-600 text-amal-white shadow-md">
+          <VideoIcon className="h-5 w-5" />
         </div>
-      </div>
+      }
+    >
       <div className="space-y-5 p-5">
         {!evaluation || score == null ? (
           <p className="rounded-2xl border border-dashed border-black/10 bg-amal-sheet/60 px-4 py-8 text-center text-sm text-zinc-600">
@@ -741,7 +753,7 @@ function AiVideoEvaluationPanel({
           </>
         )}
       </div>
-    </section>
+    </CollapsibleSection>
   );
 }
 
@@ -758,13 +770,10 @@ function VideoResponsesPanel({
   const videoUrl = mediaUrl(selected?.video);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white">
-      <div className="border-b border-black/5 px-5 py-4">
-        <h2 className="text-lg font-bold">Video Test Responses</h2>
-        <p className="text-sm text-zinc-500">
-          Review recorded answers for each question
-        </p>
-      </div>
+    <CollapsibleSection
+      title="Video Test Responses"
+      subtitle="Review recorded answers for each question"
+    >
       {responses.length === 0 ? (
         <div className="flex flex-col items-center justify-center px-6 py-14 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amal-sheet">
@@ -869,7 +878,7 @@ function VideoResponsesPanel({
           </div>
         </div>
       )}
-    </section>
+    </CollapsibleSection>
   );
 }
 
@@ -891,26 +900,23 @@ function QuestionnairePanel({
 }) {
   const questions = section?.questions ?? [];
   return (
-    <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white">
-      <div className="border-b border-black/5 px-5 py-4">
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amal-sheet text-amal-red">
-            <MessageSquareIcon className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold">Questionnaire</h2>
-            <p className="text-sm text-zinc-500">
-              {section
-                ? `${labelFor(section.status)}${
-                    section.score_percentage != null
-                      ? ` · Score ${section.score_percentage}`
-                      : ""
-                  }`
-                : "No result yet."}
-            </p>
-          </div>
+    <CollapsibleSection
+      title="Questionnaire"
+      subtitle={
+        section
+          ? `${labelFor(section.status)}${
+              section.score_percentage != null
+                ? ` · Score ${section.score_percentage}`
+                : ""
+            }`
+          : "No result yet."
+      }
+      icon={
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amal-sheet text-amal-red">
+          <MessageSquareIcon className="h-5 w-5" />
         </div>
-      </div>
+      }
+    >
       <div className="space-y-3 p-5">
         {questions.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-black/10 bg-amal-sheet/60 px-4 py-8 text-center text-sm text-zinc-600">
@@ -932,7 +938,7 @@ function QuestionnairePanel({
           ))
         )}
       </div>
-    </section>
+    </CollapsibleSection>
   );
 }
 
