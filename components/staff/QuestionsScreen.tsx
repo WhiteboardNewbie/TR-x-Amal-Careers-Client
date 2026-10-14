@@ -377,7 +377,7 @@ function BankTab({
       type="button"
       onMouseDown={preventFocusScroll}
       onClick={onClick}
-      className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
+      className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium outline-none transition-colors focus-visible:outline-none ${
         active
           ? "border-amal-red bg-amal-red/5 text-amal-red"
           : "border-transparent text-zinc-500 hover:border-black/20 hover:text-zinc-700"
