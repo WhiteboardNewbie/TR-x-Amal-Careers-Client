@@ -113,14 +113,71 @@ export function ResumePreviewPanel({
   downloadUrl,
   hasResume,
   loading = false,
+  showHeader = true,
 }: {
   resumePath: string | null | undefined;
   resumeBlob: Blob | null;
   downloadUrl: string;
   hasResume: boolean;
   loading?: boolean;
+  showHeader?: boolean;
 }) {
   const previewKind = getResumePreviewKind(resumePath);
+
+  const body = !hasResume ? (
+    <div className="flex min-h-[420px] flex-col items-center justify-center p-8 text-center text-zinc-500">
+      <FileTextIcon className="mb-3 h-12 w-12" />
+      <p>No resume uploaded.</p>
+    </div>
+  ) : loading ? (
+    <div className="flex min-h-[420px] items-center justify-center p-8 text-sm text-zinc-500">
+      Loading resume preview...
+    </div>
+  ) : !resumeBlob || !downloadUrl ? (
+    <div className="flex min-h-[420px] flex-col items-center justify-center p-8 text-center text-zinc-500">
+      <FileTextIcon className="mb-3 h-12 w-12" />
+      <p>Could not load resume preview.</p>
+    </div>
+  ) : previewKind === "pdf" ? (
+    <iframe
+      src={downloadUrl}
+      title="Candidate resume"
+      className="h-[calc(100vh-15rem)] min-h-[560px] w-full bg-amal-sheet"
+    />
+  ) : previewKind === "word" ? (
+    <WordDocPreview blob={resumeBlob} downloadUrl={downloadUrl} />
+  ) : (
+    <div className="flex min-h-[420px] flex-col items-center justify-center p-8 text-center">
+      <FileTextIcon className="mb-3 h-12 w-12 text-zinc-400" />
+      <h2 className="text-lg font-bold">Resume preview unavailable</h2>
+      <p className="mt-2 max-w-sm text-sm text-zinc-600">
+        This file type cannot be previewed in the browser. Open or download it
+        to review the document.
+      </p>
+      <div className="mt-5 flex flex-wrap justify-center gap-2">
+        <a
+          href={downloadUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-2 rounded-lg bg-amal-ink px-4 py-2 text-sm font-semibold text-amal-white hover:bg-amal-ink/90"
+        >
+          <ExternalLinkIcon className="h-4 w-4" />
+          Open Resume
+        </a>
+        <a
+          href={downloadUrl}
+          download
+          className="inline-flex items-center gap-2 rounded-lg border border-black/15 bg-amal-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-amal-sheet"
+        >
+          Download
+        </a>
+      </div>
+    </div>
+  );
+
+  if (!showHeader) {
+    return body;
+  }
 
   return (
     <section className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-black/10 bg-amal-white">
@@ -141,56 +198,7 @@ export function ResumePreviewPanel({
           </a>
         ) : null}
       </div>
-      {!hasResume ? (
-        <div className="flex min-h-[420px] flex-col items-center justify-center p-8 text-center text-zinc-500">
-          <FileTextIcon className="mb-3 h-12 w-12" />
-          <p>No resume uploaded.</p>
-        </div>
-      ) : loading ? (
-        <div className="flex min-h-[420px] items-center justify-center p-8 text-sm text-zinc-500">
-          Loading resume preview...
-        </div>
-      ) : !resumeBlob || !downloadUrl ? (
-        <div className="flex min-h-[420px] flex-col items-center justify-center p-8 text-center text-zinc-500">
-          <FileTextIcon className="mb-3 h-12 w-12" />
-          <p>Could not load resume preview.</p>
-        </div>
-      ) : previewKind === "pdf" ? (
-        <iframe
-          src={downloadUrl}
-          title="Candidate resume"
-          className="h-[calc(100vh-15rem)] min-h-[560px] w-full bg-amal-sheet"
-        />
-      ) : previewKind === "word" ? (
-        <WordDocPreview blob={resumeBlob} downloadUrl={downloadUrl} />
-      ) : (
-        <div className="flex min-h-[420px] flex-col items-center justify-center p-8 text-center">
-          <FileTextIcon className="mb-3 h-12 w-12 text-zinc-400" />
-          <h2 className="text-lg font-bold">Resume preview unavailable</h2>
-          <p className="mt-2 max-w-sm text-sm text-zinc-600">
-            This file type cannot be previewed in the browser. Open or download
-            it to review the document.
-          </p>
-          <div className="mt-5 flex flex-wrap justify-center gap-2">
-            <a
-              href={downloadUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-amal-ink px-4 py-2 text-sm font-semibold text-amal-white hover:bg-amal-ink/90"
-            >
-              <ExternalLinkIcon className="h-4 w-4" />
-              Open Resume
-            </a>
-            <a
-              href={downloadUrl}
-              download
-              className="inline-flex items-center gap-2 rounded-lg border border-black/15 bg-amal-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-amal-sheet"
-            >
-              Download
-            </a>
-          </div>
-        </div>
-      )}
+      {body}
     </section>
   );
 }

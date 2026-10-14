@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { ApiError, getJobOpening, mediaUrl } from "@/lib/api";
 import { peekCareersApplicationsReturn } from "@/lib/careers-return";
 import { formatPhoneDisplay, phoneTelHref } from "@/lib/phone-format";
@@ -708,13 +709,33 @@ export function ApplicationDetail({
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         <div className="space-y-6 xl:sticky xl:top-6 xl:self-start">
-          <ResumePreviewPanel
-            resumePath={application.resume}
-            resumeBlob={resumeBlob}
-            downloadUrl={resumeDownloadUrl}
-            hasResume={Boolean(application.resume)}
-            loading={resumeLoading}
-          />
+          <CollapsibleSection
+            className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-black/10 bg-amal-white"
+            title="Resume"
+            subtitle="Candidate document preview"
+            headerAction={
+              resumeDownloadUrl ? (
+                <a
+                  href={resumeDownloadUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-black/15 bg-amal-white px-3 py-2 text-xs font-semibold text-zinc-700 hover:bg-amal-sheet"
+                >
+                  <ExternalLinkIcon className="h-3.5 w-3.5" />
+                  Open
+                </a>
+              ) : null
+            }
+          >
+            <ResumePreviewPanel
+              resumePath={application.resume}
+              resumeBlob={resumeBlob}
+              downloadUrl={resumeDownloadUrl}
+              hasResume={Boolean(application.resume)}
+              loading={resumeLoading}
+              showHeader={false}
+            />
+          </CollapsibleSection>
           <TimelinePanel events={timeline} application={application} />
         </div>
 
@@ -768,11 +789,19 @@ export function ApplicationDetail({
             headerAction={reviewStageAction}
             emptyStateAction={reviewStageAction}
           />
-          <AssessmentCommentsPanel
-            applicationId={id}
-            headerTitle="Comments"
-            headerSubtitle="Notes and feedback from reviewers"
-          />
+          <CollapsibleSection
+            title="Comments"
+            subtitle="Notes and feedback from reviewers"
+          >
+            <div className="p-5">
+              <AssessmentCommentsPanel
+                applicationId={id}
+                headerTitle="Comments"
+                headerSubtitle="Notes and feedback from reviewers"
+                showHeader={false}
+              />
+            </div>
+          </CollapsibleSection>
         </div>
       </div>
 
@@ -943,38 +972,33 @@ function AiRelevancePanel({
   onRunAnalysis: () => void;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-violet-200/70 bg-amal-white shadow-sm shadow-violet-100/50">
-      <div className="border-b border-violet-100 bg-gradient-to-r from-violet-50 via-amal-white to-violet-50/60 px-5 py-5">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-600 text-amal-white shadow-md shadow-violet-500/30">
-              <FileTextIcon className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-zinc-900">
-                AI Resume Evaluation
-              </h2>
-              <p className="mt-1 text-sm text-zinc-600">
-                Compare this resume against the job description and required
-                skills.
-              </p>
-            </div>
-          </div>
-          {showActions ? (
-            <PrimaryButton
-              type="button"
-              disabled={!hasResume || analyzing}
-              onClick={onRunAnalysis}
-            >
-              {analyzing
-                ? "Analyzing..."
-                : score != null
-                  ? "Re-run Analysis"
-                  : "Run Analysis"}
-            </PrimaryButton>
-          ) : null}
+    <CollapsibleSection
+      className="overflow-hidden rounded-2xl border border-violet-200/70 bg-amal-white shadow-sm shadow-violet-100/50"
+      headerClassName="border-b border-violet-100 bg-gradient-to-r from-violet-50 via-amal-white to-violet-50/60 px-5 py-5"
+      subtitleClassName="mt-1 text-sm text-zinc-600"
+      title="AI Resume Evaluation"
+      subtitle="Compare this resume against the job description and required skills."
+      icon={
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-violet-600 text-amal-white shadow-md shadow-violet-500/30">
+          <FileTextIcon className="h-5 w-5" />
         </div>
-      </div>
+      }
+      headerAction={
+        showActions ? (
+          <PrimaryButton
+            type="button"
+            disabled={!hasResume || analyzing}
+            onClick={onRunAnalysis}
+          >
+            {analyzing
+              ? "Analyzing..."
+              : score != null
+                ? "Re-run Analysis"
+                : "Run Analysis"}
+          </PrimaryButton>
+        ) : null
+      }
+    >
       <div className="grid gap-5 p-5 sm:grid-cols-[180px_minmax(0,1fr)]">
         <div
           className={cn(
@@ -1016,7 +1040,7 @@ function AiRelevancePanel({
           ) : null}
         </div>
       </div>
-    </section>
+    </CollapsibleSection>
   );
 }
 
@@ -1034,13 +1058,10 @@ function ApplicationContextPanel({
     ? (EMPLOYMENT_LABEL[opening.employment_type] ?? opening.employment_type)
     : null;
   return (
-    <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white">
-      <div className="border-b border-black/5 px-5 py-4">
-        <h2 className="text-lg font-bold">Application Context</h2>
-        <p className="text-sm text-zinc-500">
-          Role, contact details, and submitted notes
-        </p>
-      </div>
+    <CollapsibleSection
+      title="Application Context"
+      subtitle="Role, contact details, and submitted notes"
+    >
       <div className="grid grid-cols-1 gap-3 p-5 md:grid-cols-2 lg:grid-cols-3">
         <InfoRow
           icon={BriefcaseIcon}
@@ -1088,7 +1109,7 @@ function ApplicationContextPanel({
           <TextBlock label="Cover letter" value={application.cover_letter} />
         </div>
       ) : null}
-    </section>
+    </CollapsibleSection>
   );
 }
 
@@ -1157,13 +1178,10 @@ function StagesPanel({
   onToggleStage: (stageId: number) => void;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white">
-      <div className="border-b border-black/5 px-5 py-4">
-        <h2 className="text-lg font-bold">Hiring Pipeline</h2>
-        <p className="text-sm text-zinc-500">
-          Manager stages and interview progress
-        </p>
-      </div>
+    <CollapsibleSection
+      title="Hiring Pipeline"
+      subtitle="Manager stages and interview progress"
+    >
       <div className="space-y-4 p-5">
         {currentStage ? (
           <div className="rounded-2xl border border-amal-red/20 bg-gradient-to-r from-amal-red/5 to-amal-white p-4">
@@ -1286,7 +1304,7 @@ function StagesPanel({
           </div>
         )}
       </div>
-    </section>
+    </CollapsibleSection>
   );
 }
 
@@ -1339,11 +1357,10 @@ function TimelinePanel({
         },
       ];
   return (
-    <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white">
-      <div className="border-b border-black/5 px-5 py-4">
-        <h2 className="text-lg font-bold">Activity Timeline</h2>
-        <p className="text-sm text-zinc-500">Recent application milestones</p>
-      </div>
+    <CollapsibleSection
+      title="Activity Timeline"
+      subtitle="Recent application milestones"
+    >
       <div className="p-5">
         <ul>
           {visible.map((event, index) => {
@@ -1368,7 +1385,7 @@ function TimelinePanel({
           })}
         </ul>
       </div>
-    </section>
+    </CollapsibleSection>
   );
 }
 
@@ -1453,56 +1470,51 @@ function AiVideoEvaluationPanel({
   });
   const hasResults = score != null && competencyRows.some((row) => row.score != null);
   const transcripts = evaluation?.transcripts ?? [];
+  const statusBadge =
+    status && VIDEO_EVAL_STATUS_BADGE[status] ? (
+      <span
+        className={cn(
+          "rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
+          VIDEO_EVAL_STATUS_BADGE[status].className,
+        )}
+      >
+        {VIDEO_EVAL_STATUS_BADGE[status].label}
+      </span>
+    ) : status ? (
+      <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-700">
+        {status}
+      </span>
+    ) : null;
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-teal-200/70 bg-amal-white shadow-sm shadow-teal-100/50">
-      <div className="border-b border-teal-100 bg-gradient-to-r from-teal-50 via-amal-white to-teal-50/60 px-5 py-5">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-600 text-amal-white shadow-md shadow-teal-500/30">
-              <VideoIcon className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-lg font-bold text-zinc-900">
-                  AI Video Evaluation
-                </h2>
-                {status && VIDEO_EVAL_STATUS_BADGE[status] ? (
-                  <span
-                    className={cn(
-                      "rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
-                      VIDEO_EVAL_STATUS_BADGE[status].className,
-                    )}
-                  >
-                    {VIDEO_EVAL_STATUS_BADGE[status].label}
-                  </span>
-                ) : status ? (
-                  <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-700">
-                    {status}
-                  </span>
-                ) : null}
-              </div>
-              <p className="mt-1 text-sm text-zinc-600">
-                Scores are generated from video answer transcripts against the
-                role requirements.
-              </p>
-            </div>
-          </div>
-          {showActions ? (
-            <PrimaryButton
-              type="button"
-              disabled={!ready || analyzing}
-              onClick={onRunAnalysis}
-            >
-              {analyzing
-                ? "Evaluating..."
-                : hasResults
-                  ? "Re-run Evaluation"
-                  : "Run Evaluation"}
-            </PrimaryButton>
-          ) : null}
+    <CollapsibleSection
+      className="overflow-hidden rounded-2xl border border-teal-200/70 bg-amal-white shadow-sm shadow-teal-100/50"
+      headerClassName="border-b border-teal-100 bg-gradient-to-r from-teal-50 via-amal-white to-teal-50/60 px-5 py-5"
+      subtitleClassName="mt-1 text-sm text-zinc-600"
+      title="AI Video Evaluation"
+      subtitle="Scores are generated from video answer transcripts against the role requirements."
+      titleAddon={statusBadge}
+      icon={
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-teal-600 text-amal-white shadow-md shadow-teal-500/30">
+          <VideoIcon className="h-5 w-5" />
         </div>
-      </div>
+      }
+      headerAction={
+        showActions ? (
+          <PrimaryButton
+            type="button"
+            disabled={!ready || analyzing}
+            onClick={onRunAnalysis}
+          >
+            {analyzing
+              ? "Evaluating..."
+              : hasResults
+                ? "Re-run Evaluation"
+                : "Run Evaluation"}
+          </PrimaryButton>
+        ) : null
+      }
+    >
       <div className="space-y-5 p-5">
         {!showActions || ready ? null : (
           <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
@@ -1642,7 +1654,7 @@ function AiVideoEvaluationPanel({
           </div>
         ) : null}
       </div>
-    </section>
+    </CollapsibleSection>
   );
 }
 
@@ -1656,16 +1668,11 @@ function FeedbackPanel({
   emptyStateAction?: ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-black/5 px-5 py-4">
-        <div>
-          <h2 className="text-lg font-bold">Interview Feedback</h2>
-          <p className="text-sm text-zinc-500">
-            HR, manager, and reviewer comments
-          </p>
-        </div>
-        {headerAction}
-      </div>
+    <CollapsibleSection
+      title="Interview Feedback"
+      subtitle="HR, manager, and reviewer comments"
+      headerAction={headerAction}
+    >
       <div className="space-y-3 p-5">
         {items.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-black/15 bg-amal-sheet/70 px-4 py-8 text-center">
@@ -1687,7 +1694,7 @@ function FeedbackPanel({
           ))
         )}
       </div>
-    </section>
+    </CollapsibleSection>
   );
 }
 
@@ -1749,13 +1756,10 @@ function VideoResponsesPanel({
     selected?.duration_seconds ?? playbackDuration ?? null;
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white">
-      <div className="border-b border-black/5 px-5 py-4">
-        <h2 className="text-lg font-bold">Video Test Responses</h2>
-        <p className="text-sm text-zinc-500">
-          Review recorded answers for each question
-        </p>
-      </div>
+    <CollapsibleSection
+      title="Video Test Responses"
+      subtitle="Review recorded answers for each question"
+    >
       {responses.length === 0 ? (
         <div className="flex flex-col items-center justify-center px-6 py-14 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amal-sheet">
@@ -1875,6 +1879,6 @@ function VideoResponsesPanel({
           </div>
         </div>
       )}
-    </section>
+    </CollapsibleSection>
   );
 }

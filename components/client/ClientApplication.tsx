@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { formatPhoneDisplay, phoneTelHref } from "@/lib/phone-format";
 import type { Comment } from "@/lib/types";
@@ -463,14 +464,17 @@ export function ClientApplication({ id }: { id: number }) {
 
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(440px,0.95fr)]">
           <div className="min-w-0 space-y-5 xl:sticky xl:top-5 xl:self-start">
-            <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/5 px-5 py-4">
-                <SectionHeading
-                  icon={FileTextIcon}
-                  title="Resume"
-                  subtitle="Candidate document preview"
-                />
-                {resumeUrl ? (
+            <CollapsibleSection
+              className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-sm"
+              title="Resume"
+              subtitle="Candidate document preview"
+              icon={
+                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-amal-sheet text-zinc-600">
+                  <FileTextIcon className="h-3.5 w-3.5" />
+                </span>
+              }
+              headerAction={
+                resumeUrl ? (
                   <a
                     href={resumeUrl}
                     target="_blank"
@@ -480,8 +484,9 @@ export function ClientApplication({ id }: { id: number }) {
                     <ExternalLinkIcon className="h-3.5 w-3.5" />
                     Open
                   </a>
-                ) : null}
-              </div>
+                ) : null
+              }
+            >
               {!row.has_resume ? (
                 <div className="flex min-h-[420px] flex-col items-center justify-center p-8 text-center text-zinc-500">
                   <FileTextIcon className="mb-3 h-12 w-12" />
@@ -503,24 +508,22 @@ export function ClientApplication({ id }: { id: number }) {
                   <p>Could not load resume preview.</p>
                 </div>
               )}
-            </section>
+            </CollapsibleSection>
           </div>
 
           <div className="space-y-5">
-            <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-sm">
-              <div className="border-b border-black/5 bg-amal-sheet/60 px-5 py-5">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amal-ink text-amal-white">
-                    <FileTextIcon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold">AI Resume Evaluation</h2>
-                    <p className="mt-1 text-sm text-zinc-600">
-                      Resume relevance score and reasoning for this role.
-                    </p>
-                  </div>
+            <CollapsibleSection
+              className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-sm"
+              headerClassName="border-b border-black/5 bg-amal-sheet/60 px-5 py-5"
+              subtitleClassName="mt-1 text-sm text-zinc-600"
+              title="AI Resume Evaluation"
+              subtitle="Resume relevance score and reasoning for this role."
+              icon={
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amal-ink text-amal-white">
+                  <FileTextIcon className="h-5 w-5" />
                 </div>
-              </div>
+              }
+            >
               <div className="grid gap-5 p-5 sm:grid-cols-[180px_minmax(0,1fr)] sm:p-6">
                 <div
                   className={cn(
@@ -567,23 +570,20 @@ export function ClientApplication({ id }: { id: number }) {
                   ) : null}
                 </div>
               </div>
-            </section>
+            </CollapsibleSection>
 
-            <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-sm">
-              <div className="border-b border-black/5 bg-amal-sheet/60 px-5 py-5">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amal-ink text-amal-white">
-                    <VideoIcon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold">AI Video Evaluation</h2>
-                    <p className="mt-1 text-sm text-zinc-600">
-                      Scores are generated from video answer transcripts against
-                      the role requirements.
-                    </p>
-                  </div>
+            <CollapsibleSection
+              className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-sm"
+              headerClassName="border-b border-black/5 bg-amal-sheet/60 px-5 py-5"
+              subtitleClassName="mt-1 text-sm text-zinc-600"
+              title="AI Video Evaluation"
+              subtitle="Scores are generated from video answer transcripts against the role requirements."
+              icon={
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amal-ink text-amal-white">
+                  <VideoIcon className="h-5 w-5" />
                 </div>
-              </div>
+              }
+            >
               <div className="grid gap-5 p-5 sm:grid-cols-[140px_minmax(0,1fr)] sm:p-6">
                 <div className="flex flex-col items-center justify-center rounded-2xl border border-black/10 bg-amal-sheet/80 px-4 py-5 text-center">
                   <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
@@ -604,7 +604,7 @@ export function ClientApplication({ id }: { id: number }) {
                     : "Not available yet. Hiring staff run video AI after pre-screening completes."}
                 </p>
               </div>
-            </section>
+            </CollapsibleSection>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <button
@@ -659,10 +659,15 @@ export function ClientApplication({ id }: { id: number }) {
               </button>
             </div>
 
-            <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-sm">
-              <div className="border-b border-black/5 px-5 py-4">
-                <SectionHeading icon={BriefcaseIcon} title="Application Context" />
-              </div>
+            <CollapsibleSection
+              className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-sm"
+              title="Application Context"
+              icon={
+                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-amal-sheet text-zinc-600">
+                  <BriefcaseIcon className="h-3.5 w-3.5" />
+                </span>
+              }
+            >
               <div className="grid grid-cols-1 gap-4 p-5 md:grid-cols-2">
                 <InfoRow
                   icon={BriefcaseIcon}
@@ -718,16 +723,18 @@ export function ClientApplication({ id }: { id: number }) {
                   </div>
                 </div>
               ) : null}
-            </section>
+            </CollapsibleSection>
 
-            <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-sm">
-              <div className="border-b border-black/5 px-5 py-4">
-                <SectionHeading
-                  icon={MessageSquareIcon}
-                  title="Your comments"
-                  subtitle="Your notes on this applicant"
-                />
-              </div>
+            <CollapsibleSection
+              className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-sm"
+              title="Your comments"
+              subtitle="Your notes on this applicant"
+              icon={
+                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-amal-sheet text-zinc-600">
+                  <MessageSquareIcon className="h-3.5 w-3.5" />
+                </span>
+              }
+            >
               <div className="space-y-4 p-5">
                 {comments.length === 0 ? (
                   <div className="rounded-2xl border border-dashed border-black/10 bg-amal-sheet/70 px-4 py-6 text-center">
@@ -797,16 +804,18 @@ export function ClientApplication({ id }: { id: number }) {
                   </div>
                 </div>
               </div>
-            </section>
+            </CollapsibleSection>
 
-            <section className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-sm">
-              <div className="border-b border-black/5 px-5 py-4">
-                <SectionHeading
-                  icon={VideoIcon}
-                  title="Video Test"
-                  subtitle="Click a question to play the response in this view"
-                />
-              </div>
+            <CollapsibleSection
+              className="overflow-hidden rounded-2xl border border-black/10 bg-amal-white shadow-sm"
+              title="Video Test"
+              subtitle="Click a question to play the response in this view"
+              icon={
+                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-amal-sheet text-zinc-600">
+                  <VideoIcon className="h-3.5 w-3.5" />
+                </span>
+              }
+            >
               {videoQuestions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-10 text-center text-zinc-500">
                   <VideoIcon className="mb-3 h-12 w-12" />
@@ -882,7 +891,7 @@ export function ClientApplication({ id }: { id: number }) {
                   </div>
                 </div>
               )}
-            </section>
+            </CollapsibleSection>
           </div>
         </div>
       </div>
@@ -1063,30 +1072,6 @@ function HeaderStat({ label, value }: { label: string; value: string }) {
         {label}
       </p>
       <p className="mt-1 font-semibold text-amal-white">{value || "—"}</p>
-    </div>
-  );
-}
-
-function SectionHeading({
-  icon: Icon,
-  title,
-  subtitle,
-}: {
-  icon: (props: { className?: string }) => ReactNode;
-  title: string;
-  subtitle?: string;
-}) {
-  return (
-    <div>
-      <div className="flex items-center gap-2">
-        <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-amal-sheet text-zinc-600">
-          <Icon className="h-3.5 w-3.5" />
-        </span>
-        <h2 className="text-base font-bold">{title}</h2>
-      </div>
-      {subtitle ? (
-        <p className="mt-1 text-xs text-zinc-500">{subtitle}</p>
-      ) : null}
     </div>
   );
 }
