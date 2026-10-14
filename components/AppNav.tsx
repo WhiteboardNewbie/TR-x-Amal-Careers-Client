@@ -64,7 +64,7 @@ export function AppNav({ session }: { session: AuthSession }) {
               key={link.href}
               href={link.href}
               onMouseDown={preventFocusScroll}
-              className={`rounded-md px-3 py-2 text-sm font-bold transition-colors ${
+              className={`rounded-md px-3 py-2 text-sm font-bold outline-none transition-colors focus-visible:outline-none ${
                 isActive(pathname, link.href)
                   ? "bg-amal-sheet text-amal-red"
                   : "text-zinc-500 hover:bg-amal-sheet hover:text-amal-ink"
@@ -102,7 +102,7 @@ export function AppNav({ session }: { session: AuthSession }) {
         <Link
           href={home.href}
           onMouseDown={preventFocusScroll}
-          className={`rounded-md px-3 py-2 text-sm font-bold ${
+          className={`rounded-md px-3 py-2 text-sm font-bold outline-none focus-visible:outline-none ${
             pathname === home.href
               ? "bg-amal-sheet text-amal-red"
               : "text-zinc-500 hover:bg-amal-sheet hover:text-amal-ink"
@@ -115,7 +115,7 @@ export function AppNav({ session }: { session: AuthSession }) {
             key={link.href}
             href={link.href}
             onMouseDown={preventFocusScroll}
-            className={`whitespace-nowrap rounded-md px-3 py-2 text-sm font-bold ${
+            className={`whitespace-nowrap rounded-md px-3 py-2 text-sm font-bold outline-none focus-visible:outline-none ${
               isActive(pathname, link.href)
                 ? "bg-amal-sheet text-amal-red"
                 : "text-zinc-500 hover:bg-amal-sheet hover:text-amal-ink"

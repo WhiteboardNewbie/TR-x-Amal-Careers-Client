@@ -174,7 +174,7 @@ function StatCard({
       type="button"
       onClick={onClick}
       onMouseDown={preventFocusScroll}
-      className={`rounded-xl border border-black/10 p-4 text-left transition ${tone}`}
+      className={`rounded-xl border border-black/10 p-4 text-left outline-none transition focus-visible:outline-none ${tone}`}
     >
       <div className="flex items-center justify-between">
         <p className="text-xs font-semibold uppercase tracking-wide opacity-90">
